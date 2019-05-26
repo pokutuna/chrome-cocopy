@@ -1,20 +1,28 @@
+window.addEventListener("message", event => {
+  console.log("message on eventpage", event);
+  new Notification("Error", {
+    icon: "img/icon/128.png",
+    body: JSON.stringify(event.data)
+  });
+});
+
 const onMenuItemClick = (
   info: chrome.contextMenus.OnClickData,
   tab: chrome.tabs.Tab | undefined
 ) => {
   console.log(info);
   if (tab) {
-    chrome.tabs.executeScript(
+    const sandbox = document.getElementById("sandbox") as HTMLIFrameElement;
+    if (!sandbox.contentWindow) {
+      console.log("sandbox contentwindow is false");
+      return;
+    }
+
+    sandbox.contentWindow.postMessage(
       {
-        file: "content.js"
+        code: "() => 1 + 1"
       },
-      () => {
-        chrome.tabs.sendMessage(
-          tab.id!,
-          { code: "() => `[${document.title}](${location.href})`" },
-          res => console.log(res)
-        );
-      }
+      "*"
     );
   }
 };

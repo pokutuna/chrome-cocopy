@@ -12,7 +12,7 @@
   },
 
   "background": {
-    "scripts": ["background.js"],
+    "page": "eventpage.html",
     "persistent": false
   },
 
@@ -24,12 +24,15 @@
 
   "options_page": "options.html",
 
+  "sandbox": {
+    "pages": ["sandbox.html"]
+  },
+
   "permissions": [
     "tabs",
     "storage",
     "clipboardWrite",
     "contextMenus",
-    "http://*/*",
-    "https://*/*"
+    "notifications"
   ]
 }

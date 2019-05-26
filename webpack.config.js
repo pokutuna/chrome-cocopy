@@ -14,8 +14,8 @@ function versionName() {
 module.exports = {
   mode: "development",
   entry: {
-    background: "./src/background.ts",
-    content: "./src/content.ts",
+    eventpage: "./src/eventpage.ts",
+    sandbox: "./src/sandbox.ts",
     popup: "./src/popup.tsx",
     options: "./src/options.tsx"
   },
@@ -66,6 +66,16 @@ module.exports = {
         to: "img/"
       }
     ]),
+    new HtmlWebpackPlugin({
+      chunks: ["eventpage"],
+      template: "src/eventpage.html",
+      filename: "eventpage.html"
+    }),
+    new HtmlWebpackPlugin({
+      chunks: ["sandbox"],
+      template: "src/sandbox.html",
+      filename: "sandbox.html"
+    }),
     new HtmlWebpackPlugin({
       chunks: ["popup"],
       template: "src/popup.html",
