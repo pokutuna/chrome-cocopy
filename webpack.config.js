@@ -14,11 +14,16 @@ function versionName() {
 module.exports = {
   mode: "development",
   entry: {
-    popup: "./src/popup.tsx"
+    background: "./src/background.ts",
+    popup: "./src/popup.tsx",
+    options: "./src/options.tsx"
   },
   output: {
     path: __dirname + "/build/",
     filename: "[name].js"
+  },
+  resolve: {
+    extensions: [".js", ".ts", ".tsx"]
   },
   module: {
     rules: [
@@ -41,7 +46,7 @@ module.exports = {
     ]
   },
   plugins: [
-    new CleanWebpackPlugin(),
+    new CleanWebpackPlugin({ cleanStaleWebpackAssets: false }),
     new CopyWebpackPlugin([
       {
         from: "src/manifest.json",
@@ -64,6 +69,11 @@ module.exports = {
       chunks: ["popup"],
       template: "src/popup.html",
       filename: "popup.html"
+    }),
+    new HtmlWebpackPlugin({
+      chunks: ["options"],
+      template: "src/options.html",
+      filename: "options.html"
     })
   ],
   devtool: "inline-source-map"

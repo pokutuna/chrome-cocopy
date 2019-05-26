@@ -6,9 +6,12 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "build": "webpack"
+    "build": "webpack",
+    "build:watch": "webpack --watch"
   },
   "dependencies": {
+    "@emotion/core": "^10.0.10",
+    "@emotion/styled": "^10.0.11",
     "@types/react-dom": "^16.8.4",
     "react": "^16.8.6",
     "react-dom": "^16.8.6"
@@ -18,6 +21,7 @@
     "@babel/preset-env": "^7.4.5",
     "@babel/preset-react": "^7.0.0",
     "@babel/preset-typescript": "^7.3.3",
+    "@types/chrome": "^0.0.86",
     "@types/react": "^16.8.18",
     "babel-loader": "^8.0.6",
     "clean-webpack-plugin": "^2.0.2",
