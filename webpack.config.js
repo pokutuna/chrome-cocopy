@@ -15,6 +15,7 @@ module.exports = {
   mode: "development",
   entry: {
     background: "./src/background.ts",
+    content: "./src/content.ts",
     popup: "./src/popup.tsx",
     options: "./src/options.tsx"
   },

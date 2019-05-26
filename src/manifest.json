@@ -24,5 +24,12 @@
 
   "options_page": "options.html",
 
-  "permissions": ["tabs", "storage", "clipboardWrite", "contextMenus"]
+  "permissions": [
+    "tabs",
+    "storage",
+    "clipboardWrite",
+    "contextMenus",
+    "http://*/*",
+    "https://*/*"
+  ]
 }

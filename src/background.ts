@@ -3,7 +3,20 @@ const onMenuItemClick = (
   tab: chrome.tabs.Tab | undefined
 ) => {
   console.log(info);
-  console.log(tab);
+  if (tab) {
+    chrome.tabs.executeScript(
+      {
+        file: "content.js"
+      },
+      () => {
+        chrome.tabs.sendMessage(
+          tab.id!,
+          { code: "() => `[${document.title}](${location.href})`" },
+          res => console.log(res)
+        );
+      }
+    );
+  }
 };
 
 const refreshContextMenues = () => {
