@@ -1,4 +1,3 @@
-console.log("sandbox");
 const onDOMContentLoaded = new Promise(resolve => {
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", () => resolve());
@@ -8,16 +7,14 @@ const onDOMContentLoaded = new Promise(resolve => {
 });
 
 window.addEventListener("message", (event: MessageEvent) => {
-  console.log("message in sandbox", event);
   const sendResponse = (data: EvaluateResponse) => {
     if (!event.source || !event.origin) return;
     (event.source as Window).postMessage(data, event.origin);
   };
 
-  let fn: () => string;
+  let fn: Function;
   try {
     fn = eval(event.data.code);
-    if (typeof fn !== "function") throw new Error("Must be a function");
   } catch (e) {
     sendResponse({
       error: {
@@ -31,7 +28,7 @@ window.addEventListener("message", (event: MessageEvent) => {
   onDOMContentLoaded.then(() => {
     let result: any;
     try {
-      result = fn();
+      result = fn.call(undefined, event.data.targetData);
     } catch (e) {
       sendResponse({
         error: {
