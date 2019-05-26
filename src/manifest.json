@@ -1,0 +1,26 @@
+{
+  "manifest_version": 2,
+  "name": "cocopy",
+  "version": "<from package.json>",
+
+  "default_locale": "en",
+  "description": "a chrome extension to copy link by your function code.",
+  "icons": {
+    "16": "img/icon/16.png",
+    "48": "img/icon/48.png",
+    "128": "img/icon/128.png"
+  },
+
+  "browser_action": {
+    "default_icon": "img/icon/32.png",
+    "default_title": "COOCPY",
+    "default_popup": "popup.html"
+  },
+
+  "permissions": [
+    "tabs",
+    "storage",
+    "clipboardWrite",
+    "contextMenus"
+  ]
+}

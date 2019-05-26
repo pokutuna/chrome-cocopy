@@ -1,0 +1,11 @@
+{
+  "name": "chrome-cocopy",
+  "version": "1.0.0",
+  "repository": "ssh://git@github.com/pokutuna/chrome-cocopy.git",
+  "author": "pokutuna <popopopopokutuna@gmail.com>",
+  "license": "MIT",
+  "private": true,
+  "devDependencies": {
+    "typescript": "^3.4.5"
+  }
+}

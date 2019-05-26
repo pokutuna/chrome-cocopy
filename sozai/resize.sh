@@ -1,0 +1,11 @@
+#!/bin/bash
+
+CWD=$(dirname "$0" && pwd)
+ROOT=$(cd $CWD && cd .. && pwd)
+OUT=$ROOT/build/img/icon
+
+set -x
+mkdir -p $OUT
+for px in 16 32 48 128; do
+  convert -geometry ${px}x${px} co.png $OUT/${px}.png
+done
