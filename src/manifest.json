@@ -2,8 +2,8 @@
   "manifest_version": 2,
   "name": "cocopy",
   "version": "<from package.json>",
+  "version_name": "<from git tag & revision>",
 
-  "default_locale": "en",
   "description": "a chrome extension to copy link by your function code.",
   "icons": {
     "16": "img/icon/16.png",

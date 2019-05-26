@@ -2,7 +2,7 @@
 
 CWD=$(dirname "$0" && pwd)
 ROOT=$(cd $CWD && cd .. && pwd)
-OUT=$ROOT/build/img/icon
+OUT=$ROOT/src/img/icon
 
 set -x
 mkdir -p $OUT
