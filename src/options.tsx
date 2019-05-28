@@ -1,12 +1,12 @@
 import React from "react";
 import ReactDOM from "react-dom";
 
-import { MainColumn } from "./components/Parts";
+import { MainColumn, Title } from "./components/Parts";
 
 const App = () => {
   return (
     <MainColumn>
-      <h1>COCOPY!</h1>
+      <Title />
     </MainColumn>
   );
 };

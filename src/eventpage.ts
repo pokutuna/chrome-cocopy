@@ -1,23 +1,8 @@
-const copyToClipboard = (text: string) => {
-  var temp = document.createElement("textarea");
-  temp.value = text;
-  temp.selectionStart = 0;
-  temp.selectionEnd = temp.value.length;
-
-  var s = temp.style;
-  s.position = "fixed";
-  s.left = "-100%";
-
-  document.body.appendChild(temp);
-  temp.focus();
-  document.execCommand("copy");
-  temp.blur();
-  document.body.removeChild(temp);
-};
+import * as util from "./util";
 
 window.addEventListener("message", event => {
   console.log("message on eventpage", event);
-  if (event.data.result) copyToClipboard(event.data.result);
+  if (event.data.result) util.copyToClipboard(event.data.result);
 
   new Notification("Error", {
     icon: "img/icon/128.png",
@@ -83,7 +68,7 @@ const onMenuItemClick = (
   if (tab) {
     const sandbox = document.getElementById("sandbox") as HTMLIFrameElement;
     if (!sandbox.contentWindow) {
-      console.log("sandbox contentwindow is false");
+      console.error("sandbox contentwindow is falthy");
       return;
     }
     const item = defs.find(d => d.id === info.menuItemId);

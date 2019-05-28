@@ -7,6 +7,8 @@ const onDOMContentLoaded = new Promise(resolve => {
 });
 
 window.addEventListener("message", (event: MessageEvent) => {
+  if (!event.data) return;
+
   const sendResponse = (data: EvaluateResponse) => {
     if (!event.source || !event.origin) return;
     (event.source as Window).postMessage(data, event.origin);

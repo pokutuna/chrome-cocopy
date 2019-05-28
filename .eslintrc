@@ -29,7 +29,8 @@
     "@typescript-eslint/explicit-member-accessibility": "off",
     "@typescript-eslint/no-explicit-any": "off",
     "@typescript-eslint/no-non-null-assertion": "off",
-    "react/no-children-prop": "off"
+    "react/no-children-prop": "off",
+    "react/display-name": "off"
   },
   "globals": {
     "chrome": true
