@@ -1,17 +1,17 @@
-import React, { useState, useEffect, useContext, useCallback } from "react";
-import ReactDOM from "react-dom";
+import React, {useState, useEffect, useContext, useCallback} from 'react';
+import ReactDOM from 'react-dom';
 
-import * as util from "./util";
-import { CopyRule, getCopyRules } from "./config";
-import SandboxProvider, { SandboxContext } from "./components/SandboxContext";
+import * as util from './util';
+import {CopyRule, getCopyRules} from './config';
+import SandboxProvider, {SandboxContext} from './components/SandboxContext';
 
 const App = () => {
   const receiver = (event: MessageEvent) => {
     if (event.data.result) util.copyToClipboard(event.data.result);
     if (event.data.error) {
-      new Notification("Error", {
-        icon: "img/icon/128.png",
-        body: JSON.stringify(event.data)
+      new Notification('Error', {
+        icon: 'img/icon/128.png',
+        body: JSON.stringify(event.data),
       });
     }
   };
@@ -44,7 +44,7 @@ const CopyRules = () => {
         sandbox &&
           sandbox.sender({
             code: c.code,
-            targetData: { title: tab.title, pageUrl: tab.url }
+            targetData: {title: tab.title, pageUrl: tab.url},
           });
       });
     },
@@ -62,4 +62,4 @@ const CopyRules = () => {
   );
 };
 
-ReactDOM.render(<App />, document.getElementById("root"));
+ReactDOM.render(<App />, document.getElementById('root'));

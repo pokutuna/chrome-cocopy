@@ -1,16 +1,16 @@
 /* eslint-disable no-console */
-import React from "react";
+import React from 'react';
 
 export const MorePermission = () => {
   const onClick = () => {
-    chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
+    chrome.tabs.query({active: true, currentWindow: true}, tabs => {
       const activeTab = tabs[0];
       if (activeTab.url) {
-        const origin = new URL(activeTab.url).origin + "/*";
+        const origin = new URL(activeTab.url).origin + '/*';
         console.log(origin);
         chrome.permissions.request(
           {
-            origins: [origin]
+            origins: [origin],
           },
           res => {
             console.log(res);

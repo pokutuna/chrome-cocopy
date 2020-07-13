@@ -1,16 +1,16 @@
-import * as util from "./util";
+import * as util from './util';
 
-window.addEventListener("message", event => {
-  console.log("message on eventpage", event);
+window.addEventListener('message', event => {
+  console.log('message on eventpage', event);
   if (event.data.result) util.copyToClipboard(event.data.result);
 
-  new Notification("Error", {
-    icon: "img/icon/128.png",
-    body: JSON.stringify(event.data)
+  new Notification('Error', {
+    icon: 'img/icon/128.png',
+    body: JSON.stringify(event.data),
   });
 });
 
-type WIPInput = { title: string } & chrome.contextMenus.OnClickData;
+type WIPInput = {title: string} & chrome.contextMenus.OnClickData;
 
 const copyAsMarkdown = `(target) => {
   if (target.srcUrl && target.linkUrl) {
@@ -41,23 +41,23 @@ const quote = `(target) => {
 
 const defs = [
   {
-    id: "1",
-    name: "Copy as Markdown",
+    id: '1',
+    name: 'Copy as Markdown',
     code: copyAsMarkdown,
-    contexts: ["page", "selection", "link", "image"]
+    contexts: ['page', 'selection', 'link', 'image'],
   },
   {
-    id: "2",
-    name: "Copy as Scrapbox",
+    id: '2',
+    name: 'Copy as Scrapbox',
     code: copyAsScrapbox,
-    contexts: ["page", "selection", "link"]
+    contexts: ['page', 'selection', 'link'],
   },
   {
-    id: "3",
-    name: "Quote selection",
+    id: '3',
+    name: 'Quote selection',
     code: quote,
-    contexts: ["selection"]
-  }
+    contexts: ['selection'],
+  },
 ];
 
 const onMenuItemClick = (
@@ -66,9 +66,9 @@ const onMenuItemClick = (
 ) => {
   console.log(info);
   if (tab) {
-    const sandbox = document.getElementById("sandbox") as HTMLIFrameElement;
+    const sandbox = document.getElementById('sandbox') as HTMLIFrameElement;
     if (!sandbox.contentWindow) {
-      console.error("sandbox contentwindow is falthy");
+      console.error('sandbox contentwindow is falthy');
       return;
     }
     const item = defs.find(d => d.id === info.menuItemId);
@@ -79,10 +79,10 @@ const onMenuItemClick = (
           code: item.code,
           targetData: {
             title: tab.title,
-            ...info
-          }
+            ...info,
+          },
         },
-        "*"
+        '*'
       );
     }
   }
@@ -92,24 +92,24 @@ chrome.contextMenus.onClicked.addListener(onMenuItemClick);
 
 const refreshContextMenues = () => {
   // https://developer.chrome.com/extensions/contextMenus#type-ContextType
-  const contexts = ["page", "selection", "link", "image"];
+  const contexts = ['page', 'selection', 'link', 'image'];
 
   chrome.contextMenus.removeAll();
 
   // https://developer.chrome.com/extensions/contextMenus#method-create
   chrome.contextMenus.create({
-    title: "COCOPY",
-    id: "root",
-    contexts
+    title: 'COCOPY',
+    id: 'root',
+    contexts,
   });
 
   defs.forEach(d => {
     chrome.contextMenus.create({
-      parentId: "root",
+      parentId: 'root',
       id: d.id,
       title: d.name,
-      type: "normal",
-      contexts: d.contexts
+      type: 'normal',
+      contexts: d.contexts,
     });
   });
 };

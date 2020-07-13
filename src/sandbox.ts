@@ -1,12 +1,12 @@
 const onDOMContentLoaded = new Promise(resolve => {
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", () => resolve());
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => resolve());
   } else {
     resolve();
   }
 });
 
-window.addEventListener("message", (event: MessageEvent) => {
+window.addEventListener('message', (event: MessageEvent) => {
   if (!event.data) return;
 
   const sendResponse = (data: EvaluateResponse) => {
@@ -21,8 +21,8 @@ window.addEventListener("message", (event: MessageEvent) => {
     sendResponse({
       error: {
         message: e.message,
-        type: "ParseError"
-      }
+        type: 'ParseError',
+      },
     });
     return;
   }
@@ -35,10 +35,10 @@ window.addEventListener("message", (event: MessageEvent) => {
       sendResponse({
         error: {
           message: e.message,
-          type: "ExecutionError"
-        }
+          type: 'ExecutionError',
+        },
       });
     }
-    sendResponse({ result });
+    sendResponse({result});
   });
 });

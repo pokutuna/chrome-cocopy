@@ -1,13 +1,13 @@
-import React from "react";
-import { css } from "@emotion/core";
-import styled from "@emotion/styled";
+import React from 'react';
+import {css} from '@emotion/core';
+import styled from '@emotion/styled';
 
 export const theme = {
   space: {
-    1: "8px",
-    2: "16px",
-    3: "24px"
-  }
+    1: '8px',
+    2: '16px',
+    3: '24px',
+  },
 };
 
 export const MainColumn = styled.div`
@@ -29,12 +29,12 @@ export const Columns = styled.div`
 `;
 
 export const Title = React.memo(() => {
-  const Header = Columns.withComponent("header");
+  const Header = Columns.withComponent('header');
   return (
     <Header>
       <div
         css={css`
-          background-image: url("img/icon/128.png");
+          background-image: url('img/icon/128.png');
           background-size: contain;
           width: 64px;
           height: 64px;
