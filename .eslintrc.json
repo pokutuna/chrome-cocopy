@@ -6,6 +6,7 @@
   "plugins": [
     "node",
     "react",
+    "jest",
     "prettier"
   ],
   "settings": {
@@ -29,15 +30,9 @@
         "argsIgnorePattern": "^_"
       }
     ],
+    "node/no-unpublished-import": "off",
+    "node/no-unpublished-require": "off",
     "@typescript-eslint/no-explicit-any": "off",
     "react/display-name": "off"
-  },
-  "overrides": [
-    {
-      "files": ["webpack.config.js"],
-      "rules": {
-        "node/no-unpublished-require": "off"
-      }
-    }
-  ]
+  }
 }
