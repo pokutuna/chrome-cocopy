@@ -27,19 +27,19 @@ export const Columns = styled.div`
   align-items: center;
 `;
 
+const TitleIcon = styled.div`
+  background-image: url('img/icon/128.png');
+  background-size: contain;
+  width: 64px;
+  height: 64px;
+  margin-right: ${theme.space[1]};
+`;
+
 export const Title = React.memo(() => {
   const Header = Columns.withComponent('header');
   return (
     <Header>
-      <div
-        style={css`
-          background-image: url('img/icon/128.png');
-          background-size: contain;
-          width: 64px;
-          height: 64px;
-          margin-right: ${theme.space[1]};
-        `}
-      />
+      <TitleIcon />
       <h1 className="title">COCOPY</h1>
     </Header>
   );
