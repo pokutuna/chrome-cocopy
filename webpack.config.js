@@ -24,13 +24,12 @@ module.exports = {
     filename: '[name].js',
   },
   resolve: {
-    extensions: ['.js', '.ts', '.tsx'],
+    extensions: ['.js', '.ts', '.tsx', '.json'],
   },
   module: {
     rules: [
       {
         test: /\.tsx?$/,
-        exclude: /node_modules/,
         use: [
           {
             loader: 'babel-loader',
@@ -39,7 +38,6 @@ module.exports = {
                 '@babel/preset-env',
                 '@babel/preset-typescript',
                 '@babel/preset-react',
-                '@emotion/babel-preset-css-prop',
               ],
             },
           },

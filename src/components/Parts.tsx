@@ -1,6 +1,5 @@
 import React from 'react';
-import {css} from '@emotion/core';
-import styled from '@emotion/styled';
+import styled, {css} from 'styled-components';
 
 export const theme = {
   space: {
@@ -33,7 +32,7 @@ export const Title = React.memo(() => {
   return (
     <Header>
       <div
-        css={css`
+        style={css`
           background-image: url('img/icon/128.png');
           background-size: contain;
           width: 64px;
