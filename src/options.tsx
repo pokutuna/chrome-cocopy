@@ -1,6 +1,4 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-
+import {h, render} from 'preact';
 import {MainColumn, Title} from './components/Parts';
 
 const App = () => {
@@ -11,4 +9,4 @@ const App = () => {
   );
 };
 
-ReactDOM.render(<App />, document.getElementById('root'));
+render(<App />, document.getElementById('root')!);

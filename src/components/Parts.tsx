@@ -1,4 +1,5 @@
-import React from 'react';
+import {h} from 'preact';
+import {memo} from 'preact/compat';
 import styled from 'styled-components';
 
 export const theme = {
@@ -35,7 +36,7 @@ const TitleIcon = styled.div`
   margin-right: ${theme.space[1]};
 `;
 
-export const Title = React.memo(() => {
+export const Title = memo(() => {
   const Header = Columns.withComponent('header');
   return (
     <Header>
