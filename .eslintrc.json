@@ -11,7 +11,7 @@
   ],
   "settings": {
     "react": {
-      "pragma": "React",
+      "pragma": "h",
       "version": "detect"
     }
   },
@@ -33,6 +33,7 @@
     "node/no-unpublished-import": "off",
     "node/no-unpublished-require": "off",
     "@typescript-eslint/no-explicit-any": "off",
-    "react/display-name": "off"
+    "react/display-name": "off",
+    "react/react-in-jsx-scope": "off"
   }
 }

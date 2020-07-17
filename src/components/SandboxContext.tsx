@@ -1,4 +1,6 @@
-import React, {useState, useEffect} from 'react';
+import {h, createContext} from 'preact';
+import type {ComponentChildren} from 'preact';
+import {useState, useEffect} from 'preact/hooks';
 
 export type Sender = (message: any) => any; // TODO add message type
 export type Receiver = (this: Window, event: MessageEvent) => any;
@@ -7,11 +9,11 @@ export interface SandboxValue {
   sender: Sender;
 }
 
-export const SandboxContext = React.createContext<SandboxValue | null>(null);
+export const SandboxContext = createContext<SandboxValue | null>(null);
 
 interface SandboxProviderProps {
   receiver: Receiver;
-  children: React.ReactNode;
+  children: ComponentChildren;
 }
 
 const SandboxProvider = (props: SandboxProviderProps) => {

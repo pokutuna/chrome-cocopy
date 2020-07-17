@@ -6,7 +6,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 function versionName() {
   return new Promise((resolve, reject) => {
     exec('git describe --tags --always --dirty', (err, stdout, _stderr) =>
-      err ? reject(err) : resolve('Build ' + stdout.replace('\n', ''))
+      err ? reject(err) : resolve(`Build ${stdout.replace('\n', '')}`)
     );
   });
 }
@@ -20,11 +20,16 @@ module.exports = {
     options: './src/options.tsx',
   },
   output: {
-    path: __dirname + '/build/',
+    path: `${__dirname}/build/`,
     filename: '[name].js',
   },
   resolve: {
     extensions: ['.js', '.ts', '.tsx', '.json'],
+    alias: {
+      react: 'preact/compat',
+      'react-dom/test-utils': 'preact/test-utils',
+      'react-dom': 'preact/compat',
+    },
   },
   module: {
     rules: [

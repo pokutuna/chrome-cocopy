@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import React from 'react';
+import {h} from 'preact';
 
 export const MorePermission = () => {
   const onClick = () => {

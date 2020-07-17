@@ -1,5 +1,5 @@
-import React, {useState, useEffect, useContext, useCallback} from 'react';
-import ReactDOM from 'react-dom';
+import {h, render, Fragment} from 'preact';
+import {useState, useEffect, useContext, useCallback} from 'preact/hooks';
 
 import * as util from './util';
 import {CopyRule, getCopyRules} from './config';
@@ -17,7 +17,7 @@ const App = () => {
   };
 
   return (
-    <>
+    <Fragment>
       <h1>COCOPY!</h1>
       <a href="options.html" target="_blank">
         options
@@ -25,7 +25,7 @@ const App = () => {
       <SandboxProvider receiver={receiver}>
         <CopyRules />
       </SandboxProvider>
-    </>
+    </Fragment>
   );
 };
 
@@ -62,4 +62,4 @@ const CopyRules = () => {
   );
 };
 
-ReactDOM.render(<App />, document.getElementById('root'));
+render(<App />, document.getElementById('root')!);
