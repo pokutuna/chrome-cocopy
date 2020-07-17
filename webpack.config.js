@@ -25,6 +25,11 @@ module.exports = {
   },
   resolve: {
     extensions: ['.js', '.ts', '.tsx', '.json'],
+    alias: {
+      react: 'preact/compat',
+      'react-dom/test-utils': 'preact/test-utils',
+      'react-dom': 'preact/compat',
+    },
   },
   module: {
     rules: [
