@@ -4,7 +4,7 @@
   "version": "<from package.json>",
   "version_name": "<from git tag & revision>",
 
-  "description": "a chrome extension to copy link by your function code.",
+  "description": "a chrome extension to copy link by your code.",
   "icons": {
     "16": "img/icon/16.png",
     "48": "img/icon/48.png",
@@ -15,15 +15,12 @@
     "page": "eventpage.html",
     "persistent": false
   },
-
   "browser_action": {
     "default_icon": "img/icon/32.png",
     "default_title": "COOCPY",
     "default_popup": "popup.html"
   },
-
   "options_page": "options.html",
-
   "sandbox": {
     "pages": ["sandbox.html"]
   },
@@ -35,6 +32,15 @@
     "contextMenus",
     "notifications"
   ],
+  "optional_permissions": ["http://*/*", "https://*/*"],
 
-  "optional_permissions": ["http://*/*", "https://*/*"]
+  "commands": {
+    "_execute_browser_action": {
+      "description": "Open COCOPY",
+      "suggested_key": {
+        "default": "Ctrl+Shift+L",
+        "mac": "Ctrl+Shift+L"
+      }
+    }
+  }
 }
