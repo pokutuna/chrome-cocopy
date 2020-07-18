@@ -4,6 +4,7 @@ import {useState, useEffect, useContext, useCallback} from 'preact/hooks';
 import * as util from './util';
 import {CopyRule, getCopyRules} from './config';
 import SandboxProvider, {SandboxContext} from './components/SandboxContext';
+import {createPageTargetFromTab} from './target';
 
 const App = () => {
   const receiver = (event: MessageEvent) => {
@@ -44,7 +45,7 @@ const CopyRules = () => {
         sandbox &&
           sandbox.sender({
             code: c.code,
-            target: {type: 'page', title: tab.title, pageURL: tab.url},
+            target: createPageTargetFromTab(tab),
           });
       });
     },

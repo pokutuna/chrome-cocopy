@@ -1,4 +1,5 @@
 import * as util from './util';
+import {createTargetFromContextMenu} from './target';
 
 window.addEventListener('message', event => {
   console.log('message on eventpage', event);
@@ -78,10 +79,7 @@ const onMenuItemClick = (
         {
           type: 'page',
           code: item.code,
-          targetData: {
-            title: tab.title,
-            ...info,
-          },
+          target: createTargetFromContextMenu(info, tab),
         },
         '*'
       );
