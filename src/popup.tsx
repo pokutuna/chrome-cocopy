@@ -8,8 +8,12 @@ import {createPageTargetFromTab} from './target';
 
 const App = () => {
   const receiver = (event: MessageEvent) => {
-    if (event.data.result) util.copyToClipboard(event.data.result);
+    if (event.data.result) {
+      navigator.clipboard.writeText(event.data.result);
+    }
+    // TODO collect error and copy rule
     if (event.data.error) {
+      console.error(event.data);
       new Notification('Error', {
         icon: 'img/icon/128.png',
         body: JSON.stringify(event.data),
@@ -41,21 +45,37 @@ const CopyRules = () => {
 
   const onClick = useCallback(
     (c: CopyRule) => {
-      util.getActiveTab().then(tab => {
-        sandbox &&
-          sandbox.sender({
-            code: c.code,
-            target: createPageTargetFromTab(tab),
-          });
-      });
+      util
+        .getActiveTab()
+        .then(tab => {
+          sandbox &&
+            sandbox.sender({
+              code: c.code,
+              target: createPageTargetFromTab(tab),
+            });
+        })
+        .catch(e => console.error(e));
     },
     [sandbox]
   );
 
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      // index
+      if (/^\d$/.test(e.key)) {
+        const index = util.keyToIndex(e.key);
+        const rule = rules[index];
+        if (rule) onClick(rule);
+      }
+    };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [rules]);
+
   return (
     <ul>
       {rules.map(r => (
-        <li key={r.id} onClick={() => onClick(r)}>
+        <li key={r.id} onClick={() => onClick(r)} tabIndex={0}>
           {r.displayName}
         </li>
       ))}

@@ -1,9 +1,8 @@
-import * as util from './util';
 import {createTargetFromContextMenu} from './target';
 
 window.addEventListener('message', event => {
   console.log('message on eventpage', event);
-  if (event.data.result) util.copyToClipboard(event.data.result);
+  if (event.data.result) navigator.clipboard.writeText(event.data.result);
 
   new Notification('Error', {
     icon: 'img/icon/128.png',
