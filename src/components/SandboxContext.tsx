@@ -2,14 +2,16 @@ import {h, createContext} from 'preact';
 import type {ComponentChildren} from 'preact';
 import {useState, useEffect} from 'preact/hooks';
 
-export type Sender = (message: any) => any; // TODO add message type
-export type Receiver = (this: Window, event: MessageEvent) => any;
+import {EvaluatePayload} from '../lib/eval';
 
-export interface SandboxValue {
-  sender: Sender;
+export type Sender = (message: EvaluatePayload) => void;
+export type Receiver = (this: Window, event: MessageEvent) => void;
+
+export interface Sandbox {
+  send: Sender;
 }
 
-export const SandboxContext = createContext<SandboxValue | null>(null);
+export const SandboxContext = createContext<Sandbox | null>(null);
 
 interface SandboxProviderProps {
   receiver: Receiver;
@@ -17,18 +19,16 @@ interface SandboxProviderProps {
 }
 
 const SandboxProvider = (props: SandboxProviderProps) => {
-  const [sandbox, setSandbox] = useState<SandboxValue | null>(null);
+  const [sandbox, setSandbox] = useState<Sandbox | null>(null);
 
   useEffect(() => {
     const sandbox = document.getElementById('sandbox') as HTMLIFrameElement;
-    if (!sandbox.contentWindow) {
-      console.error('sandbox.contentWindow is falthy');
-      return;
+    if (sandbox.tagName !== 'IFRAME' || !sandbox.contentWindow) {
+      throw new Error('sandbox.contentWindow is falthy');
     }
 
     setSandbox({
-      sender: (message: any) =>
-        sandbox.contentWindow!.postMessage(message, '*'),
+      send: payload => sandbox.contentWindow!.postMessage(payload, '*'),
     });
 
     window.addEventListener('message', props.receiver);

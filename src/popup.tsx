@@ -49,7 +49,7 @@ const CopyRules = () => {
         .getActiveTab()
         .then(tab => {
           sandbox &&
-            sandbox.sender({
+            sandbox.send({
               code: c.code,
               target: createPageTargetFromTab(tab),
             });
