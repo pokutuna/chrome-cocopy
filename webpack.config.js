@@ -83,5 +83,9 @@ module.exports = {
       filename: 'options.html',
     }),
   ],
+  performance: {
+    maxEntrypointSize: 2000000,
+    maxAssetSize: 2000000,
+  },
   devtool: 'inline-source-map',
 };
