@@ -27,14 +27,14 @@ const defaultRules: CopyRule[] = [
     id: 'default-1',
     displayName: 'Markdown: [title](url)',
     types: ['page'],
-    code: '(target) => `[${target.title}](${target.pageUrl})`',
+    code: '(target) => `[${target.title}](${target.pageURL})`',
     enabled: true,
   },
   {
     id: 'default-2',
     displayName: 'Scrapbox: [title url]',
     types: ['page'],
-    code: '(target) => `[${target.title} ${target.pageUrl}]`',
+    code: '(target) => `[${target.title} ${target.pageURL}]`',
     enabled: true,
   },
   {

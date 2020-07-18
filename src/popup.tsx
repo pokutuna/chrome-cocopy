@@ -20,7 +20,7 @@ const App = () => {
     <Fragment>
       <h1>COCOPY!</h1>
       <a href="options.html" target="_blank">
-        options
+        settings
       </a>
       <SandboxProvider receiver={receiver}>
         <CopyRules />
@@ -44,7 +44,7 @@ const CopyRules = () => {
         sandbox &&
           sandbox.sender({
             code: c.code,
-            targetData: {title: tab.title, pageUrl: tab.url},
+            target: {type: 'page', title: tab.title, pageURL: tab.url},
           });
       });
     },

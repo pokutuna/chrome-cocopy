@@ -76,6 +76,7 @@ const onMenuItemClick = (
       console.log(item.code);
       sandbox.contentWindow.postMessage(
         {
+          type: 'page',
           code: item.code,
           targetData: {
             title: tab.title,
