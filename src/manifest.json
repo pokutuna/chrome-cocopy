@@ -11,10 +11,6 @@
     "128": "img/icon/128.png"
   },
 
-  "background": {
-    "page": "eventpage.html",
-    "persistent": false
-  },
   "browser_action": {
     "default_icon": "img/icon/32.png",
     "default_title": "COOCPY",
@@ -29,10 +25,8 @@
     "activeTab",
     "storage",
     "clipboardWrite",
-    "contextMenus",
     "notifications"
   ],
-  "optional_permissions": ["http://*/*", "https://*/*"],
 
   "commands": {
     "_execute_browser_action": {

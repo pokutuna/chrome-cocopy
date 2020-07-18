@@ -14,7 +14,8 @@ function versionName() {
 module.exports = {
   mode: 'development',
   entry: {
-    eventpage: './src/eventpage.ts',
+    // Stop context menu feature on xxx
+    // eventpage: './src/eventpage.ts',
     sandbox: './src/sandbox.ts',
     popup: './src/popup.tsx',
     options: './src/options.tsx',
@@ -61,11 +62,11 @@ module.exports = {
         },
       ],
     }),
-    new HtmlWebpackPlugin({
-      chunks: ['eventpage'],
-      template: 'src/eventpage.html',
-      filename: 'eventpage.html',
-    }),
+    // new HtmlWebpackPlugin({
+    //   chunks: ['eventpage'],
+    //   template: 'src/eventpage.html',
+    //   filename: 'eventpage.html',
+    // }),
     new HtmlWebpackPlugin({
       chunks: ['sandbox'],
       template: 'src/sandbox.html',
