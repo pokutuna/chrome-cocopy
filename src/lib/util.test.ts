@@ -27,3 +27,8 @@ test('keyToIndex', () => {
   ];
   cases.forEach(c => expect(util.keyToIndex(c.in)).toBe(c.out));
 });
+
+test('textColorFromBgColor', () => {
+  expect(util.textColorFromBgColor('#000000')).toBe('#FFFFFF');
+  expect(util.textColorFromBgColor('#FFFFFF')).toBe('#000000');
+});
