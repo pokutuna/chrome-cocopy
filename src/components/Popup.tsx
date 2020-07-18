@@ -1,6 +1,9 @@
 import {h} from 'preact';
 import styled from 'styled-components';
 
+import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
+import {faCog} from '@fortawesome/free-solid-svg-icons/faCog';
+
 export const PopupWrapper = styled.div``;
 
 const Header = styled.div`
@@ -8,6 +11,7 @@ const Header = styled.div`
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  position: relative;
 `;
 
 const Title = styled.h1`
@@ -17,13 +21,20 @@ const Title = styled.h1`
   border-bottom: ${props => props.theme.size[2]} solid teal;
 `;
 
+const OptionLink = styled.a`
+  position: absolute;
+  right: 0;
+  font-size: ${props => props.theme.size.xl};
+  margin-right: ${props => props.theme.space[4]};
+`;
+
 export function PopupHeader() {
   return (
     <Header>
       <Title>COCOPY!</Title>
-      <a href="options.html" target="_blank">
-        settings
-      </a>
+      <OptionLink href="options.html" target="_blank">
+        <FontAwesomeIcon icon={faCog} />
+      </OptionLink>
     </Header>
   );
 }
