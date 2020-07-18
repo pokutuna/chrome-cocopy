@@ -1,62 +1,79 @@
-export type Type = 'page';
+import {CopyFunctionWithTheme} from './function';
+import {PageTarget} from './target';
 
-export interface CopyRule {
-  id: string;
-  displayName: string;
-  types: Type[];
-  code: string;
-  pattern?: string;
-  enabled: boolean;
-  // theme
-  //   favicon?
-  //   color?
-  // version
-}
+const simplifyAmazon = (target: PageTarget) => {
+  const match = target.pageURL.match(/(\/dp\/\w+)[/?]?/);
+  return match ? new URL(target.pageURL).origin + match[1] : target.pageURL;
+};
 
-const simplifyAmazon = `
-(target) => {
-  const match = target.pageUrl.match(/(\\/dp\\/\\w+)[/?]?/)
-  return match
-    ? new URL(target.pageUrl).origin + match[1]
-    : target.pageUrl;
-}
-`.trim();
-
-const defaultRules: CopyRule[] = [
+const defaultRules: CopyFunctionWithTheme[] = [
   {
     id: 'default-1',
-    displayName: 'Markdown: [title](url)',
+    name: 'Markdown: [title](url)',
     types: ['page'],
-    code: '(target) => `[${target.title}](${target.pageURL})`',
+    code: ((target: PageTarget) =>
+      `[${target.title}](${target.pageURL})`).toString(),
+    glob: undefined,
     enabled: true,
+    isBuiltIn: true,
+    version: 1,
+    theme: {
+      icon: {
+        char: 'M⬇',
+      },
+      textColor: '#000000',
+      backgroundColor: '#f5f5f5',
+    },
   },
   {
     id: 'default-2',
-    displayName: 'Scrapbox: [title url]',
+    name: 'Scrapbox: [title url]',
     types: ['page'],
-    code: '(target) => `[${target.title} ${target.pageURL}]`',
+    code: ((target: PageTarget) =>
+      `[${target.title} ${target.pageURL}]`).toString(),
+    glob: undefined,
     enabled: true,
+    isBuiltIn: true,
+    version: 1,
+    theme: {
+      icon: {
+        char: 'S',
+      },
+      textColor: '#FFFFFF',
+      backgroundColor: '#06B632',
+    },
   },
   {
     id: 'default-3',
-    displayName: 'Amazon.co.jp: simple url',
+    name: 'Simplify Amazon.co.jp Item URL',
     types: ['page'],
-    code: simplifyAmazon,
-    pattern: 'amazon.co.jp.+/dp/', // TODO
+    code: simplifyAmazon.toString(),
+    glob: 'https://amazon.co.jp/*/db/*',
     enabled: true,
+    isBuiltIn: true,
+    version: 1,
+    theme: {
+      icon: {
+        char: 'Ama',
+      },
+      textColor: '#000000',
+      backgroundColor: '#ffa724',
+    },
   },
 ];
 
-export const getCopyRules = (): Promise<CopyRule[]> => {
+export const getCopyFunctions = (): Promise<CopyFunctionWithTheme[]> => {
   return new Promise(resolve => {
-    chrome.storage.sync.get({rules: defaultRules}, (value: any) => {
-      Array.isArray(value.rules) ? resolve(value.rules) : resolve([]);
+    chrome.storage.sync.get({functions: defaultRules}, (value: any) => {
+      Array.isArray(value.functions) ? resolve(value.functions) : resolve([]);
     });
   });
 };
 
-export const setCopyRules = (rules: CopyRule[]): Promise<void> => {
+export const setCopyFunctions = (
+  functions: CopyFunctionWithTheme[]
+): Promise<void> => {
   return new Promise(resolve => {
-    chrome.storage.sync.set({rules}, resolve);
+    chrome.storage.sync.set({functions}, resolve);
   });
 };

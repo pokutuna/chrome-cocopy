@@ -1,10 +1,16 @@
-import {h, render, Fragment} from 'preact';
+import {h, render} from 'preact';
 import {useState, useEffect, useContext, useCallback} from 'preact/hooks';
+import {ThemeProvider} from 'styled-components';
 
-import * as util from './lib/util';
-import {CopyRule, getCopyRules} from './lib/config';
-import SandboxProvider, {SandboxContext} from './components/SandboxContext';
+import {getCopyFunctions} from './lib/config';
 import {createPageTargetFromTab} from './lib/target';
+import {CopyFunction, CopyFunctionWithTheme} from './lib/function';
+import * as util from './lib/util';
+
+import SandboxProvider, {SandboxContext} from './components/SandboxContext';
+import {theme} from './components/Theme';
+import {PopupWrapper, PopupHeader} from './components/Popup';
+import {FunctionItem} from './components/Function';
 
 const App = () => {
   const receiver = (event: MessageEvent) => {
@@ -22,29 +28,28 @@ const App = () => {
   };
 
   return (
-    <Fragment>
-      <h1>COCOPY!</h1>
-      <a href="options.html" target="_blank">
-        settings
-      </a>
-      <SandboxProvider receiver={receiver}>
-        <CopyRules />
-      </SandboxProvider>
-    </Fragment>
+    <ThemeProvider theme={theme}>
+      <PopupWrapper>
+        <PopupHeader />
+        <SandboxProvider receiver={receiver}>
+          <CopyRules />
+        </SandboxProvider>
+      </PopupWrapper>
+    </ThemeProvider>
   );
 };
 
 const CopyRules = () => {
-  const [rules, setRules] = useState<CopyRule[]>([]);
+  const [rules, setRules] = useState<CopyFunctionWithTheme[]>([]);
 
   const sandbox = useContext(SandboxContext);
 
   useEffect(() => {
-    getCopyRules().then(setRules);
+    getCopyFunctions().then(setRules);
   }, []);
 
   const onClick = useCallback(
-    (c: CopyRule) => {
+    (c: CopyFunction) => {
       util
         .getActiveTab()
         .then(tab => {
@@ -74,13 +79,11 @@ const CopyRules = () => {
   }, [rules]);
 
   return (
-    <ul>
+    <div>
       {rules.map(r => (
-        <li key={r.id} onClick={() => onClick(r)} tabIndex={0}>
-          {r.displayName}
-        </li>
+        <FunctionItem key={r.id} fn={r} onClick={onClick} />
       ))}
-    </ul>
+    </div>
   );
 };
 
