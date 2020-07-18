@@ -1,10 +1,10 @@
 import {h, render, Fragment} from 'preact';
 import {useState, useEffect, useContext, useCallback} from 'preact/hooks';
 
-import * as util from './util';
-import {CopyRule, getCopyRules} from './config';
+import * as util from './lib/util';
+import {CopyRule, getCopyRules} from './lib/config';
 import SandboxProvider, {SandboxContext} from './components/SandboxContext';
-import {createPageTargetFromTab} from './target';
+import {createPageTargetFromTab} from './lib/target';
 
 const App = () => {
   const receiver = (event: MessageEvent) => {
@@ -59,6 +59,7 @@ const CopyRules = () => {
     [sandbox]
   );
 
+  // Kyeboard Shortcut
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       // index

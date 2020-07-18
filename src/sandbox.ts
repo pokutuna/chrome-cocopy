@@ -5,24 +5,7 @@
  * @packageDocumentation
  */
 
-import {PageTarget, TextTarget, ImageTarget, isTarget} from './target';
-
-export interface EvaluateRequest {
-  code: string;
-  target: PageTarget | TextTarget | ImageTarget;
-}
-
-export interface EvaluateResponse {
-  result: string | null;
-  error?: {
-    type: 'ParseError' | 'ExecutionError';
-    message: string;
-  };
-}
-
-function isCopyRequest(input: any): input is EvaluateRequest {
-  return typeof input.code === 'string' && isTarget(input.target);
-}
+import {EvaluateResponse, isCopyRequest} from './lib/eval';
 
 const onDOMContentLoaded = new Promise(resolve => {
   if (document.readyState === 'loading') {
@@ -33,13 +16,12 @@ const onDOMContentLoaded = new Promise(resolve => {
 });
 
 window.addEventListener('message', (event: MessageEvent) => {
-  console.log(event);
   if (!event.data) return;
   if (!isCopyRequest(event.data)) return;
 
-  const sendResponse = (data: EvaluateResponse) => {
+  const sendResponse = (res: EvaluateResponse) => {
     if (!event.source || !event.origin) return;
-    (event.source as Window).postMessage(data, event.origin);
+    (event.source as Window).postMessage(res, event.origin);
   };
 
   let fn: Function;

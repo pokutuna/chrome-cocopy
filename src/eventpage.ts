@@ -1,4 +1,4 @@
-import {createTargetFromContextMenu} from './target';
+import {createTargetFromContextMenu} from './lib/target';
 
 window.addEventListener('message', event => {
   console.log('message on eventpage', event);
