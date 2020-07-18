@@ -12,7 +12,7 @@
   "settings": {
     "react": {
       "pragma": "h",
-      "version": "detect"
+      "version": "latest"
     }
   },
   "env": {
