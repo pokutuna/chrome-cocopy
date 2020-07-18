@@ -14,7 +14,7 @@ function versionName() {
 module.exports = {
   mode: 'development',
   entry: {
-    // Stop context menu feature on xxx
+    // Stop context menu feature on c44a127b
     // eventpage: './src/eventpage.ts',
     sandbox: './src/sandbox.ts',
     popup: './src/popup.tsx',
