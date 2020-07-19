@@ -68,7 +68,8 @@ const FunctionName = styled.div`
 `;
 
 const Shortcut = styled.kbd<CopyFunctionTheme & {shortcut?: number}>`
-  display: ${props => (props.shortcut ? 'default' : 'none')};
+  display: ${props =>
+    typeof props.shortcut !== 'undefined' ? 'default' : 'none'};
   margin-left: auto;
   text-align: center;
   padding: 0 ${props => props.theme.space[1]};
@@ -76,6 +77,7 @@ const Shortcut = styled.kbd<CopyFunctionTheme & {shortcut?: number}>`
   border: 2px solid ${props => props.textColor};
   font: bold ${props => props.theme.size.lg} monospace;
   box-shadow: 2px 2px 0px 0px rgba(0, 0, 0, 0.3);
+  // TODO show pressed effect on running
 `;
 
 function wrapKeyDown(cb: () => void) {
