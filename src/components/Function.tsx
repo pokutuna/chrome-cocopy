@@ -9,7 +9,7 @@ import {
 } from '../lib/function';
 import {charLength, indexToKey} from '../lib/util';
 
-const syuuun = keyframes`
+const scanning = keyframes`
   0% { background-position: 100% }
   50% { background-position: 50% }
   100% { background-position: 0% }
@@ -27,7 +27,8 @@ const FunctionWrap = styled.div<CopyFunctionTheme & {running: boolean}>`
     filter: brightness(110%);
   }
 
-  animation-name: ${props => (props.running ? syuuun : 'none')};
+  /* scanning animation */
+  animation-name: ${props => (props.running ? scanning : 'none')};
   animation-duration: 0.3s;
   animation-timing-function: linear;
   animation-iteration-count: 1;
