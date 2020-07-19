@@ -24,3 +24,8 @@ export function textColorFromBgColor(hex: string): string {
     return '#FFFFFF';
   }
 }
+
+export function charLength(s: string): number {
+  // TODO UAX#29
+  return Array.from(s).length;
+}

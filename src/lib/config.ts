@@ -54,7 +54,7 @@ const defaultRules: CopyFunctionWithTheme[] = [
     version: 1,
     theme: {
       icon: {
-        char: 'Ama',
+        char: '🌴',
       },
       textColor: '#000000',
       backgroundColor: '#ffa724',

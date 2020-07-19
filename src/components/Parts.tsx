@@ -1,6 +1,6 @@
 import {h} from 'preact';
 import {memo} from 'preact/compat';
-import styled from 'styled-components';
+import styled, {keyframes} from 'styled-components';
 
 export const theme = {
   space: {
@@ -45,3 +45,12 @@ export const Title = memo(() => {
     </Header>
   );
 });
+
+export const spin = keyframes`
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+`;
