@@ -15,6 +15,12 @@ export function keyToIndex(key: string): number {
   return k !== 0 ? k - 1 : 9;
 }
 
+export function indexToKey(index: number): number | undefined {
+  if (9 < index) return undefined;
+  if (index === 9) return 0;
+  return index + 1;
+}
+
 import {contrast} from 'chroma-js';
 export function textColorFromBgColor(hex: string): string {
   const minContrast = 7;

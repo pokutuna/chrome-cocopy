@@ -30,8 +30,10 @@ const OptionLink = styled.a`
   right: 0;
   font-size: ${props => props.theme.size.xl};
   margin-right: ${props => props.theme.space[4]};
+  color: #666;
   &:hover,
   &:focus {
+    color: #333;
     animation: ${spin} 1.5s linear infinite;
   }
 `;

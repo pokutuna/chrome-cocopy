@@ -1,13 +1,13 @@
 import {h} from 'preact';
-import {useCallback} from 'preact/hooks';
-import styled from 'styled-components';
+import {useCallback, useMemo} from 'preact/hooks';
+import styled, {keyframes} from 'styled-components';
 
 import {
   CopyFunction,
   CopyFunctionTheme,
   CopyFunctionWithTheme,
 } from '../lib/function';
-import {charLength} from '../lib/util';
+import {charLength, indexToKey} from '../lib/util';
 
 const FunctionWrap = styled.div<CopyFunctionTheme>`
   display: flex;
@@ -47,7 +47,8 @@ const FunctionName = styled.div`
   text-overflow: ellipsis;
 `;
 
-const Shortcut = styled.kbd<CopyFunctionTheme>`
+const Shortcut = styled.kbd<CopyFunctionTheme & {shortcut?: number}>`
+  display: ${props => (props.shortcut ? 'default' : 'none')};
   margin-left: auto;
   text-align: center;
   padding: 0 ${props => props.theme.space[1]};
@@ -59,6 +60,7 @@ const Shortcut = styled.kbd<CopyFunctionTheme>`
 
 type FunctionItemProps = {
   fn: CopyFunctionWithTheme;
+  index: number;
   onClick: (fn: CopyFunction) => void;
 };
 
@@ -70,6 +72,7 @@ function wrapKeyDown(cb: () => void) {
 
 export function FunctionItem(props: FunctionItemProps) {
   const {fn} = props;
+  const shortcut = useMemo(() => indexToKey(props.index), [props.index]);
   const onClick = useCallback(() => props.onClick(fn), [props]);
   const onKeyDown = useCallback(wrapKeyDown(onClick), [onClick]);
 
@@ -84,7 +87,9 @@ export function FunctionItem(props: FunctionItemProps) {
         {fn.theme.icon.char}
       </FunctionIcon>
       <FunctionName>{fn.name}</FunctionName>
-      <Shortcut {...fn.theme}>1</Shortcut>
+      <Shortcut {...fn.theme} shortcut={shortcut}>
+        {shortcut}
+      </Shortcut>
     </FunctionWrap>
   );
 }

@@ -80,8 +80,8 @@ const CopyRules = () => {
 
   return (
     <div>
-      {rules.map(r => (
-        <FunctionItem key={r.id} fn={r} onClick={onClick} />
+      {rules.map((r, idx) => (
+        <FunctionItem key={r.id} fn={r} index={idx} onClick={onClick} />
       ))}
     </div>
   );
