@@ -40,9 +40,9 @@ const App = () => {
 };
 
 const CopyRules = () => {
-  const [rules, setRules] = useState<CopyFunctionWithTheme[]>([]);
-
   const sandbox = useContext(SandboxContext);
+  const [rules, setRules] = useState<CopyFunctionWithTheme[]>([]);
+  const [running, setRunning] = useState<string | null>(null);
 
   useEffect(() => {
     getCopyFunctions().then(setRules);
@@ -50,6 +50,10 @@ const CopyRules = () => {
 
   const onClick = useCallback(
     (c: CopyFunction) => {
+      // XXX fix canceling animation when other function running.
+      setRunning(c.id);
+      setTimeout(() => setRunning(null), 300);
+
       util
         .getActiveTab()
         .then(tab => {
@@ -73,6 +77,9 @@ const CopyRules = () => {
         const rule = rules[index];
         if (rule) onClick(rule);
       }
+      if (e.key === 'Esc' || e.key === 'Escape') {
+        window.close();
+      }
     };
     document.addEventListener('keydown', handler);
     return () => document.removeEventListener('keydown', handler);
@@ -81,7 +88,13 @@ const CopyRules = () => {
   return (
     <div>
       {rules.map((r, idx) => (
-        <FunctionItem key={r.id} fn={r} index={idx} onClick={onClick} />
+        <FunctionItem
+          key={r.id}
+          running={r.id === running}
+          fn={r}
+          index={idx}
+          onClick={onClick}
+        />
       ))}
     </div>
   );

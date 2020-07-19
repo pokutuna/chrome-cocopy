@@ -9,19 +9,38 @@ import {
 } from '../lib/function';
 import {charLength, indexToKey} from '../lib/util';
 
-const FunctionWrap = styled.div<CopyFunctionTheme>`
+const syuuun = keyframes`
+  0% { background-position: 100% }
+  50% { background-position: 50% }
+  100% { background-position: 0% }
+`;
+
+const FunctionWrap = styled.div<CopyFunctionTheme & {running: boolean}>`
   display: flex;
   flex-direction: row;
   align-items: center;
+  height: 32px;
   padding: ${props => props.theme.space[2]};
   color: ${props => props.textColor};
-  background-color: ${props => props.backgroundColor};
-  height: 36px;
-
   &:focus,
   &:hover {
     filter: brightness(110%);
   }
+
+  animation-name: ${props => (props.running ? syuuun : 'none')};
+  animation-duration: 0.3s;
+  animation-timing-function: linear;
+  animation-iteration-count: 1;
+  background-size: 300% 100%;
+  background-position: 0%;
+  background-image: linear-gradient(
+    90deg,
+    ${props => props.backgroundColor} 0%,
+    ${props => props.backgroundColor} 35%,
+    ${props => props.textColor} 60%,
+    ${props => props.backgroundColor} 60%,
+    ${props => props.backgroundColor} 100%
+  );
 `;
 
 const lenToSize: {[len: number]: string} = {
@@ -58,17 +77,18 @@ const Shortcut = styled.kbd<CopyFunctionTheme & {shortcut?: number}>`
   box-shadow: 2px 2px 0px 0px rgba(0, 0, 0, 0.3);
 `;
 
-type FunctionItemProps = {
-  fn: CopyFunctionWithTheme;
-  index: number;
-  onClick: (fn: CopyFunction) => void;
-};
-
 function wrapKeyDown(cb: () => void) {
   return (e: KeyboardEvent) => {
     if (e.key === 'Enter' || e.key === ' ') cb();
   };
 }
+
+type FunctionItemProps = {
+  fn: CopyFunctionWithTheme;
+  running: boolean;
+  index: number;
+  onClick: (fn: CopyFunction) => void;
+};
 
 export function FunctionItem(props: FunctionItemProps) {
   const {fn} = props;
@@ -78,6 +98,7 @@ export function FunctionItem(props: FunctionItemProps) {
 
   return (
     <FunctionWrap
+      running={props.running}
       {...fn.theme}
       onClick={onClick}
       onKeyDown={onKeyDown as any}
