@@ -1,13 +1,14 @@
 import globToRegExp from 'glob-to-regexp';
 
 import {TargetType, PageTarget, TextTarget, ImageTarget} from './target';
+import {Library} from './library';
 
 type CopyResult = string | number | null | undefined;
 export type CopyFn =
-  | (() => CopyResult | Promise<CopyResult>)
-  | ((t: PageTarget) => CopyResult | Promise<CopyResult>)
-  | ((t: TextTarget) => CopyResult | Promise<CopyResult>)
-  | ((t: ImageTarget) => CopyResult | Promise<CopyResult>);
+  | ((this: Library) => CopyResult | Promise<CopyResult>)
+  | ((this: Library, t: PageTarget) => CopyResult | Promise<CopyResult>)
+  | ((this: Library, t: TextTarget) => CopyResult | Promise<CopyResult>)
+  | ((this: Library, t: ImageTarget) => CopyResult | Promise<CopyResult>);
 
 export interface CopyFunction {
   id: string;

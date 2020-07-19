@@ -6,6 +6,9 @@
  */
 
 import {isEvaluatePayload, evaluate} from './lib/eval';
+import * as library from './lib/library';
+
+Object.assign(window, library);
 
 const doneDOMContentLoaded = new Promise(resolve => {
   if (document.readyState === 'loading') {

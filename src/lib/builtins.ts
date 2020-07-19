@@ -1,5 +1,6 @@
 import {CopyFunctionWithTheme, CopyFn} from './function';
 import {PageTarget} from './target';
+import {render} from 'mustache';
 
 export const copyAsMarkdownFn: CopyFn = (target: PageTarget) =>
   `[${target.title}](${target.pageURL})`;
@@ -43,14 +44,11 @@ const copyAsScrapbox: CopyFunctionWithTheme = {
   },
 };
 
-export const copyAsAnchorHTMLElementFn = (target: PageTarget) => `
-  <a href="${encodeURI(target.pageURL)}">${target.title}</a>`;
-
 const copyAsHTML: CopyFunctionWithTheme = {
   id: 'builtin-html',
   name: 'HTML: <a href={url}>{title}</a>',
   types: ['page'],
-  code: copyAsAnchorHTMLElementFn.toString(),
+  code: '(target) => render(\'<a href="{{&pageURL}}">{{title}}</a>\', target);',
   glob: undefined,
   enabled: true,
   isBuiltIn: true,
