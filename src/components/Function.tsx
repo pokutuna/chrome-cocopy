@@ -11,10 +11,16 @@ import {
 const FunctionWrap = styled.div<CopyFunctionTheme>`
   display: flex;
   flex-direction: row;
+  align-items: center;
   width: 300px;
   padding: ${props => props.theme.space[2]};
   color: ${props => props.textColor};
   background-color: ${props => props.backgroundColor};
+
+  &:focus,
+  &:hover {
+    filter: brightness(110%);
+  }
 `;
 
 const FunctionIcon = styled.span`
@@ -27,21 +33,36 @@ const FunctionIcon = styled.span`
 
 const FunctionName = styled.span``;
 
-const Shortcut = styled.div``;
+const Shortcut = styled.div<CopyFunctionTheme>`
+  border: 2px solid ${props => props.textColor};
+`;
 
 type FunctionItemProps = {
   fn: CopyFunctionWithTheme;
   onClick: (fn: CopyFunction) => void;
 };
 
+function wrapKeyDown(cb: () => void) {
+  return (e: KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') cb();
+  };
+}
+
 export function FunctionItem(props: FunctionItemProps) {
   const {fn} = props;
   const onClick = useCallback(() => props.onClick(fn), [props]);
+  const onKeyDown = useCallback(wrapKeyDown(onClick), [onClick]);
+
   return (
-    <FunctionWrap {...fn.theme} onClick={onClick} tabIndex={-1}>
+    <FunctionWrap
+      {...fn.theme}
+      onClick={onClick}
+      onKeyDown={onKeyDown as any}
+      tabIndex={1}
+    >
       <FunctionIcon>{fn.theme.icon.char}</FunctionIcon>
       <FunctionName>{fn.name}</FunctionName>
-      <Shortcut></Shortcut>
+      <Shortcut {...fn.theme}>1</Shortcut>
     </FunctionWrap>
   );
 }
