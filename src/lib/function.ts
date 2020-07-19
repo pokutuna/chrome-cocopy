@@ -1,6 +1,12 @@
 import globToRegExp from 'glob-to-regexp';
 
-import {TargetType} from './target';
+import {TargetType, PageTarget, TextTarget, ImageTarget} from './target';
+
+type CopyResult = string | number | null | undefined;
+export type CopyFn =
+  | ((t: PageTarget) => CopyResult)
+  | ((t: TextTarget) => CopyResult)
+  | ((t: ImageTarget) => CopyResult);
 
 export interface CopyFunction {
   id: string;
