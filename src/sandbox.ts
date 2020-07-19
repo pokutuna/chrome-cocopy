@@ -19,8 +19,8 @@ window.addEventListener('message', (event: MessageEvent) => {
   if (!event.data) return;
   if (!isEvaluatePayload(event.data)) return;
 
-  doneDOMContentLoaded.then(() => {
-    const result = evaluate(event.data);
+  doneDOMContentLoaded.then(async () => {
+    const result = await evaluate(event.data);
     if (!event.source || !event.origin) return;
     (event.source as Window).postMessage(result, event.origin);
   });

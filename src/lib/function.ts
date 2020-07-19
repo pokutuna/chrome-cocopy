@@ -4,9 +4,10 @@ import {TargetType, PageTarget, TextTarget, ImageTarget} from './target';
 
 type CopyResult = string | number | null | undefined;
 export type CopyFn =
-  | ((t: PageTarget) => CopyResult)
-  | ((t: TextTarget) => CopyResult)
-  | ((t: ImageTarget) => CopyResult);
+  | (() => CopyResult | Promise<CopyResult>)
+  | ((t: PageTarget) => CopyResult | Promise<CopyResult>)
+  | ((t: TextTarget) => CopyResult | Promise<CopyResult>)
+  | ((t: ImageTarget) => CopyResult | Promise<CopyResult>);
 
 export interface CopyFunction {
   id: string;

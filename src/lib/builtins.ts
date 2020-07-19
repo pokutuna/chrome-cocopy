@@ -87,13 +87,11 @@ const copyAsSimplifiedAmazonURL: CopyFunctionWithTheme = {
   },
 };
 
-// export const debugFn: CopyFn = (target: PageTarget) => console.log(m as any);
-
 const debug: CopyFunctionWithTheme = {
   id: 'builtin-debug',
   name: 'debugging',
   types: ['page'],
-  code: '() => temp',
+  code: 'async () => Promise.resolve(100)',
   glob: undefined,
   enabled: true,
   isBuiltIn: true,

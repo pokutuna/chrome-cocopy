@@ -27,7 +27,9 @@ function isAcceptableResult(input: any): input is ReturnType<CopyFn> {
   );
 }
 
-export function evaluate(request: EvaluatePayload): EvaluateResult {
+export async function evaluate(
+  request: EvaluatePayload
+): Promise<EvaluateResult> {
   let fn: Function;
   try {
     fn = eval.call(undefined, request.code);
@@ -46,7 +48,7 @@ export function evaluate(request: EvaluatePayload): EvaluateResult {
 
   let result: any;
   try {
-    result = fn.call(undefined, request.target);
+    result = await Promise.resolve(fn.call(undefined, request.target));
     if (!isAcceptableResult(result)) {
       throw new Error(
         'returning value is not a one of (string | number | null | undefined)'

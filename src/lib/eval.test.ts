@@ -8,8 +8,8 @@ describe('evaluate', () => {
     pageURL: 'https://example.test/some/page',
   };
 
-  test('success', () => {
-    const result = ev.evaluate({
+  test('success', async () => {
+    const result = await ev.evaluate({
       code: '(t) => `[${t.title}](${t.pageURL})`',
       target,
     });
@@ -18,8 +18,8 @@ describe('evaluate', () => {
     });
   });
 
-  test('success with number', () => {
-    const result = ev.evaluate({
+  test('success with number', async () => {
+    const result = await ev.evaluate({
       code: '(t) => t.title.length',
       target,
     });
@@ -28,8 +28,8 @@ describe('evaluate', () => {
     });
   });
 
-  test('success with null', () => {
-    const result = ev.evaluate({
+  test('success with null', async () => {
+    const result = await ev.evaluate({
       code: '() => null',
       target,
     });
@@ -38,8 +38,8 @@ describe('evaluate', () => {
     });
   });
 
-  test('parse error with syntax error', () => {
-    const result = ev.evaluate({
+  test('parse error with syntax error', async () => {
+    const result = await ev.evaluate({
       code: '}',
       target,
     });
@@ -52,8 +52,8 @@ describe('evaluate', () => {
     });
   });
 
-  test('parse error with not a function', () => {
-    const result = ev.evaluate({
+  test('parse error with not a function', async () => {
+    const result = await ev.evaluate({
       code: '123',
       target,
     });
@@ -66,8 +66,8 @@ describe('evaluate', () => {
     });
   });
 
-  test('execution error with error', () => {
-    const result = ev.evaluate({
+  test('execution error with error', async () => {
+    const result = await ev.evaluate({
       code: '() => { throw new Error("simulated error") }',
       target,
     });
@@ -80,8 +80,8 @@ describe('evaluate', () => {
     });
   });
 
-  test('execution error with unacceptable value', () => {
-    const result = ev.evaluate({
+  test('execution error with unacceptable value', async () => {
+    const result = await ev.evaluate({
       code: '() => ({ foo: "bar" })',
       target,
     });
