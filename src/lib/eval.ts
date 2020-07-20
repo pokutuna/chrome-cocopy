@@ -1,13 +1,12 @@
 import {PageTarget, TextTarget, ImageTarget, isTarget} from './target';
-import {CopyFn} from './function';
+import {CopyResult} from './function';
 
 export interface EvaluatePayload {
   code: string;
   target: PageTarget | TextTarget | ImageTarget;
 }
-
 export interface EvaluateResult {
-  result: ReturnType<CopyFn>;
+  result: CopyResult;
   error?: {
     type: 'ParseError' | 'ExecutionError';
     message: string;
@@ -18,7 +17,7 @@ export function isEvaluatePayload(input: any): input is EvaluatePayload {
   return typeof input.code === 'string' && isTarget(input.target);
 }
 
-function isAcceptableResult(input: any): input is ReturnType<CopyFn> {
+function isAcceptableResult(input: any): input is CopyResult {
   return (
     typeof input === 'string' ||
     typeof input === 'number' ||

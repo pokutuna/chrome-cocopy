@@ -1,5 +1,5 @@
 import {h, render} from 'preact';
-import {useState, useEffect, useContext, useCallback} from 'preact/hooks';
+import {useState, useEffect, useCallback} from 'preact/hooks';
 import {ThemeProvider} from 'styled-components';
 
 import {getCopyFunctions} from './lib/config';
@@ -7,40 +7,39 @@ import {createPageTargetFromTab} from './lib/target';
 import {CopyFunction, CopyFunctionWithTheme} from './lib/function';
 import * as util from './lib/util';
 
-import SandboxProvider, {SandboxContext} from './components/SandboxContext';
 import {theme} from './components/Theme';
 import {PopupWrapper, PopupHeader} from './components/Popup';
 import {FunctionItem} from './components/Function';
+import {useSandbox} from './components/Sandbox';
+import {EvaluateResult} from './lib/eval';
+
+const receiver = (res: EvaluateResult) => {
+  if (res.result) {
+    navigator.clipboard.writeText(res.result.toString());
+  }
+  // TODO collect error and copy rule
+  if (res.error) {
+    console.error(res);
+    new Notification('Error', {
+      icon: 'img/icon/128.png',
+      body: JSON.stringify(res),
+    });
+  }
+};
 
 const App = () => {
-  const receiver = (event: MessageEvent) => {
-    if (event.data.result) {
-      navigator.clipboard.writeText(event.data.result);
-    }
-    // TODO collect error and copy rule
-    if (event.data.error) {
-      console.error(event.data);
-      new Notification('Error', {
-        icon: 'img/icon/128.png',
-        body: JSON.stringify(event.data),
-      });
-    }
-  };
-
   return (
     <ThemeProvider theme={theme}>
       <PopupWrapper>
         <PopupHeader />
-        <SandboxProvider receiver={receiver}>
-          <CopyRules />
-        </SandboxProvider>
+        <CopyRules />
       </PopupWrapper>
     </ThemeProvider>
   );
 };
 
 const CopyRules = () => {
-  const sandbox = useContext(SandboxContext);
+  const evaluate = useSandbox(receiver);
   const [rules, setRules] = useState<CopyFunctionWithTheme[]>([]);
   const [running, setRunning] = useState<string | null>(null);
 
@@ -57,15 +56,14 @@ const CopyRules = () => {
       util
         .getActiveTab()
         .then(tab => {
-          sandbox &&
-            sandbox.send({
-              code: c.code,
-              target: createPageTargetFromTab(tab),
-            });
+          evaluate({
+            code: c.code,
+            target: createPageTargetFromTab(tab),
+          });
         })
         .catch(e => console.error(e));
     },
-    [sandbox]
+    [evaluate]
   );
 
   // Kyeboard Shortcut
