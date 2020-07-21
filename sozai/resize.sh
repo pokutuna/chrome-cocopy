@@ -2,7 +2,7 @@
 
 CWD=$(dirname "$0" && pwd)
 ROOT=$(cd $CWD && cd .. && pwd)
-IN="co2.png"
+IN="coco.png"
 OUT=$ROOT/src/img/icon
 
 set -x
