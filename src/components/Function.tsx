@@ -15,7 +15,7 @@ const scanning = keyframes`
   100% { background-position: 0% }
 `;
 
-const FunctionWrap = styled.div<CopyFunctionTheme & {running: boolean}>`
+const FunctionBox = styled.div<CopyFunctionTheme & {running: boolean}>`
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -100,7 +100,7 @@ export function FunctionItem(props: FunctionItemProps) {
   const onKeyDown = useCallback(wrapKeyDown(onClick), [onClick]);
 
   return (
-    <FunctionWrap
+    <FunctionBox
       running={props.running}
       {...fn.theme}
       onClick={onClick}
@@ -114,6 +114,6 @@ export function FunctionItem(props: FunctionItemProps) {
       <Shortcut {...fn.theme} shortcut={shortcut}>
         {shortcut}
       </Shortcut>
-    </FunctionWrap>
+    </FunctionBox>
   );
 }
