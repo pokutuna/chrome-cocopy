@@ -14,7 +14,7 @@
     "outDir": "./build"
   },
   "include": [
-    "src/**/*"
+    "src/libs.d.ts"
   ],
   "exclude": [
     "src/**/*.test.ts"

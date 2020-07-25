@@ -7,7 +7,7 @@ import {faCog} from '@fortawesome/free-solid-svg-icons/faCog';
 import {spin} from './Parts';
 
 export const PopupWrapper = styled.div`
-  width: 360px;
+  width: ${props => props.theme.constants.popupWidth};
 `;
 
 const Header = styled.div`

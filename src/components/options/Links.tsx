@@ -1,10 +1,9 @@
 import {h, Fragment} from 'preact';
-import {SectionTitle} from '../options/Parts';
+import {Section} from '../options/Parts';
 
 export function Links() {
   return (
-    <Fragment>
-      <SectionTitle title="Links" />
+    <Section title="Links">
       <ul>
         <li>
           <a href="#TODO">Chrome Web Store</a>
@@ -18,6 +17,6 @@ export function Links() {
           <a href="#TODO">Copyright notice</a>
         </li>
       </ul>
-    </Fragment>
+    </Section>
   );
 }

@@ -32,4 +32,11 @@ export const theme = {
     extrabold: 800,
     black: 900,
   },
+  fontFamily: {
+    default: 'inherit',
+    monospace: 'Menlo, Consolas, monospace',
+  },
+  constants: {
+    popupWidth: '360px',
+  },
 } as const;
