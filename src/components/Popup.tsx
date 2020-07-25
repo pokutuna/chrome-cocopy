@@ -18,11 +18,12 @@ const Header = styled.div`
   position: relative;
 `;
 
-const Title = styled.h1`
-  margin: ${props => props.theme.space[2]};
-  padding: 0 ${props => props.theme.space[2]};
-  border-top: ${props => props.theme.size[2]} solid teal;
-  border-bottom: ${props => props.theme.size[2]} solid teal;
+const Title = styled.div`
+  width: 84px;
+  height: 40px;
+  background: no-repeat center/contain url('img/logo.png');
+  margin: ${props => props.theme.space[1]};
+  padding: 0 ${props => props.theme.space[1]};
 `;
 
 const OptionLink = styled.a`
@@ -41,7 +42,7 @@ const OptionLink = styled.a`
 export function PopupHeader() {
   return (
     <Header>
-      <Title>COCOPY!</Title>
+      <Title />
       <OptionLink href="options.html" target="_blank">
         <FontAwesomeIcon icon={faCog} />
       </OptionLink>
