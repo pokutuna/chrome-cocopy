@@ -1,3 +1,5 @@
+import {getTabContent} from './util';
+
 export type TargetType = 'page' | 'text' | 'image';
 
 export type Target = PageTarget | TextTarget | ImageTarget;
@@ -15,6 +17,7 @@ interface CommonCopyTarget {
 
 export interface PageTarget extends CommonCopyTarget {
   type: 'page';
+  content: string | undefined;
 }
 
 interface LinkTarget {
@@ -51,15 +54,18 @@ export function isTarget(input: any): input is Target {
   );
 }
 
-export function createPageTargetFromTab(tab: chrome.tabs.Tab): PageTarget {
+export async function createPageTargetFromTab(
+  tab: chrome.tabs.Tab
+): Promise<PageTarget> {
   // tab.url and tab.title are present when including `activeTab` permission.
   const pageURL = (tab.url || tab.pendingUrl) as string;
-  return {type: 'page', title: tab.title!, pageURL};
+  const content = await getTabContent(tab);
+  return {type: 'page', title: tab.title!, pageURL, content};
 }
 
 /**
  * This method is using from ContextMenu features.
- * I don't using this now.
+ * Not used now.
  * @internal
  */
 export function createTargetFromContextMenu(
@@ -104,5 +110,6 @@ export function createTargetFromContextMenu(
     type: 'page',
     title,
     pageURL,
+    content: '', // TODO
   };
 }

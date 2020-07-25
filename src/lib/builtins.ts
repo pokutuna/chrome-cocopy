@@ -85,11 +85,19 @@ const copyAsSimplifiedAmazonURL: CopyFunctionWithTheme = {
   },
 };
 
+const f: CopyFn = async (target: PageTarget) => {
+  const dom = new DOMParser().parseFromString(
+    target.content || '',
+    'text/html'
+  );
+  return dom.querySelector('h1')?.textContent;
+};
+
 const debug: CopyFunctionWithTheme = {
   id: 'builtin-debug',
   name: 'debugging',
   types: ['page'],
-  code: 'async () => Promise.resolve(100)',
+  code: f.toString(),
   glob: undefined,
   enabled: true,
   isBuiltIn: true,

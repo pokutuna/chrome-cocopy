@@ -53,15 +53,14 @@ const CopyRules = () => {
       setRunning(c.id);
       setTimeout(() => setRunning(null), 300);
 
-      util
-        .getActiveTab()
-        .then(tab => {
-          evaluate({
-            code: c.code,
-            target: createPageTargetFromTab(tab),
-          });
-        })
-        .catch(e => console.error(e));
+      const run = async () => {
+        const tab = await util.getActiveTab();
+        evaluate({
+          code: c.code,
+          target: await createPageTargetFromTab(tab),
+        });
+      };
+      run().catch(e => console.error(e));
     },
     [evaluate]
   );

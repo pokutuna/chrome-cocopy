@@ -6,6 +6,30 @@ export function getActiveTab(): Promise<chrome.tabs.Tab> {
   });
 }
 
+export function timeout(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+export async function getTabContent(
+  tab: chrome.tabs.Tab
+): Promise<string | undefined> {
+  const html = new Promise<string>(resolve => {
+    chrome.tabs.executeScript(
+      tab.id!,
+      {
+        code: 'document.documentElement.outerHTML',
+      },
+      results => {
+        const result = results?.[0];
+        resolve(result);
+      }
+    );
+  });
+
+  const result = await Promise.race([html, timeout(2000)]);
+  return typeof result === 'string' ? result : undefined;
+}
+
 /**
  * convert number to index based on Keyboard Layout
  * @param a single char of digit.
