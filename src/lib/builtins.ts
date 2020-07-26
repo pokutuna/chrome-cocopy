@@ -22,8 +22,8 @@ const copyAsMarkdown: CopyFunctionWithTheme = {
   },
 };
 
-export const copyAsScrapboxFn: CopyFn = (target: PageTarget) =>
-  `[${target.title} ${target.pageURL}]`;
+export const copyAsScrapboxFn: CopyFn = ({title, pageURL}: PageTarget) =>
+  `[${title} ${pageURL}]`;
 
 const copyAsScrapbox: CopyFunctionWithTheme = {
   id: 'builtin-scrapbox',
@@ -61,9 +61,9 @@ const copyAsHTML: CopyFunctionWithTheme = {
   },
 };
 
-const simplifyAmazonFn: CopyFn = (target: PageTarget) => {
-  const match = target.pageURL.match(/(\/dp\/\w+)[/?]?/);
-  return match ? new URL(target.pageURL).origin + match[1] : undefined;
+const simplifyAmazonFn: CopyFn = ({pageURL}: PageTarget) => {
+  const match = pageURL.match(/(\/dp\/\w+)[/?]?/);
+  return match ? new URL(pageURL).origin + match[1] : undefined;
 };
 
 const copyAsSimplifiedAmazonURL: CopyFunctionWithTheme = {
