@@ -14,9 +14,7 @@ const copyAsMarkdown: CopyFunctionWithTheme = {
   isBuiltIn: true,
   version: 1,
   theme: {
-    icon: {
-      symbol: 'M⬇',
-    },
+    symbol: 'M⬇',
     textColor: '#000000',
     backgroundColor: '#f5f5f5',
   },
@@ -35,9 +33,7 @@ const copyAsScrapbox: CopyFunctionWithTheme = {
   isBuiltIn: true,
   version: 1,
   theme: {
-    icon: {
-      symbol: 'S',
-    },
+    symbol: 'S',
     textColor: '#FFFFFF',
     backgroundColor: '#06B632',
   },
@@ -53,9 +49,7 @@ const copyAsHTML: CopyFunctionWithTheme = {
   isBuiltIn: true,
   version: 1,
   theme: {
-    icon: {
-      symbol: 'H',
-    },
+    symbol: 'H',
     textColor: '#FFFFFF',
     backgroundColor: '#ff5722',
   },
@@ -76,9 +70,7 @@ const copyAsSimplifiedAmazonURL: CopyFunctionWithTheme = {
   isBuiltIn: true,
   version: 1,
   theme: {
-    icon: {
-      symbol: '🌴',
-    },
+    symbol: '🌴',
     textColor: '#000000',
     backgroundColor: '#ffa724',
   },
@@ -102,9 +94,7 @@ const debug: CopyFunctionWithTheme = {
   isBuiltIn: true,
   version: 1,
   theme: {
-    icon: {
-      symbol: '🐜',
-    },
+    symbol: '🐜',
     textColor: '#000000',
     backgroundColor: '#f5f5f5',
   },
