@@ -1,4 +1,4 @@
-import {h} from 'preact';
+import {h, Fragment} from 'preact';
 import {useState, useEffect, useCallback, useRef} from 'preact/hooks';
 import {DndProvider, useDrag, useDrop} from 'react-dnd';
 import {HTML5Backend} from 'react-dnd-html5-backend';
@@ -6,12 +6,15 @@ import {HTML5Backend} from 'react-dnd-html5-backend';
 import styled from 'styled-components';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {faBars} from '@fortawesome/free-solid-svg-icons/faBars';
+import {faCaretRight} from '@fortawesome/free-solid-svg-icons/faCaretRight';
+import {faCaretDown} from '@fortawesome/free-solid-svg-icons/faCaretDown';
 
 import {getCopyFunctions} from '../../lib/config';
 import {CopyFunctionWithTheme} from '../../lib/function';
 
-import {Section} from '../options/Parts';
 import {FunctionItem} from '../Function';
+import {Section} from '../options/Parts';
+import {Editor} from '../options/Editor';
 
 const type = 'function';
 interface DragItem {
@@ -27,17 +30,26 @@ const Box = styled.div<{isDragging?: boolean}>`
   align-items: center;
 `;
 
-const ItemLeft = styled.div``;
-const ItemBody = styled.div`
-  width: ${props => props.theme.constants.popupWidth};
-`;
-const ItemRight = styled.div`
+const ItemButton = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  width: ${props => props.theme.size['4xl']};
   height: ${props => props.theme.constants.functionHeight};
+`;
+
+const ItemLeft = styled(ItemButton)`
+  width: ${props => props.theme.size['4xl']};
+  font-size: ${props => props.theme.size.xl};
+`;
+const ItemBody = styled.div`
+  width: ${props => props.theme.constants.popupWidth};
+`;
+const ItemRight = styled(ItemButton)`
+  width: ${props => props.theme.size['4xl']};
   cursor: grab;
+`;
+const EditorBox = styled.div`
+  margin-left: ${props => props.theme.size['4xl']};
 `;
 
 type FunctionEditItemProps = {
@@ -49,6 +61,8 @@ type FunctionEditItemProps = {
 };
 
 function FunctionEditItem(props: FunctionEditItemProps) {
+  const {fn, onClick, active, index, move} = props;
+
   const ref = useRef<HTMLDivElement>(null);
 
   const [, drop] = useDrop({
@@ -56,45 +70,62 @@ function FunctionEditItem(props: FunctionEditItemProps) {
     hover(item: DragItem) {
       if (!ref.current) return;
       const dragIndex = item.index;
-      const hoverIndex = props.index;
+      const hoverIndex = index;
       if (dragIndex === hoverIndex) return;
-      props.move(dragIndex, hoverIndex);
+      move(dragIndex, hoverIndex);
       item.index = hoverIndex;
     },
   });
 
   const [{isDragging}, drag, dragPreview] = useDrag({
-    item: {type, id: props.fn.id, index: props.index},
+    item: {type, id: fn.id, index: index},
     collect: (monitor: any) => ({isDragging: monitor.isDragging()}),
   });
 
   dragPreview(drop(ref));
 
   return (
-    <Box ref={ref} isDragging={isDragging}>
-      <ItemLeft />
-      <ItemBody>
-        <FunctionItem
-          fn={props.fn}
-          index={10} // XXX hide shortcut
-          onClick={props.onClick}
-          running={false}
-        />
-      </ItemBody>
-      <ItemRight ref={drag}>
-        <FontAwesomeIcon icon={faBars} />
-      </ItemRight>
-    </Box>
+    <Fragment>
+      <Box ref={ref} isDragging={isDragging}>
+        <ItemLeft onClick={onClick}>
+          <FontAwesomeIcon icon={active ? faCaretDown : faCaretRight} />
+        </ItemLeft>
+        <ItemBody>
+          <FunctionItem
+            fn={fn}
+            index={10} // XXX hide shortcut
+            onClick={onClick}
+            running={false}
+          />
+        </ItemBody>
+        <ItemRight ref={drag}>
+          <FontAwesomeIcon icon={faBars} />
+        </ItemRight>
+      </Box>
+      {active && (
+        <EditorBox>
+          <Editor />
+        </EditorBox>
+      )}
+    </Fragment>
   );
 }
 
 export function Functions() {
-  const [active, setActive] = useState<number | undefined>(0);
+  const [active, setActive] = useState<string | undefined>(undefined);
   const [functions, setFunctions] = useState<CopyFunctionWithTheme[]>([]);
+
+  const toggleActive = useCallback(
+    (id: string) => (active === id ? setActive(undefined) : setActive(id)),
+    [active, functions]
+  );
+
+  useEffect(() => {
+    getCopyFunctions().then(setFunctions);
+  }, []); // TODO refresh
 
   const move = useCallback(
     (dragIndex: number, hoverIndex: number) => {
-      console.log(dragIndex, hoverIndex);
       const fs = [...functions];
       const [dragging] = fs.splice(dragIndex, 1);
       fs.splice(hoverIndex, 0, dragging);
@@ -103,19 +134,15 @@ export function Functions() {
     [functions]
   );
 
-  useEffect(() => {
-    getCopyFunctions().then(setFunctions);
-  }, []); // TODO refresh
-
   return (
-    <Section title="Function">
+    <Section title="Functions">
       <DndProvider backend={HTML5Backend}>
         {functions.map((fn, idx) => (
           <FunctionEditItem
             key={fn.id}
             fn={fn}
-            active={idx === active}
-            onClick={() => setActive(idx)}
+            active={fn.id === active}
+            onClick={() => toggleActive(fn.id)}
             index={idx}
             move={move}
           />
