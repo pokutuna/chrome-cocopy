@@ -34,6 +34,7 @@ export const theme = {
   },
   color: {
     gray: '#666',
+    codeBg: '#f5f2f0',
   },
   fontFamily: {
     default: 'inherit',

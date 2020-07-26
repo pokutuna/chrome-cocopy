@@ -56,9 +56,9 @@ const CodeEditor = (props: {code: string; setCode: (code: string) => void}) => {
         padding={theme.space[2]}
         textareaId="code"
         style={{
-          fontSize: theme.size.lg,
+          fontSize: theme.size.base,
           fontFamily: theme.fontFamily.monospace,
-          backgroundColor: '#f5f2f0',
+          backgroundColor: theme.color.codeBg,
         }}
       />
     </InputBox>
@@ -67,7 +67,7 @@ const CodeEditor = (props: {code: string; setCode: (code: string) => void}) => {
 
 const initialCode = `
 /**
- * Returning value will be copied to clipboard.
+ * Return value will be copied to clipboard.
  * @param {Object} target
  * @returns {(string|undefined|Promise)}
  */
