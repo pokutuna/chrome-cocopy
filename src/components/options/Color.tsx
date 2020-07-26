@@ -5,8 +5,7 @@ import styled from 'styled-components';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {faPalette} from '@fortawesome/free-solid-svg-icons/faPalette';
 
-import {InputBox, Label, Input} from './Parts';
-import {ProgressPlugin} from 'webpack';
+import {InputBox, Label, Input} from './InputLayout';
 
 const palette = [
   '#F44336',

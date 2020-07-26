@@ -7,16 +7,8 @@ import 'prismjs/components/prism-clike';
 import 'prismjs/components/prism-javascript';
 
 import {theme} from '../Theme';
-import {
-  TextInput,
-  InputBox,
-  Label,
-  LabelSub,
-  Box,
-  Row,
-  Item,
-  Button,
-} from './Parts';
+import {Box, Row, Item, Button} from './Parts';
+import {TextInput, InputBox, Label, LabelSub} from './InputLayout';
 import {ColorInput} from './Color';
 import {CopyFunctionWithTheme} from '../../lib/function';
 

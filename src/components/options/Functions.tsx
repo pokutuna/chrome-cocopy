@@ -1,7 +1,6 @@
 import {h} from 'preact';
 import {useState, useEffect, useCallback, useRef} from 'preact/hooks';
 
-import styled from 'styled-components';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {faBars} from '@fortawesome/free-solid-svg-icons/faBars';
 import {faCaretRight} from '@fortawesome/free-solid-svg-icons/faCaretRight';
@@ -14,36 +13,13 @@ import {FunctionItem} from '../Function';
 import {DnDWrapper, useDnDItem} from '../options/DnD';
 import {Section} from '../options/Parts';
 import {Editor} from '../options/Editor';
-
-const Box = styled.div<{isDragging?: boolean}>`
-  opacity: ${props => (props.isDragging ? 0.5 : 1)};
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-`;
-
-const ItemButton = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: ${props => props.theme.constants.functionHeight};
-`;
-
-const ItemLeft = styled(ItemButton)`
-  width: ${props => props.theme.size['4xl']};
-  font-size: ${props => props.theme.size.xl};
-`;
-const ItemBody = styled.div`
-  width: ${props => props.theme.constants.popupWidth};
-`;
-const ItemRight = styled(ItemButton)`
-  width: ${props => props.theme.size['4xl']};
-  cursor: grab;
-`;
-const EditorBox = styled.div`
-  margin-left: ${props => props.theme.size['4xl']};
-  margin-bottom: ${props => props.theme.size['4xl']};
-`;
+import {
+  FunctionBox,
+  ItemLeft,
+  ItemBody,
+  ItemRight,
+  EditorBox,
+} from './FunctionsLayout';
 
 type FunctionEditItemProps = {
   fn: CopyFunctionWithTheme;
@@ -65,8 +41,8 @@ function FunctionEditItem(props: FunctionEditItemProps) {
   });
 
   return (
-    <div>
-      <Box ref={ref} isDragging={isDragging}>
+    <div ref={ref}>
+      <FunctionBox isDragging={isDragging}>
         <ItemLeft onClick={onClick}>
           <FontAwesomeIcon icon={active ? faCaretDown : faCaretRight} />
         </ItemLeft>
@@ -81,7 +57,7 @@ function FunctionEditItem(props: FunctionEditItemProps) {
         <ItemRight ref={drag}>
           <FontAwesomeIcon icon={faBars} />
         </ItemRight>
-      </Box>
+      </FunctionBox>
       {active && (
         <EditorBox>
           <Editor />
