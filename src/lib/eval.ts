@@ -47,6 +47,8 @@ export async function evaluate(
 
   let result: any;
   try {
+    // currently type is not public
+    delete request.target['type'];
     result = await Promise.resolve(fn.call(undefined, request.target));
     if (!isAcceptableResult(result)) {
       throw new Error(
