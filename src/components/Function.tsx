@@ -107,8 +107,8 @@ export function FunctionItem(props: FunctionItemProps) {
       onKeyDown={onKeyDown as any}
       tabIndex={1}
     >
-      <FunctionIcon len={charLength(fn.theme.icon.char)}>
-        {fn.theme.icon.char}
+      <FunctionIcon len={charLength(fn.theme.icon.symbol)}>
+        {fn.theme.icon.symbol}
       </FunctionIcon>
       <FunctionName>{fn.name}</FunctionName>
       <Shortcut {...fn.theme} shortcut={shortcut}>

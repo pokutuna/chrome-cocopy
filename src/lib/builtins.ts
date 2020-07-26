@@ -15,7 +15,7 @@ const copyAsMarkdown: CopyFunctionWithTheme = {
   version: 1,
   theme: {
     icon: {
-      char: 'M⬇',
+      symbol: 'M⬇',
     },
     textColor: '#000000',
     backgroundColor: '#f5f5f5',
@@ -36,7 +36,7 @@ const copyAsScrapbox: CopyFunctionWithTheme = {
   version: 1,
   theme: {
     icon: {
-      char: 'S',
+      symbol: 'S',
     },
     textColor: '#FFFFFF',
     backgroundColor: '#06B632',
@@ -54,7 +54,7 @@ const copyAsHTML: CopyFunctionWithTheme = {
   version: 1,
   theme: {
     icon: {
-      char: 'H',
+      symbol: 'H',
     },
     textColor: '#FFFFFF',
     backgroundColor: '#ff5722',
@@ -77,7 +77,7 @@ const copyAsSimplifiedAmazonURL: CopyFunctionWithTheme = {
   version: 1,
   theme: {
     icon: {
-      char: '🌴',
+      symbol: '🌴',
     },
     textColor: '#000000',
     backgroundColor: '#ffa724',
@@ -103,7 +103,7 @@ const debug: CopyFunctionWithTheme = {
   version: 1,
   theme: {
     icon: {
-      char: '🐜',
+      symbol: '🐜',
     },
     textColor: '#000000',
     backgroundColor: '#f5f5f5',

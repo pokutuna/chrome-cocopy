@@ -21,7 +21,7 @@ export interface CopyFunction {
 
 export interface CopyFunctionTheme {
   icon: {
-    char: string;
+    symbol: string;
   };
   textColor: string;
   backgroundColor: string;
