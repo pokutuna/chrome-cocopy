@@ -1,17 +1,11 @@
-import {h, ComponentChildren} from 'preact';
+import {h, VNode, ComponentChildren} from 'preact';
 import {memo} from 'preact/compat';
 import styled from 'styled-components';
 
 export const MainColumn = styled.div`
   padding: 0;
-  width: 960px;
+  width: 700px;
   margin: 20px auto;
-`;
-
-export const Columns = styled.div`
-  display: flex;
-  flex-direction: row;
-  align-items: center;
 `;
 
 const TitleIcon = styled.div`
@@ -21,11 +15,10 @@ const TitleIcon = styled.div`
 `;
 
 export const Title = memo(() => {
-  const Header = Columns.withComponent('header');
   return (
-    <Header>
+    <header>
       <TitleIcon />
-    </Header>
+    </header>
   );
 });
 
@@ -51,17 +44,28 @@ export const Section = (props: {
 export const InputBox = styled.div`
   display: flex;
   flex-direction: column;
+  width: 100%;
   margin-bottom: ${props => props.theme.space[2]};
+  border-radius: ${props => props.theme.space[1]};
 `;
 
 export const Label = styled.label`
-  font-size: ${props => props.theme.size.xl};
-  margin: ${props => props.theme.space[1]} 0;
+  font-size: ${props => props.theme.size.lg};
+  margin: ${props => props.theme.space[2]} 0;
+
+  display: flex;
+`;
+
+const LabelSub = styled.span`
+  margin-left: ${props => props.theme.space[2]};
+  font-size: ${props => props.theme.size.sm};
+  align-self: flex-end;
+  color: ${props => props.theme.color.gray};
 `;
 
 const InputText = styled.input`
   padding: ${props => props.theme.space[1]};
-  font-size: ${props => props.theme.size.xl};
+  font-size: ${props => props.theme.size.lg};
 `;
 
 export const TextInput = (props: {
@@ -70,10 +74,14 @@ export const TextInput = (props: {
   placeholder?: string;
   value?: string;
   onInput?: (value: string) => void;
+  sub?: VNode;
 }) => {
   return (
     <InputBox>
-      <Label htmlFor={props.name}>{props.label}</Label>
+      <Label htmlFor={props.name}>
+        {props.label}
+        {props.sub && <LabelSub>{props.sub}</LabelSub>}
+      </Label>
       <InputText
         type="text"
         id={props.name}
@@ -83,3 +91,29 @@ export const TextInput = (props: {
     </InputBox>
   );
 };
+
+export const Box = styled.div`
+  display: flex;
+  flex-flow: column wrap;
+`;
+
+export const Item = styled.div<{grow?: number}>`
+  display: flex;
+  flex-grow: ${props => props.grow || 0};
+`;
+
+export const Row = styled.div`
+  display: flex;
+  flex-flow: row wrap;
+
+  ${Item} + ${Item} {
+    margin-left: ${props => props.theme.space[4]};
+  }
+`;
+
+export const Button = styled.button<{color?: string}>`
+  padding: ${props => props.theme.space[2]};
+  background-color: transparent;
+  border: solid 1px;
+  border-radius: ${props => props.theme.space[1]};
+`;

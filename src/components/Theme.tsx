@@ -32,6 +32,9 @@ export const theme = {
     extrabold: 800,
     black: 900,
   },
+  color: {
+    gray: '#666',
+  },
   fontFamily: {
     default: 'inherit',
     monospace: 'Menlo, Consolas, monospace',

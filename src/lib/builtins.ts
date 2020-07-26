@@ -1,6 +1,5 @@
 import {CopyFunctionWithTheme, CopyFn} from './function';
 import {PageTarget} from './target';
-import {render} from 'mustache';
 
 export const copyAsMarkdownFn: CopyFn = (target: PageTarget) =>
   `[${target.title}](${target.pageURL})`;

@@ -1,5 +1,6 @@
 import {h} from 'preact';
 import {useState, useCallback} from 'preact/hooks';
+import styled from 'styled-components';
 
 import {default as SimpleCodeEditor} from 'react-simple-code-editor';
 import {highlight as hl, languages} from 'prismjs/components/prism-core';
@@ -7,7 +8,7 @@ import 'prismjs/components/prism-clike';
 import 'prismjs/components/prism-javascript';
 
 import {theme} from '../Theme';
-import {Section, TextInput, InputBox, Label} from './Parts';
+import {TextInput, InputBox, Label, Box, Row, Item, Button} from './Parts';
 import {FunctionItem} from '../Function';
 import {CopyFunctionWithTheme} from '../../lib/function';
 
@@ -31,7 +32,6 @@ export function PreviewFuncitonItem(props: {function: CopyFunctionWithTheme}) {
 const CodeEditor = (props: {code: string; setCode: (code: string) => void}) => {
   const highlight = useCallback((code: string) => {
     const result = hl(code, languages.js);
-    console.log(result, languages);
     return result;
   }, []);
 
@@ -61,11 +61,45 @@ export function Editor() {
 
   return (
     <form>
-      <TextInput label="Name" name="name" placeholder="function name" />
-      <TextInput label="Icon" name="icon" placeholder="1~3 char" />
-      <TextInput label="Glob" name="glob" placeholder="(optional)" />
-      <TextInput label="Color" name="color" placeholder="hex" />
+      <Box>
+        <Row>
+          <Item style={{width: '4rem'}}>
+            <TextInput label="Symbol" name="icon" placeholder="☺" />
+          </Item>
+          <Item grow={1}>
+            <TextInput label="Name" name="name" placeholder="" />
+          </Item>
+          <Item style={{width: '10rem'}}>
+            <TextInput label="Color" name="color" placeholder="#F0F0F0" />
+          </Item>
+        </Row>
+        <TextInput
+          label="URL Pattern"
+          name="pattern"
+          placeholder=".*"
+          sub={
+            <span>
+              (optional) This function will be displayed if the URL matches.
+            </span>
+          }
+        />
+      </Box>
+
       <CodeEditor code={code} setCode={setCode} />
+
+      <Box>
+        <Row>
+          <Item>
+            <Button>Save</Button>
+          </Item>
+          <Item>
+            <Button>Cancel</Button>
+          </Item>
+          <Item style={{marginLeft: 'auto'}}>
+            <Button>Delete</Button>
+          </Item>
+        </Row>
+      </Box>
     </form>
   );
 }
