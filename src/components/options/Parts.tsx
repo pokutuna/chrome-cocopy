@@ -52,7 +52,6 @@ export const InputBox = styled.div`
 export const Label = styled.label`
   font-size: ${props => props.theme.size.lg};
   margin: ${props => props.theme.space[2]} 0;
-
   display: flex;
 `;
 
@@ -63,27 +62,29 @@ export const LabelSub = styled.span`
   color: ${props => props.theme.color.gray};
 `;
 
-const InputText = styled.input`
+export const Input = styled.input`
   padding: ${props => props.theme.space[1]};
   font-size: ${props => props.theme.size.lg};
+  width: 100%;
 `;
 
 export const TextInput = (props: {
   label: string;
   name: string;
   placeholder?: string;
+  pattern?: string;
   value?: string;
   onInput?: (value: string) => void;
-  sub?: VNode;
-  pattern?: string;
+  subLabel?: VNode;
+  extra?: VNode;
 }) => {
   return (
     <InputBox>
       <Label htmlFor={props.name}>
         {props.label}
-        {props.sub && <LabelSub>{props.sub}</LabelSub>}
+        {props.subLabel && <LabelSub>{props.subLabel}</LabelSub>}
       </Label>
-      <InputText
+      <Input
         type="text"
         id={props.name}
         name={props.name}
@@ -118,4 +119,5 @@ export const Button = styled.button<{color?: string}>`
   background-color: transparent;
   border: solid 1px;
   border-radius: ${props => props.theme.space[1]};
+  cursor: pointer;
 `;

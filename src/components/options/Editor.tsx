@@ -17,6 +17,7 @@ import {
   Item,
   Button,
 } from './Parts';
+import {ColorInput} from './Color';
 import {FunctionItem} from '../Function';
 import {CopyFunctionWithTheme} from '../../lib/function';
 
@@ -89,20 +90,15 @@ export function Editor() {
           <Item grow={1}>
             <TextInput label="Name" name="name" placeholder="" />
           </Item>
-          <Item style={{width: '10rem'}}>
-            <TextInput
-              label="Color"
-              name="color"
-              placeholder="#F0F0F0"
-              pattern="#([0-9A-F]{3}|[0-9A-F]{6})"
-            />
+          <Item style={{width: '9rem'}}>
+            <ColorInput />
           </Item>
         </Row>
         <TextInput
           label="URL Pattern"
           name="pattern"
           placeholder=".*"
-          sub={
+          subLabel={
             <span>
               (optional) This function will be displayed if the URL matches.
             </span>
