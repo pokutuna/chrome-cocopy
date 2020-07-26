@@ -47,10 +47,7 @@ const CodeEditor = (props: {code: string; setCode: (code: string) => void}) => {
     <InputBox>
       <Label htmlFor="code">
         Code
-        <LabelSub>
-          Must be a single function. The returning value will be copied to
-          clipboard.
-        </LabelSub>
+        <LabelSub>Must be a single function.</LabelSub>
       </Label>
       <SimpleCodeEditor
         value={props.code}
@@ -68,10 +65,19 @@ const CodeEditor = (props: {code: string; setCode: (code: string) => void}) => {
   );
 };
 
+const initialCode = `
+/**
+ * Returning value will be copied to clipboard.
+ * @param {Object} target
+ * @returns {(string|undefined|Promise)}
+ */
+({title, pageURL, content}) => {
+  return [title, pageURL].join(' ');
+}
+`.trim();
+
 export function Editor() {
-  const [code, setCode] = useState(
-    '(target) => {\n  const a = "hoge"\n  lll\n  WWW\n}'
-  );
+  const [code, setCode] = useState(initialCode);
 
   return (
     <form>
