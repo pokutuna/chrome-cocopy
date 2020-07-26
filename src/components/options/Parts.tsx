@@ -56,7 +56,7 @@ export const Label = styled.label`
   display: flex;
 `;
 
-const LabelSub = styled.span`
+export const LabelSub = styled.span`
   margin-left: ${props => props.theme.space[2]};
   font-size: ${props => props.theme.size.sm};
   align-self: flex-end;

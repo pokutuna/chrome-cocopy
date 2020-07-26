@@ -1,6 +1,5 @@
 import {h} from 'preact';
 import {useState, useCallback} from 'preact/hooks';
-import styled from 'styled-components';
 
 import {default as SimpleCodeEditor} from 'react-simple-code-editor';
 import {highlight as hl, languages} from 'prismjs/components/prism-core';
@@ -8,7 +7,16 @@ import 'prismjs/components/prism-clike';
 import 'prismjs/components/prism-javascript';
 
 import {theme} from '../Theme';
-import {TextInput, InputBox, Label, Box, Row, Item, Button} from './Parts';
+import {
+  TextInput,
+  InputBox,
+  Label,
+  LabelSub,
+  Box,
+  Row,
+  Item,
+  Button,
+} from './Parts';
 import {FunctionItem} from '../Function';
 import {CopyFunctionWithTheme} from '../../lib/function';
 
@@ -37,7 +45,13 @@ const CodeEditor = (props: {code: string; setCode: (code: string) => void}) => {
 
   return (
     <InputBox>
-      <Label htmlFor="code">Code</Label>
+      <Label htmlFor="code">
+        Code
+        <LabelSub>
+          Must be a single function. The returning value will be copied to
+          clipboard.
+        </LabelSub>
+      </Label>
       <SimpleCodeEditor
         value={props.code}
         onValueChange={props.setCode}

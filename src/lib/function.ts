@@ -1,7 +1,7 @@
 import {TargetType, PageTarget, TextTarget, ImageTarget} from './target';
 import {Library} from './library';
 
-export type CopyResult = string | number | null | undefined;
+export type CopyResult = string | null | undefined;
 export type CopyFn =
   | ((this: Library) => CopyResult | Promise<CopyResult>)
   | ((this: Library, t: PageTarget) => CopyResult | Promise<CopyResult>)
