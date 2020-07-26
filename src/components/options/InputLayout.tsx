@@ -1,4 +1,6 @@
 import {h, VNode} from 'preact';
+import {useCallback} from 'preact/hooks';
+
 import styled from 'styled-components';
 
 export const InputBox = styled.div`
@@ -33,11 +35,17 @@ export const TextInput = (props: {
   name: string;
   placeholder?: string;
   pattern?: string;
-  value?: string;
-  onInput?: (value: string) => void;
+  value: string;
+  onInput: (value: string) => void;
   subLabel?: VNode;
   extra?: VNode;
 }) => {
+  const handleInput = useCallback(
+    (event: InputEvent) =>
+      props.onInput((event.currentTarget as HTMLInputElement).value),
+    [props.onInput]
+  );
+
   return (
     <InputBox>
       <Label htmlFor={props.name}>
@@ -46,6 +54,8 @@ export const TextInput = (props: {
       </Label>
       <Input
         type="text"
+        value={props.value}
+        onInput={handleInput as any}
         id={props.name}
         name={props.name}
         placeholder={props.placeholder}

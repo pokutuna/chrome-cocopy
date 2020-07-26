@@ -56,6 +56,11 @@ export function reducer(state: State, action: Action): State {
         draggable: activeId === undefined,
       };
     }
+    case 'edit':
+      return {
+        ...state,
+        editing: {...state.editing!, ...action.function},
+      };
     case 'dragging':
       return {
         ...state,

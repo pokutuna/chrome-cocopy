@@ -1,5 +1,5 @@
 import {h} from 'preact';
-import {useState, useCallback} from 'preact/hooks';
+import {useReducer, useCallback} from 'preact/hooks';
 
 import {default as SimpleCodeEditor} from 'react-simple-code-editor';
 import {highlight as hl, languages} from 'prismjs/components/prism-core';
@@ -11,6 +11,7 @@ import {Box, Row, Item, Button} from './Parts';
 import {TextInput, InputBox, Label, LabelSub} from './InputLayout';
 import {ColorInput} from './Color';
 import {CopyFunctionWithTheme} from '../../lib/function';
+import {reducer, init} from './EditorReducer';
 import {DispatchType as FnDispatchType} from './FunctionsReducer';
 
 const CodeEditor = (props: {code: string; setCode: (code: string) => void}) => {
@@ -58,17 +59,32 @@ type EditorProps = {
 };
 
 export function Editor(props: EditorProps) {
-  const [code, setCode] = useState(initialCode);
+  const [state, dispatch] = useReducer(
+    reducer,
+    init(props.function, props.fnDispatch)
+  );
 
   return (
     <form>
       <Box>
         <Row>
           <Item style={{width: '4rem'}}>
-            <TextInput label="Symbol" name="icon" placeholder="☺" />
+            <TextInput
+              label="Symbol"
+              name="icon"
+              placeholder="☺"
+              value={state.symbol}
+              onInput={value => dispatch({t: 'edit', name: 'symbol', value})}
+            />
           </Item>
           <Item grow={1}>
-            <TextInput label="Name" name="name" placeholder="" />
+            <TextInput
+              label="Name"
+              name="name"
+              placeholder=""
+              value={state.name}
+              onInput={value => dispatch({t: 'edit', name: 'name', value})}
+            />
           </Item>
           <Item style={{width: '9rem'}}>
             <ColorInput />
@@ -83,10 +99,15 @@ export function Editor(props: EditorProps) {
               (optional) This function will be displayed if the URL matches.
             </span>
           }
+          value={state.pattern || ''}
+          onInput={value => dispatch({t: 'edit', name: 'pattern', value})}
         />
       </Box>
 
-      <CodeEditor code={code} setCode={setCode} />
+      <CodeEditor
+        code={state.code}
+        setCode={value => dispatch({t: 'edit', name: 'code', value})}
+      />
 
       <Box>
         <Row>
