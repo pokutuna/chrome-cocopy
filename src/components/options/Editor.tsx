@@ -60,14 +60,12 @@ export function Editor() {
   );
 
   return (
-    <Section title="Function">
-      <form>
-        <TextInput label="Name" name="name" placeholder="function name" />
-        <TextInput label="Icon" name="icon" placeholder="1~3 char" />
-        <TextInput label="Glob" name="glob" placeholder="(optional)" />
-        <TextInput label="Color" name="color" placeholder="hex" />
-        <CodeEditor code={code} setCode={setCode} />
-      </form>
-    </Section>
+    <form>
+      <TextInput label="Name" name="name" placeholder="function name" />
+      <TextInput label="Icon" name="icon" placeholder="1~3 char" />
+      <TextInput label="Glob" name="glob" placeholder="(optional)" />
+      <TextInput label="Color" name="color" placeholder="hex" />
+      <CodeEditor code={code} setCode={setCode} />
+    </form>
   );
 }

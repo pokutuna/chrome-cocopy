@@ -1,4 +1,4 @@
-import {h, Fragment, ComponentChildren} from 'preact';
+import {h, ComponentChildren} from 'preact';
 import {memo} from 'preact/compat';
 import styled from 'styled-components';
 
@@ -6,12 +6,6 @@ export const MainColumn = styled.div`
   padding: 0;
   width: 960px;
   margin: 20px auto;
-`;
-
-export const Rows = styled.div`
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
 `;
 
 export const Columns = styled.div`
@@ -48,10 +42,10 @@ export const Section = (props: {
   title: string;
   children?: ComponentChildren;
 }) => (
-  <Fragment>
+  <div>
     <SectionTitleHeader>{props.title}</SectionTitleHeader>
     <SectionInner>{props.children}</SectionInner>
-  </Fragment>
+  </div>
 );
 
 export const InputBox = styled.div`

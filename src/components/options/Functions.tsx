@@ -1,4 +1,4 @@
-import {h, Fragment} from 'preact';
+import {h} from 'preact';
 import {useState, useEffect, useCallback, useRef} from 'preact/hooks';
 import {DndProvider, useDrag, useDrop} from 'react-dnd';
 import {HTML5Backend} from 'react-dnd-html5-backend';
@@ -85,7 +85,7 @@ function FunctionEditItem(props: FunctionEditItemProps) {
   dragPreview(drop(ref));
 
   return (
-    <Fragment>
+    <div>
       <Box ref={ref} isDragging={isDragging}>
         <ItemLeft onClick={onClick}>
           <FontAwesomeIcon icon={active ? faCaretDown : faCaretRight} />
@@ -107,12 +107,12 @@ function FunctionEditItem(props: FunctionEditItemProps) {
           <Editor />
         </EditorBox>
       )}
-    </Fragment>
+    </div>
   );
 }
 
 export function Functions() {
-  const [active, setActive] = useState<string | undefined>(undefined);
+  const [active, setActive] = useState<string | undefined>('builtin-markdown');
   const [functions, setFunctions] = useState<CopyFunctionWithTheme[]>([]);
 
   const toggleActive = useCallback(

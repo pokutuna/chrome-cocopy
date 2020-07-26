@@ -1,4 +1,4 @@
-import {h, Fragment} from 'preact';
+import {h} from 'preact';
 import {Section} from '../options/Parts';
 
 export function Links() {
