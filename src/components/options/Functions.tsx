@@ -1,7 +1,5 @@
 import {h} from 'preact';
 import {useState, useEffect, useCallback, useRef} from 'preact/hooks';
-import {DndProvider, useDrag, useDrop} from 'react-dnd';
-import {HTML5Backend} from 'react-dnd-html5-backend';
 
 import styled from 'styled-components';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
@@ -13,15 +11,9 @@ import {getCopyFunctions} from '../../lib/config';
 import {CopyFunctionWithTheme} from '../../lib/function';
 
 import {FunctionItem} from '../Function';
+import {DnDWrapper, useDnDItem} from '../options/DnD';
 import {Section} from '../options/Parts';
 import {Editor} from '../options/Editor';
-
-const type = 'function';
-interface DragItem {
-  index: number;
-  id: string;
-  type: string;
-}
 
 const Box = styled.div<{isDragging?: boolean}>`
   opacity: ${props => (props.isDragging ? 0.5 : 1)};
@@ -65,25 +57,12 @@ function FunctionEditItem(props: FunctionEditItemProps) {
   const {fn, onClick, active, index, move} = props;
 
   const ref = useRef<HTMLDivElement>(null);
-
-  const [, drop] = useDrop({
-    accept: type,
-    hover(item: DragItem) {
-      if (!ref.current) return;
-      const dragIndex = item.index;
-      const hoverIndex = index;
-      if (dragIndex === hoverIndex) return;
-      move(dragIndex, hoverIndex);
-      item.index = hoverIndex;
-    },
+  const {isDragging, drag} = useDnDItem({
+    id: fn.id,
+    index,
+    ref,
+    move,
   });
-
-  const [{isDragging}, drag, dragPreview] = useDrag({
-    item: {type, id: fn.id, index: index},
-    collect: (monitor: any) => ({isDragging: monitor.isDragging()}),
-  });
-
-  dragPreview(drop(ref));
 
   return (
     <div>
@@ -137,7 +116,7 @@ export function Functions() {
 
   return (
     <Section title="Functions">
-      <DndProvider backend={HTML5Backend}>
+      <DnDWrapper>
         {functions.map((fn, idx) => (
           <FunctionEditItem
             key={fn.id}
@@ -148,7 +127,7 @@ export function Functions() {
             move={move}
           />
         ))}
-      </DndProvider>
+      </DnDWrapper>
     </Section>
   );
 }

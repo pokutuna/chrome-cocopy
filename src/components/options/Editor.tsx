@@ -18,25 +18,7 @@ import {
   Button,
 } from './Parts';
 import {ColorInput} from './Color';
-import {FunctionItem} from '../Function';
 import {CopyFunctionWithTheme} from '../../lib/function';
-
-export function PreviewFuncitonItem(props: {function: CopyFunctionWithTheme}) {
-  const [running, setRunning] = useState(false);
-  const onClick = useCallback(() => {
-    setRunning(true);
-    setTimeout(() => setRunning(false), 300);
-  }, []);
-
-  return (
-    <FunctionItem
-      fn={props.function}
-      index={1}
-      running={running}
-      onClick={onClick}
-    />
-  );
-}
 
 const CodeEditor = (props: {code: string; setCode: (code: string) => void}) => {
   const highlight = useCallback((code: string) => {
