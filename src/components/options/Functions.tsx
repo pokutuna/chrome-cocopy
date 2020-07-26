@@ -1,10 +1,5 @@
 import {h} from 'preact';
-import {useState, useEffect, useCallback, useRef} from 'preact/hooks';
-
-import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
-import {faBars} from '@fortawesome/free-solid-svg-icons/faBars';
-import {faCaretRight} from '@fortawesome/free-solid-svg-icons/faCaretRight';
-import {faCaretDown} from '@fortawesome/free-solid-svg-icons/faCaretDown';
+import {useEffect, useCallback, useRef, useReducer} from 'preact/hooks';
 
 import {getCopyFunctions} from '../../lib/config';
 import {CopyFunctionWithTheme} from '../../lib/function';
@@ -15,37 +10,52 @@ import {Section} from '../options/Parts';
 import {Editor} from '../options/Editor';
 import {
   FunctionBox,
-  ItemLeft,
+  Caret,
   ItemBody,
-  ItemRight,
+  DragKnob,
   EditorBox,
 } from './FunctionsLayout';
+import {reducer, initialState, DispatchType} from './FunctionsReducer';
 
 type FunctionEditItemProps = {
   fn: CopyFunctionWithTheme;
-  onClick: () => void;
-  active: boolean;
   index: number;
-  move: (dragIndex: number, hoverIndex: number) => void;
+  active: boolean;
+  draggable: boolean;
+  dispatch: DispatchType;
 };
 
 function FunctionEditItem(props: FunctionEditItemProps) {
-  const {fn, onClick, active, index, move} = props;
+  const {fn, index, active, draggable, dispatch} = props;
 
   const ref = useRef<HTMLDivElement>(null);
+
+  const move = useCallback(
+    (dragIndex: number, hoverIndex: number) =>
+      dispatch({t: 'dragging', dragIndex, hoverIndex}),
+    []
+  );
+
+  const onDropped = useCallback(() => dispatch({t: 'dropped'}), []);
+
+  const onClick = useCallback(
+    () => dispatch({t: 'select', functionId: fn.id}),
+    [fn.id]
+  );
+
   const {isDragging, drag} = useDnDItem({
     id: fn.id,
     index,
     ref,
     move,
+    onDropped,
+    canDrag: draggable,
   });
 
   return (
     <div ref={ref}>
       <FunctionBox isDragging={isDragging}>
-        <ItemLeft onClick={onClick}>
-          <FontAwesomeIcon icon={active ? faCaretDown : faCaretRight} />
-        </ItemLeft>
+        <Caret active={active} onClick={onClick} />
         <ItemBody>
           <FunctionItem
             fn={fn}
@@ -54,13 +64,13 @@ function FunctionEditItem(props: FunctionEditItemProps) {
             running={false}
           />
         </ItemBody>
-        <ItemRight ref={drag}>
-          <FontAwesomeIcon icon={faBars} />
-        </ItemRight>
+        <div ref={drag}>
+          <DragKnob draggable={draggable} />
+        </div>
       </FunctionBox>
       {active && (
         <EditorBox>
-          <Editor />
+          <Editor function={fn} fnDispatch={dispatch} />
         </EditorBox>
       )}
     </div>
@@ -68,39 +78,23 @@ function FunctionEditItem(props: FunctionEditItemProps) {
 }
 
 export function Functions() {
-  const [active, setActive] = useState<string | undefined>('builtin-markdown');
-  const [functions, setFunctions] = useState<CopyFunctionWithTheme[]>([]);
-
-  const toggleActive = useCallback(
-    (id: string) => (active === id ? setActive(undefined) : setActive(id)),
-    [active, functions]
-  );
+  const [state, dispatch] = useReducer(reducer, initialState);
 
   useEffect(() => {
-    getCopyFunctions().then(setFunctions);
+    getCopyFunctions().then(functions => dispatch({t: 'init', functions}));
   }, []); // TODO refresh
-
-  const move = useCallback(
-    (dragIndex: number, hoverIndex: number) => {
-      const fs = [...functions];
-      const [dragging] = fs.splice(dragIndex, 1);
-      fs.splice(hoverIndex, 0, dragging);
-      setFunctions(fs);
-    },
-    [functions]
-  );
 
   return (
     <Section title="Functions">
       <DnDWrapper>
-        {functions.map((fn, idx) => (
+        {state.functions.map((fn, idx) => (
           <FunctionEditItem
             key={fn.id}
-            fn={fn}
-            active={fn.id === active}
-            onClick={() => toggleActive(fn.id)}
             index={idx}
-            move={move}
+            fn={fn.id === state.activeId ? state.editing! : fn}
+            active={fn.id === state.activeId}
+            draggable={state.draggable}
+            dispatch={dispatch}
           />
         ))}
       </DnDWrapper>

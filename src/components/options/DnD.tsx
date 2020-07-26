@@ -1,7 +1,7 @@
 import {h, ComponentChildren} from 'preact';
 import {useCallback, Ref} from 'preact/hooks';
 
-import {DndProvider, useDrag, useDrop} from 'react-dnd';
+import {DndProvider, useDrag, useDrop, DropTargetMonitor} from 'react-dnd';
 import {HTML5Backend} from 'react-dnd-html5-backend';
 
 export function DnDWrapper(props: {children: ComponentChildren}) {
@@ -21,8 +21,8 @@ type DnDItemArgs = {
   index: number;
   ref: Ref<HTMLElement>;
   move: (dragIndex: number, hoverIndex: number) => void;
-  canDrag?: (monitor: any) => boolean;
-  onDropped?: (item: DragItem) => void;
+  canDrag?: boolean;
+  onDropped?: (item: DragItem, monitor: DropTargetMonitor) => void;
 };
 
 const collect = (monitor: any) => ({isDragging: monitor.isDragging()});
@@ -50,7 +50,7 @@ export function useDnDItem(props: DnDItemArgs) {
   const [{isDragging}, drag, dragPreview] = useDrag({
     item: {type, id, index},
     collect,
-    canDrag: canDrag,
+    canDrag,
   });
 
   dragPreview(drop(ref));

@@ -11,6 +11,7 @@ import {Box, Row, Item, Button} from './Parts';
 import {TextInput, InputBox, Label, LabelSub} from './InputLayout';
 import {ColorInput} from './Color';
 import {CopyFunctionWithTheme} from '../../lib/function';
+import {DispatchType} from './FunctionsReducer';
 
 const CodeEditor = (props: {code: string; setCode: (code: string) => void}) => {
   const highlight = useCallback((code: string) => {
@@ -51,7 +52,12 @@ const initialCode = `
 }
 `.trim();
 
-export function Editor() {
+type EditorProps = {
+  function: CopyFunctionWithTheme;
+  fnDispatch: DispatchType;
+};
+
+export function Editor(props: EditorProps) {
   const [code, setCode] = useState(initialCode);
 
   return (
