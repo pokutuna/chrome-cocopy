@@ -19,7 +19,7 @@ const FunctionBox = styled.div<CopyFunctionTheme & {running: boolean}>`
   display: flex;
   flex-direction: row;
   align-items: center;
-  height: 32px;
+  height: ${props => props.theme.constants.functionHeight};
   padding: ${props => props.theme.space[2]};
   color: ${props => props.textColor};
   &:focus,

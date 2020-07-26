@@ -38,5 +38,6 @@ export const theme = {
   },
   constants: {
     popupWidth: '360px',
+    functionHeight: '32px',
   },
 } as const;
