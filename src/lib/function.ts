@@ -1,5 +1,3 @@
-import globToRegExp from 'glob-to-regexp';
-
 import {TargetType, PageTarget, TextTarget, ImageTarget} from './target';
 import {Library} from './library';
 
@@ -15,7 +13,7 @@ export interface CopyFunction {
   name: string;
   types: TargetType[];
   code: string;
-  glob?: string;
+  pattern?: string;
   enabled: boolean;
   isBuiltIn: boolean;
   version: number;
@@ -42,6 +40,6 @@ export function filterFunctions(
     f =>
       f.enabled &&
       f.types.includes(targetType) &&
-      (f.glob ? globToRegExp(f.glob).test(pageURL) : true)
+      (f.pattern ? new RegExp(f.pattern).test(pageURL) : true)
   );
 }

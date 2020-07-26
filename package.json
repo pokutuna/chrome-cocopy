@@ -29,7 +29,6 @@
     "@fortawesome/free-solid-svg-icons": "^5.14.0",
     "@fortawesome/react-fontawesome": "^0.1.11",
     "chroma-js": "^2.1.0",
-    "glob-to-regexp": "^0.4.1",
     "mustache": "^4.0.1",
     "preact": "^10.4.6",
     "prismjs": "^1.20.0",
@@ -41,7 +40,6 @@
   "devDependencies": {
     "@types/chroma-js": "^2.0.0",
     "@types/chrome": "^0.0.120",
-    "@types/glob-to-regexp": "^0.4.0",
     "@types/jest": "^26.0.4",
     "@types/mustache": "^4.0.1",
     "@types/node": "^13.11.1",
