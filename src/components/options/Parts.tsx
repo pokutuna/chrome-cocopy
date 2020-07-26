@@ -75,6 +75,7 @@ export const TextInput = (props: {
   value?: string;
   onInput?: (value: string) => void;
   sub?: VNode;
+  pattern?: string;
 }) => {
   return (
     <InputBox>
@@ -87,6 +88,7 @@ export const TextInput = (props: {
         id={props.name}
         name={props.name}
         placeholder={props.placeholder}
+        pattern={props.pattern}
       />
     </InputBox>
   );

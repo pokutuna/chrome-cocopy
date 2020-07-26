@@ -6,15 +6,23 @@ export function Links() {
     <Section title="Links">
       <ul>
         <li>
-          <a href="#TODO">Chrome Web Store</a>
+          <a href="#TODO" target="_blank" rel="noreferrer noopener">
+            Chrome Web Store
+          </a>
         </li>
         <li>
-          <a href="https://github.com/pokutuna/chrome-cocopy">
+          <a
+            href="https://github.com/pokutuna/chrome-cocopy"
+            target="_blank"
+            rel="noreferrer noopener"
+          >
             GitHub Repository
           </a>
         </li>
         <li>
-          <a href="#TODO">Copyright notice</a>
+          <a href="#TODO" target="_blank" rel="noreferrer noopener">
+            Copyright notice
+          </a>
         </li>
       </ul>
     </Section>

@@ -50,6 +50,7 @@ const ItemRight = styled(ItemButton)`
 `;
 const EditorBox = styled.div`
   margin-left: ${props => props.theme.size['4xl']};
+  margin-bottom: ${props => props.theme.size['4xl']};
 `;
 
 type FunctionEditItemProps = {

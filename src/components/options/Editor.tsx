@@ -90,7 +90,12 @@ export function Editor() {
             <TextInput label="Name" name="name" placeholder="" />
           </Item>
           <Item style={{width: '10rem'}}>
-            <TextInput label="Color" name="color" placeholder="#F0F0F0" />
+            <TextInput
+              label="Color"
+              name="color"
+              placeholder="#F0F0F0"
+              pattern="#([0-9A-F]{3}|[0-9A-F]{6})"
+            />
           </Item>
         </Row>
         <TextInput
