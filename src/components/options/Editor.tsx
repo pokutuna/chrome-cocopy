@@ -6,8 +6,8 @@ import {Box, Row, Item, Button} from './Parts';
 import {TextInput} from './Input';
 import {ColorInput} from './Color';
 import {CodeEditor} from './Code';
-import {reducer, init} from './EditorReducer';
 import {DispatchType as FnDispatchType} from './FunctionsReducer';
+import {reducer, init} from './EditorReducer';
 
 const initialCode = `
 /**
@@ -32,9 +32,12 @@ export function Editor(props: EditorProps) {
   );
 
   const onEdit = useCallback(
-    (name: string, value: string) => {
-      dispatch({t: 'edit', name, value});
-    },
+    (name: string, value: string) => dispatch({t: 'edit', name, value}),
+    [dispatch]
+  );
+
+  const onCodeEdit = useCallback(
+    (value: string) => dispatch({t: 'edit', name: 'code', value}),
     [dispatch]
   );
 
@@ -78,10 +81,7 @@ export function Editor(props: EditorProps) {
         />
       </Box>
 
-      <CodeEditor
-        code={state.code}
-        setCode={value => dispatch({t: 'edit', name: 'code', value})}
-      />
+      <CodeEditor code={state.code} setCode={onCodeEdit} />
 
       <Box>
         <Row>

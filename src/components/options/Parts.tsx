@@ -1,4 +1,5 @@
 import {h, ComponentChildren} from 'preact';
+import {useCallback} from 'preact/hooks';
 import {memo} from 'preact/compat';
 import styled from 'styled-components';
 
@@ -60,10 +61,25 @@ export const Row = styled.div`
   }
 `;
 
-export const Button = styled.button<{color?: string}>`
+const ButtonStyle = styled.button<{color?: string}>`
   padding: ${props => props.theme.space[2]};
   background-color: transparent;
   border: solid 1px;
   border-radius: ${props => props.theme.space[1]};
   cursor: pointer;
 `;
+
+export const Button = (props: {
+  onClick?: (event: MouseEvent) => void;
+  children?: ComponentChildren;
+}) => {
+  const onClick = useCallback(
+    (event: MouseEvent) => {
+      event.preventDefault();
+      props.onClick?.(event);
+    },
+    [props.onClick]
+  );
+
+  return <ButtonStyle onClick={onClick as any}>{props.children}</ButtonStyle>;
+};
