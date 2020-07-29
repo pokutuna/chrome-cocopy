@@ -4,7 +4,7 @@ import {useEffect, useCallback, useRef, useReducer} from 'preact/hooks';
 import {getCopyFunctions} from '../../lib/config';
 import {CopyFunctionWithTheme} from '../../lib/function';
 
-import {FunctionItem} from '../Function';
+import {FunctionItem} from '../common/Function';
 import {DnDWrapper, useDnDItem} from '../options/DnD';
 import {Section} from '../options/Parts';
 import {Editor} from '../options/Editor';

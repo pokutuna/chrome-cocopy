@@ -1,17 +1,17 @@
 import {h, render} from 'preact';
 import {ThemeProvider} from 'styled-components';
 
-import {theme} from './components/Theme';
+import {theme} from './components/common/Theme';
 import {PopupWrapper} from './components/popup/Parts';
 import {PopupHeader} from './components/popup/Header';
-import {Functions} from './components/popup/Functions';
+import {FunctionList} from './components/popup/FunctionList';
 
 const App = () => {
   return (
     <ThemeProvider theme={theme}>
       <PopupWrapper>
         <PopupHeader />
-        <Functions />
+        <FunctionList />
       </PopupWrapper>
     </ThemeProvider>
   );

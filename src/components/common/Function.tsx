@@ -6,8 +6,8 @@ import {
   CopyFunction,
   CopyFunctionTheme,
   CopyFunctionWithTheme,
-} from '../lib/function';
-import {charLength, indexToKey} from '../lib/util';
+} from '../../lib/function';
+import {charLength, indexToKey} from '../../lib/util';
 
 const scanning = keyframes`
   0% { background-position: 100% }
