@@ -6,11 +6,11 @@ import {highlight as hl, languages} from 'prismjs/components/prism-core';
 import 'prismjs/components/prism-clike';
 import 'prismjs/components/prism-javascript';
 
+import {CopyFunctionWithTheme} from '../../lib/function';
 import {theme} from '../common/Theme';
 import {Box, Row, Item, Button} from './Parts';
 import {TextInput, InputBox, Label, LabelSub} from './InputLayout';
 import {ColorInput} from './Color';
-import {CopyFunctionWithTheme} from '../../lib/function';
 import {reducer, init} from './EditorReducer';
 import {DispatchType as FnDispatchType} from './FunctionsReducer';
 

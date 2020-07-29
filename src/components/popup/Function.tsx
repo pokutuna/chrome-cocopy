@@ -3,11 +3,12 @@ import {useCallback, useMemo} from 'preact/hooks';
 import styled, {keyframes} from 'styled-components';
 
 import {
-  CopyFunction,
-  CopyFunctionTheme,
-  CopyFunctionWithTheme,
-} from '../../lib/function';
-import {charLength, indexToKey} from '../../lib/util';
+  FunctionBox,
+  FunctionSymbol,
+  FunctionName,
+} from '../common/FunctionParts';
+import {CopyFunctionTheme, CopyFunctionWithTheme} from '../../lib/function';
+import {indexToKey} from '../../lib/util';
 
 const scanning = keyframes`
   0% { background-position: 100% }
@@ -15,19 +16,9 @@ const scanning = keyframes`
   100% { background-position: 0% }
 `;
 
-const FunctionBox = styled.div<CopyFunctionTheme & {running: boolean}>`
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  height: ${props => props.theme.constants.functionHeight};
-  padding: ${props => props.theme.space[2]};
-  color: ${props => props.textColor};
-  &:focus,
-  &:hover {
-    filter: brightness(110%);
-  }
-
-  /* scanning animation */
+const FunctionBoxWithAnimation = styled(FunctionBox)<
+  CopyFunctionTheme & {running: boolean}
+>`
   animation-name: ${props => (props.running ? scanning : 'none')};
   animation-duration: 0.3s;
   animation-timing-function: linear;
@@ -44,29 +35,6 @@ const FunctionBox = styled.div<CopyFunctionTheme & {running: boolean}>`
   );
 `;
 
-const lenToSize: {[len: number]: string} = {
-  1: '3xl',
-  2: 'xl',
-} as const;
-
-const FunctionIcon = styled.div<{len: number}>`
-  min-width: 30px;
-  width: 30px;
-  font-weight: ${props => props.theme.font['semibold']};
-  font-family: monospace;
-  font-size: ${props => props.theme.size[lenToSize[props.len] || 'base']};
-  overflow: hidden;
-  margin-right: ${props => props.theme.space[2]};
-  text-align: center;
-`;
-
-const FunctionName = styled.div`
-  font-size: ${props => props.theme.size.base};
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-`;
-
 const Shortcut = styled.kbd<CopyFunctionTheme & {shortcut?: number}>`
   display: ${props =>
     typeof props.shortcut !== 'undefined' ? 'default' : 'none'};
@@ -75,9 +43,9 @@ const Shortcut = styled.kbd<CopyFunctionTheme & {shortcut?: number}>`
   padding: 0 ${props => props.theme.space[1]};
   border-radius: ${props => props.theme.space[1]};
   border: 2px solid ${props => props.textColor};
-  font: bold ${props => props.theme.size.lg} monospace;
+  font-size: ${props => props.theme.size.lg};
+  font-family: ${props => props.theme.fontFamily.monospace};
   box-shadow: 2px 2px 0px 0px rgba(0, 0, 0, 0.3);
-  // TODO show pressed effect on running
 `;
 
 function wrapKeyDown(cb: () => void) {
@@ -88,9 +56,9 @@ function wrapKeyDown(cb: () => void) {
 
 type FunctionItemProps = {
   fn: CopyFunctionWithTheme;
+  onClick: (fn: CopyFunctionWithTheme) => void;
   running: boolean;
   index: number;
-  onClick: (fn: CopyFunction) => void;
 };
 
 export function FunctionItem(props: FunctionItemProps) {
@@ -100,20 +68,20 @@ export function FunctionItem(props: FunctionItemProps) {
   const onKeyDown = useCallback(wrapKeyDown(onClick), [onClick]);
 
   return (
-    <FunctionBox
-      running={props.running}
+    <FunctionBoxWithAnimation
       {...fn.theme}
       onClick={onClick}
+      running={props.running}
       onKeyDown={onKeyDown as any}
       tabIndex={1}
     >
-      <FunctionIcon len={charLength(fn.theme.symbol)}>
-        {fn.theme.symbol}
-      </FunctionIcon>
+      <FunctionSymbol symbol={fn.theme.symbol} />
       <FunctionName>{fn.name}</FunctionName>
-      <Shortcut {...fn.theme} shortcut={shortcut}>
-        {shortcut}
-      </Shortcut>
-    </FunctionBox>
+      {shortcut && (
+        <Shortcut {...fn.theme} shortcut={shortcut}>
+          {shortcut}
+        </Shortcut>
+      )}
+    </FunctionBoxWithAnimation>
   );
 }

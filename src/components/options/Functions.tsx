@@ -4,10 +4,10 @@ import {useEffect, useCallback, useRef, useReducer} from 'preact/hooks';
 import {getCopyFunctions} from '../../lib/config';
 import {CopyFunctionWithTheme} from '../../lib/function';
 
-import {FunctionItem} from '../common/Function';
-import {DnDWrapper, useDnDItem} from '../options/DnD';
-import {Section} from '../options/Parts';
-import {Editor} from '../options/Editor';
+import {FunctionItem} from '../common/FunctionParts';
+import {DnDWrapper, useDnDItem} from './DnD';
+import {Section} from './Parts';
+import {Editor} from './Editor';
 import {
   FunctionBox,
   Caret,
@@ -57,12 +57,7 @@ function FunctionEditItem(props: FunctionEditItemProps) {
       <FunctionBox isDragging={isDragging}>
         <Caret active={active} onClick={onClick} />
         <ItemBody>
-          <FunctionItem
-            fn={fn}
-            index={10} // XXX hide shortcut
-            onClick={onClick}
-            running={false}
-          />
+          <FunctionItem fn={fn} onClick={onClick} />
         </ItemBody>
         <div ref={drag}>
           <DragKnob draggable={draggable} />

@@ -4,7 +4,7 @@ import {getCopyFunctions} from '../../lib/config';
 import {createPageTargetFromTab} from '../../lib/target';
 import {CopyFunction, CopyFunctionWithTheme} from '../../lib/function';
 import * as util from '../../lib/util';
-import {FunctionItem} from '../common/Function';
+import {FunctionItem} from './Function';
 import {useSandbox} from '../common/Sandbox';
 import {EvaluateResult} from '../../lib/eval';
 

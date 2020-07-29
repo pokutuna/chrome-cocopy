@@ -23,8 +23,8 @@ export const Title = memo(() => {
 });
 
 const SectionTitleHeader = styled.h2`
-  font-family: monospace;
-  font-size: ${props => props.theme.size['2xl']};
+  font-family: ${props => props.theme.fontFamily.monospace};
+  font-size: ${props => props.theme.size['xl']};
 `;
 
 const SectionInner = styled.div`
