@@ -1,12 +1,14 @@
 import {h} from 'preact';
 import {useState, useEffect, useCallback} from 'preact/hooks';
+
 import {getCopyFunctions} from '../../lib/config';
 import {createPageTargetFromTab} from '../../lib/target';
 import {CopyFunction, CopyFunctionWithTheme} from '../../lib/function';
-import * as util from '../../lib/util';
+import {getActiveTab, keyToIndex} from '../../lib/util';
+import {EvaluateResult} from '../../lib/eval';
+
 import {FunctionItem} from './Function';
 import {useSandbox} from '../common/Sandbox';
-import {EvaluateResult} from '../../lib/eval';
 
 const receiver = (res: EvaluateResult) => {
   if (res.result) {
@@ -38,7 +40,7 @@ export const FunctionList = () => {
       setTimeout(() => setRunning(null), 300);
 
       const run = async () => {
-        const tab = await util.getActiveTab();
+        const tab = await getActiveTab();
         evaluate({
           code: c.code,
           target: await createPageTargetFromTab(tab),
@@ -54,7 +56,7 @@ export const FunctionList = () => {
     const handler = (e: KeyboardEvent) => {
       // index
       if (/^\d$/.test(e.key)) {
-        const index = util.keyToIndex(e.key);
+        const index = keyToIndex(e.key);
         const rule = rules[index];
         if (rule) onClick(rule);
       }

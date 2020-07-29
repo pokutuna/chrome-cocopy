@@ -1,4 +1,3 @@
-import {h} from 'preact';
 import {useMemo, useCallback, useEffect} from 'preact/hooks';
 
 type Chan = {channel: number};
