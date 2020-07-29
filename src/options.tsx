@@ -3,7 +3,7 @@ import {ThemeProvider} from 'styled-components';
 
 import {theme} from './components/common/Theme';
 import {MainColumn, Title} from './components/options/Parts';
-import {Functions} from './components/options/Functions';
+import {FunctionList} from './components/options/FunctionList';
 import {Links} from './components/options/Links';
 
 import './components/options/prism.css';
@@ -13,7 +13,7 @@ const App = () => {
     <ThemeProvider theme={theme}>
       <MainColumn>
         <Title />
-        <Functions />
+        <FunctionList />
         <Links />
       </MainColumn>
     </ThemeProvider>

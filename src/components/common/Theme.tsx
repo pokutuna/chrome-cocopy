@@ -38,7 +38,8 @@ export const theme = {
   },
   fontFamily: {
     default: 'inherit',
-    monospace: 'Menlo, Consolas, monospace',
+    monospace:
+      'Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
   },
   constants: {
     popupWidth: '360px',

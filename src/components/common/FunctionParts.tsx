@@ -71,7 +71,7 @@ export function FunctionItem(props: FunctionItemProps) {
     props.fn,
   ]);
   return (
-    <FunctionBox {...props.fn.theme} onClick={onClick}>
+    <FunctionBox {...props.fn.theme} onClick={onClick} tabIndex={-1}>
       <FunctionSymbol symbol={props.fn.theme.symbol} />
       <FunctionName>{props.fn.name}</FunctionName>
     </FunctionBox>

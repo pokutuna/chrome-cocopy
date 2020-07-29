@@ -9,7 +9,7 @@ import 'prismjs/components/prism-javascript';
 import {CopyFunctionWithTheme} from '../../lib/function';
 import {theme} from '../common/Theme';
 import {Box, Row, Item, Button} from './Parts';
-import {TextInput, InputBox, Label, LabelSub} from './InputLayout';
+import {TextInput, InputBox, Label, LabelSub} from './Input';
 import {ColorInput} from './Color';
 import {reducer, init} from './EditorReducer';
 import {DispatchType as FnDispatchType} from './FunctionsReducer';

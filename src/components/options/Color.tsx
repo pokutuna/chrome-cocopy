@@ -4,7 +4,7 @@ import styled from 'styled-components';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {faPalette} from '@fortawesome/free-solid-svg-icons/faPalette';
 
-import {InputBox, Label, Input} from './InputLayout';
+import {InputBox, Label, Input} from './Input';
 
 const palette = [
   '#F44336',

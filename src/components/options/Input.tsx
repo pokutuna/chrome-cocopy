@@ -38,7 +38,6 @@ export const TextInput = (props: {
   value: string;
   onInput: (value: string) => void;
   subLabel?: VNode;
-  extra?: VNode;
 }) => {
   const handleInput = useCallback(
     (event: InputEvent) =>
