@@ -1,16 +1,9 @@
 import {h} from 'preact';
-import styled from 'styled-components';
-
+import styled, {keyframes} from 'styled-components';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {faCog} from '@fortawesome/free-solid-svg-icons/faCog';
 
-import {spin} from './Parts';
-
-export const PopupWrapper = styled.div`
-  width: ${props => props.theme.constants.popupWidth};
-`;
-
-const Header = styled.div`
+const HeaderBox = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -24,6 +17,15 @@ const Title = styled.div`
   background: no-repeat center/contain url('img/logo.png');
   margin: ${props => props.theme.space[1]};
   padding: 0 ${props => props.theme.space[1]};
+`;
+
+const spin = keyframes`
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 `;
 
 const OptionLink = styled.a`
@@ -41,11 +43,11 @@ const OptionLink = styled.a`
 
 export function PopupHeader() {
   return (
-    <Header>
+    <HeaderBox>
       <Title />
       <OptionLink href="options.html" target="_blank">
         <FontAwesomeIcon icon={faCog} />
       </OptionLink>
-    </Header>
+    </HeaderBox>
   );
 }
