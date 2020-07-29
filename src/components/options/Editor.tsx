@@ -1,46 +1,13 @@
 import {h} from 'preact';
 import {useReducer, useCallback} from 'preact/hooks';
 
-import {default as SimpleCodeEditor} from 'react-simple-code-editor';
-import {highlight as hl, languages} from 'prismjs/components/prism-core';
-import 'prismjs/components/prism-clike';
-import 'prismjs/components/prism-javascript';
-
 import {CopyFunctionWithTheme} from '../../lib/function';
-import {theme} from '../common/Theme';
 import {Box, Row, Item, Button} from './Parts';
-import {TextInput, InputBox, Label, LabelSub} from './Input';
+import {TextInput} from './Input';
 import {ColorInput} from './Color';
+import {CodeEditor} from './Code';
 import {reducer, init} from './EditorReducer';
 import {DispatchType as FnDispatchType} from './FunctionsReducer';
-
-const CodeEditor = (props: {code: string; setCode: (code: string) => void}) => {
-  const highlight = useCallback((code: string) => {
-    const result = hl(code, languages.js);
-    return result;
-  }, []);
-
-  return (
-    <InputBox>
-      <Label htmlFor="code">
-        Code
-        <LabelSub>Must be a single function.</LabelSub>
-      </Label>
-      <SimpleCodeEditor
-        value={props.code}
-        onValueChange={props.setCode}
-        highlight={highlight}
-        padding={theme.space[2]}
-        textareaId="code"
-        style={{
-          fontSize: theme.size.base,
-          fontFamily: theme.fontFamily.monospace,
-          backgroundColor: theme.color.codeBg,
-        }}
-      />
-    </InputBox>
-  );
-};
 
 const initialCode = `
 /**
@@ -55,13 +22,20 @@ const initialCode = `
 
 type EditorProps = {
   function: CopyFunctionWithTheme;
-  fnDispatch: FnDispatchType;
+  dispatch: FnDispatchType;
 };
 
 export function Editor(props: EditorProps) {
   const [state, dispatch] = useReducer(
     reducer,
-    init(props.function, props.fnDispatch)
+    init(props.function, props.dispatch)
+  );
+
+  const onEdit = useCallback(
+    (name: string, value: string) => {
+      dispatch({t: 'edit', name, value});
+    },
+    [dispatch]
   );
 
   return (
@@ -71,10 +45,10 @@ export function Editor(props: EditorProps) {
           <Item style={{width: '4rem'}}>
             <TextInput
               label="Symbol"
-              name="icon"
+              name="symbol"
               placeholder="☺"
               value={state.symbol}
-              onInput={value => dispatch({t: 'edit', name: 'symbol', value})}
+              onInput={onEdit}
             />
           </Item>
           <Item grow={1}>
@@ -83,7 +57,7 @@ export function Editor(props: EditorProps) {
               name="name"
               placeholder=""
               value={state.name}
-              onInput={value => dispatch({t: 'edit', name: 'name', value})}
+              onInput={onEdit}
             />
           </Item>
           <Item style={{width: '9rem'}}>
@@ -100,7 +74,7 @@ export function Editor(props: EditorProps) {
             </span>
           }
           value={state.pattern || ''}
-          onInput={value => dispatch({t: 'edit', name: 'pattern', value})}
+          onInput={onEdit}
         />
       </Box>
 

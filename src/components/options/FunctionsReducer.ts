@@ -1,6 +1,6 @@
 import {CopyFunctionWithTheme} from '../../lib/function';
 
-interface State {
+export interface State {
   activeId: string | undefined;
   functions: CopyFunctionWithTheme[];
   editing: CopyFunctionWithTheme | undefined;

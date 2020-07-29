@@ -115,7 +115,7 @@ function FunctionListItem(props: FunctionListItemProps) {
       </FunctionBox>
       {active && (
         <EditorBox>
-          <Editor function={fn} fnDispatch={dispatch} />
+          <Editor function={fn} dispatch={dispatch} />
         </EditorBox>
       )}
     </div>

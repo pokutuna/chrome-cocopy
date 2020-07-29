@@ -36,13 +36,16 @@ export const TextInput = (props: {
   placeholder?: string;
   pattern?: string;
   value: string;
-  onInput: (value: string) => void;
+  onInput: (name: string, value: string) => void;
   subLabel?: VNode;
 }) => {
   const handleInput = useCallback(
     (event: InputEvent) =>
-      props.onInput((event.currentTarget as HTMLInputElement).value),
-    [props.onInput]
+      props.onInput(
+        props.name,
+        (event.currentTarget as HTMLInputElement).value
+      ),
+    [props.name, props.onInput]
   );
 
   return (
