@@ -1,4 +1,5 @@
 import {h} from 'preact';
+import {useCallback} from 'preact/hooks';
 
 import styled from 'styled-components';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
@@ -79,35 +80,65 @@ const PaletteColor = (props: {
 type ColorPickerProps = {
   show: boolean;
   onSelect: (color: string) => void;
+  onClickPalette: () => void;
 };
 
 export function ColorPicker(props: ColorPickerProps) {
   return (
     <ColorPickerBox>
-      <FontAwesomeIcon icon={faPalette} />
-      <PaletteBox>
-        {palette.map(c => (
-          <PaletteColor key={c} color={c} onClick={props.onSelect} />
-        ))}
-      </PaletteBox>
+      <FontAwesomeIcon icon={faPalette} onClick={props.onClickPalette} />
+      {props.show && (
+        <PaletteBox>
+          {palette.map(c => (
+            <PaletteColor key={c} color={c} onClick={props.onSelect} />
+          ))}
+        </PaletteBox>
+      )}
     </ColorPickerBox>
   );
 }
 
-export function ColorInput() {
+type ColorInputProps = {
+  value: string;
+  onInput: (name: string, value: string) => void;
+  onClickPalette: () => void;
+  showPalette: boolean;
+};
+
+export function ColorInput(props: ColorInputProps) {
+  const onInput = useCallback(
+    (event: InputEvent) =>
+      props.onInput?.(
+        'backgroundColor',
+        (event.currentTarget as HTMLInputElement).value
+      ),
+    [props.onInput]
+  );
+
+  const onSelect = useCallback(
+    (value: string) => props.onInput?.('backgroundColor', value),
+    [props.onInput]
+  );
+
   return (
     <InputBox>
       <Label htmlFor="color">Color</Label>
       <InputWrap>
         <Input
           type="text"
+          value={props.value}
+          onInput={onInput}
           id="color"
           name="color"
           placeholder="#F0F0F0"
           pattern="#([0-9A-F]{3}|[0-9A-F]{6})"
           maxLength={7}
         />
-        <ColorPicker show={false} onSelect={() => {}} />
+        <ColorPicker
+          show={props.showPalette}
+          onSelect={onSelect}
+          onClickPalette={props.onClickPalette}
+        />
       </InputWrap>
     </InputBox>
   );

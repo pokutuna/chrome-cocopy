@@ -1,6 +1,6 @@
 import {DispatchType as FnDispatchType} from './FunctionsReducer';
 import {CopyFunctionWithTheme} from '../../lib/function';
-
+import {textColorFromBgColor} from '../../lib/util';
 interface State {
   fn: CopyFunctionWithTheme;
   fnDispatch: FnDispatchType;
@@ -53,14 +53,32 @@ function stateToFn(state: State): Partial<CopyFunctionWithTheme> {
   };
 }
 
-export function reducer(state: State, action: Action): State {
-  switch (action.t) {
-    case 'edit': {
-      const next = {...state, [action.name]: action.value};
-      // TODO color validation
-      state.fnDispatch({t: 'edit', function: stateToFn(next)});
-      return next;
+function handleEditType(
+  state: State,
+  action: {
+    t: 'edit';
+    name: string;
+    value: string;
+  }
+): State {
+  const next = {...state, [action.name]: action.value};
+  if (action.name === 'backgroundColor') {
+    if (/^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i.test(action.value)) {
+      next.textColor = textColorFromBgColor(next.backgroundColor);
     }
+  } else {
+    next.openPalette = false;
+  }
+
+  state.fnDispatch({t: 'edit', function: stateToFn(next)});
+  return next;
+}
+
+export function reducer(state: State, action: Action): State {
+  console.log(action);
+  switch (action.t) {
+    case 'edit':
+      return handleEditType(state, action);
     case 'palette':
       return {...state, openPalette: !state.openPalette};
     default:

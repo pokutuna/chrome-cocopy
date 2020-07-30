@@ -35,7 +35,9 @@ export function Editor(props: EditorProps) {
     (name: string, value: string) => dispatch({t: 'edit', name, value}),
     [dispatch]
   );
-
+  const onClickPalette = useCallback(() => dispatch({t: 'palette'}), [
+    dispatch,
+  ]);
   const onCodeEdit = useCallback(
     (value: string) => dispatch({t: 'edit', name: 'code', value}),
     [dispatch]
@@ -64,7 +66,12 @@ export function Editor(props: EditorProps) {
             />
           </Item>
           <Item style={{width: '9rem'}}>
-            <ColorInput />
+            <ColorInput
+              value={state.backgroundColor}
+              onInput={onEdit}
+              onClickPalette={onClickPalette}
+              showPalette={state.openPalette}
+            />
           </Item>
         </Row>
         <TextInput
