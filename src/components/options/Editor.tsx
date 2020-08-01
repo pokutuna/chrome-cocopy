@@ -63,6 +63,7 @@ export function Editor(props: EditorProps) {
               placeholder=""
               value={state.name}
               onInput={onEdit}
+              error={state.errors.name}
             />
           </Item>
           <Item style={{width: '9rem'}}>
@@ -71,26 +72,28 @@ export function Editor(props: EditorProps) {
               onInput={onEdit}
               onClickPalette={onClickPalette}
               showPalette={state.openPalette}
+              error={state.errors.backgroundColor}
             />
           </Item>
         </Row>
-        <TextInput
-          label="URL Pattern"
-          name="pattern"
-          placeholder=".*"
-          subLabel={
-            <span>
-              (optional) This function will be displayed if the URL matches.
-            </span>
-          }
-          value={state.pattern || ''}
-          onInput={onEdit}
-        />
-      </Box>
-
-      <CodeEditor code={state.code} setCode={onCodeEdit} />
-
-      <Box>
+        <Row>
+          <TextInput
+            label="URL Pattern"
+            name="pattern"
+            placeholder=".*"
+            subLabel={
+              <span>
+                (optional) This function will be displayed if the URL matches.
+              </span>
+            }
+            value={state.pattern || ''}
+            onInput={onEdit}
+            error={state.errors.pattern}
+          />
+        </Row>
+        <Row>
+          <CodeEditor code={state.code} setCode={onCodeEdit} />
+        </Row>
         <Row>
           <Item>
             <Button>Save</Button>

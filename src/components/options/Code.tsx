@@ -7,11 +7,12 @@ import 'prismjs/components/prism-clike';
 import 'prismjs/components/prism-javascript';
 
 import {theme} from '../common/Theme';
-import {InputBox, Label, LabelSub} from './Input';
+import {InputBox, Label, LabelSub, ErrorMessage} from './Input';
 
 export const CodeEditor = (props: {
   code: string;
   setCode: (code: string) => void;
+  error?: string;
 }) => {
   const highlight = useCallback((code: string) => {
     const result = hl(code, languages.js);
@@ -36,6 +37,7 @@ export const CodeEditor = (props: {
           backgroundColor: theme.color.codeBg,
         }}
       />
+      <ErrorMessage>{props.error}</ErrorMessage>
     </InputBox>
   );
 };

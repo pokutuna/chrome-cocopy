@@ -24,10 +24,21 @@ export const LabelSub = styled.span`
   color: ${props => props.theme.color.gray};
 `;
 
-export const Input = styled.input`
+export const Input = styled.input<{error?: boolean}>`
   padding: ${props => props.theme.space[1]};
   font-size: ${props => props.theme.size.lg};
   width: 100%;
+  border: 1px solid;
+
+  border-color: ${p => (p.error ? p.theme.color.error : 'inherit')};
+  &:focus {
+    ${p => p.error && `outline-color: ${p.theme.color.error}`};
+  }
+`;
+
+export const ErrorMessage = styled.span`
+  color: ${p => p.theme.color.error};
+  margin-left: ${p => p.theme.space[1]};
 `;
 
 export const TextInput = (props: {
@@ -38,6 +49,7 @@ export const TextInput = (props: {
   value: string;
   onInput?: (name: string, value: string) => void;
   subLabel?: VNode;
+  error?: string;
 }) => {
   const handleInput = useCallback(
     (event: InputEvent) =>
@@ -62,7 +74,9 @@ export const TextInput = (props: {
         name={props.name}
         placeholder={props.placeholder}
         pattern={props.pattern}
+        error={!!props.error}
       />
+      {props.error && <ErrorMessage>{props.error}</ErrorMessage>}
     </InputBox>
   );
 };

@@ -12,6 +12,13 @@ interface State {
   pattern?: string;
   code: string;
   openPalette: boolean;
+
+  errors: {
+    name?: string;
+    backgroundColor?: boolean;
+    pattern?: string;
+    code?: string;
+  };
 }
 
 type Action =
@@ -35,6 +42,7 @@ export function init(
     pattern: fn.pattern,
     code: fn.code,
     openPalette: false,
+    errors: {},
   };
 }
 
@@ -53,7 +61,36 @@ function stateToFn(state: State): Partial<CopyFunctionWithTheme> {
   };
 }
 
-function handleEditType(
+function validateEdit(
+  errors: State['errors'],
+  action: {
+    t: 'edit';
+    name: string;
+    value: string;
+  }
+): State['errors'] {
+  switch (action.name) {
+    case 'name':
+      errors.name = action.value.length === 0 ? 'Cannot be empty.' : undefined;
+      break;
+    case 'backgroundColor': {
+      const valid = /^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i.test(action.value);
+      errors.backgroundColor = !valid;
+      break;
+    }
+    case 'pattern':
+      try {
+        new RegExp(action.value);
+        errors.pattern = undefined;
+      } catch (e) {
+        errors.pattern = e.message;
+      }
+      break;
+  }
+  return errors;
+}
+
+function handleEdit(
   state: State,
   action: {
     t: 'edit';
@@ -62,13 +99,18 @@ function handleEditType(
   }
 ): State {
   const next = {...state, [action.name]: action.value};
+
   if (action.name === 'backgroundColor') {
     if (/^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i.test(action.value)) {
       next.textColor = textColorFromBgColor(next.backgroundColor);
+    } else {
+      next.textColor = '#000';
     }
   } else {
     next.openPalette = false;
   }
+
+  next.errors = validateEdit(state.errors, action);
 
   state.fnDispatch({t: 'edit', function: stateToFn(next)});
   return next;
@@ -78,7 +120,7 @@ export function reducer(state: State, action: Action): State {
   console.log(action);
   switch (action.t) {
     case 'edit':
-      return handleEditType(state, action);
+      return handleEdit(state, action);
     case 'palette':
       return {...state, openPalette: !state.openPalette};
     default:

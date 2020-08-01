@@ -100,6 +100,7 @@ export function ColorPicker(props: ColorPickerProps) {
 
 type ColorInputProps = {
   value: string;
+  error?: boolean;
   onInput: (name: string, value: string) => void;
   onClickPalette: () => void;
   showPalette: boolean;
@@ -127,12 +128,13 @@ export function ColorInput(props: ColorInputProps) {
         <Input
           type="text"
           value={props.value}
-          onInput={onInput}
+          onInput={onInput as any}
           id="color"
           name="color"
           placeholder="#F0F0F0"
           pattern="#([0-9A-F]{3}|[0-9A-F]{6})"
           maxLength={7}
+          error={props.error}
         />
         <ColorPicker
           show={props.showPalette}
