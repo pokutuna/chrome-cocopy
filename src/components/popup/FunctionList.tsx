@@ -5,7 +5,7 @@ import {getCopyFunctions} from '../../lib/config';
 import {createPageTargetFromTab} from '../../lib/target';
 import {CopyFunction, CopyFunctionWithTheme} from '../../lib/function';
 import {getActiveTab, keyToIndex} from '../../lib/util';
-import {EvaluateResult} from '../../lib/eval';
+import {EvaluatePayload, EvaluateResult} from '../../lib/eval';
 
 import {FunctionItem} from './Function';
 import {useSandbox} from '../common/Sandbox';
@@ -25,7 +25,7 @@ const receiver = (res: EvaluateResult) => {
 };
 
 export const FunctionList = () => {
-  const evaluate = useSandbox(receiver);
+  const evaluate = useSandbox<EvaluatePayload, EvaluateResult>(receiver);
   const [rules, setRules] = useState<CopyFunctionWithTheme[]>([]);
   const [running, setRunning] = useState<string | null>(null);
 
@@ -42,6 +42,7 @@ export const FunctionList = () => {
       const run = async () => {
         const tab = await getActiveTab();
         evaluate({
+          command: 'eval',
           code: c.code,
           target: await createPageTargetFromTab(tab),
         });

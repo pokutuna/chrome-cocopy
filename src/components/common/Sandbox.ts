@@ -14,7 +14,6 @@ function nextChannel(): number {
 // reQuest, reSponse
 export function useSandbox<Q, S>(onMessage: (s: S) => void) {
   const channel = useMemo(nextChannel, []);
-
   const sender = useCallback((request: Q) => {
     const withChan = {...request, channel};
     const sandbox = document.getElementById('sandbox') as HTMLIFrameElement;

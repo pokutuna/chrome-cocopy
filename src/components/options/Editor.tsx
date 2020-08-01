@@ -1,12 +1,16 @@
 import {h} from 'preact';
-import {useReducer, useCallback} from 'preact/hooks';
+import {useReducer, useMemo, useCallback} from 'preact/hooks';
+
+import debounce from 'lodash.debounce';
 
 import {CopyFunctionWithTheme} from '../../lib/function';
+import {EvaluatePayload, EvaluateResult} from '../../lib/eval';
 import {Box, Row, Item, Button} from './Parts';
 import {TextInput} from './Input';
 import {ColorInput} from './Color';
 import {CodeEditor} from './Code';
 import {DispatchType as FnDispatchType} from './FunctionsReducer';
+import {useSandbox} from '../common/Sandbox';
 import {reducer, init} from './EditorReducer';
 
 const initialCode = `
@@ -38,9 +42,20 @@ export function Editor(props: EditorProps) {
   const onClickPalette = useCallback(() => dispatch({t: 'palette'}), [
     dispatch,
   ]);
+
+  const parse = useMemo(() => {
+    const evaluate = useSandbox<EvaluatePayload, EvaluateResult>(res =>
+      dispatch({t: 'parse', error: res.error ? res.error.message : undefined})
+    );
+    return debounce(evaluate, 200);
+  }, [dispatch]);
+
   const onCodeEdit = useCallback(
-    (value: string) => dispatch({t: 'edit', name: 'code', value}),
-    [dispatch]
+    (value: string) => {
+      parse({command: 'parse', code: value});
+      dispatch({t: 'edit', name: 'code', value});
+    },
+    [dispatch, parse]
   );
 
   return (
@@ -92,7 +107,11 @@ export function Editor(props: EditorProps) {
           />
         </Row>
         <Row>
-          <CodeEditor code={state.code} setCode={onCodeEdit} />
+          <CodeEditor
+            code={state.code}
+            setCode={onCodeEdit}
+            error={state.errors.code}
+          />
         </Row>
         <Row>
           <Item>

@@ -24,6 +24,7 @@ interface State {
 type Action =
   | {t: 'edit'; name: string; value: string}
   | {t: 'palette'}
+  | {t: 'parse'; error?: string}
   | {t: 'save'; value: string}
   | {t: 'cancel'; value: string}
   | {t: 'delete'; value: string};
@@ -123,6 +124,9 @@ export function reducer(state: State, action: Action): State {
       return handleEdit(state, action);
     case 'palette':
       return {...state, openPalette: !state.openPalette};
+    case 'parse':
+      state.errors.code = action.error;
+      return {...state};
     default:
       throw new Error(`unexpected action: ${action.t}`);
   }

@@ -1,20 +1,27 @@
 import {PageTarget, TextTarget, ImageTarget, isTarget} from './target';
 import {CopyResult} from './function';
 
-export interface EvaluatePayload {
-  code: string;
-  target: PageTarget | TextTarget | ImageTarget;
-}
+export type EvaluatePayload =
+  | {
+      command: 'eval';
+      code: string;
+      target: PageTarget | TextTarget | ImageTarget;
+    }
+  | {command: 'parse'; code: string};
 export interface EvaluateResult {
   result: CopyResult;
   error?: {
-    type: 'ParseError' | 'ExecutionError';
+    type: 'InternalError' | 'ParseError' | 'ExecutionError';
     message: string;
   };
 }
 
 export function isEvaluatePayload(input: any): input is EvaluatePayload {
-  return typeof input.code === 'string' && isTarget(input.target);
+  return (
+    typeof input.code === 'string' &&
+    (input.command === 'parse' ||
+      (input.command === 'eval' && isTarget(input.target)))
+  );
 }
 
 function isAcceptableResult(input: any): input is CopyResult {
@@ -29,11 +36,15 @@ function isAcceptableResult(input: any): input is CopyResult {
 export async function evaluate(
   request: EvaluatePayload
 ): Promise<EvaluateResult> {
+  if (request.command !== 'parse' && request.command !== 'eval') {
+    throw Error('unexpected command');
+  }
+
   let fn: Function;
   try {
     fn = eval.call(undefined, request.code);
     if (typeof fn !== 'function') {
-      throw new Error('evaluating code is not a function');
+      throw new Error('code is not a function');
     }
   } catch (e) {
     return {
@@ -43,6 +54,10 @@ export async function evaluate(
         message: e.message,
       },
     };
+  }
+
+  if (request.command === 'parse') {
+    return {result: 'ok'};
   }
 
   let result: any;
