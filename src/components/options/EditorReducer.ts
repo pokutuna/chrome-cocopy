@@ -19,6 +19,7 @@ interface State {
     pattern?: string;
     code?: string;
   };
+  canSave: boolean;
 }
 
 type Action =
@@ -44,6 +45,7 @@ export function init(
     code: fn.code,
     openPalette: false,
     errors: {},
+    canSave: true,
   };
 }
 
@@ -117,16 +119,26 @@ function handleEdit(
   return next;
 }
 
+function canSave(state: State): boolean {
+  return Object.values(state.errors).every(e => !e);
+}
+
 export function reducer(state: State, action: Action): State {
   console.log(action);
   switch (action.t) {
-    case 'edit':
-      return handleEdit(state, action);
+    case 'edit': {
+      const next = handleEdit(state, action);
+      next.canSave = canSave(next);
+      return next;
+    }
     case 'palette':
       return {...state, openPalette: !state.openPalette};
-    case 'parse':
-      state.errors.code = action.error;
-      return {...state};
+    case 'parse': {
+      const next = {...state};
+      next.errors.code = action.error;
+      next.canSave = canSave(next);
+      return next;
+    }
     case 'save':
       state.fnDispatch({t: 'save', functionId: state.fn.id});
       return state;

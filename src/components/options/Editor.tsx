@@ -120,7 +120,9 @@ export function Editor(props: EditorProps) {
         </Row>
         <Row>
           <Item>
-            <Button onClick={onClickSave}>Save</Button>
+            <Button onClick={onClickSave} disabled={!state.canSave}>
+              Save
+            </Button>
           </Item>
           <Item>
             <Button onClick={onClickCancel}>Cancel</Button>

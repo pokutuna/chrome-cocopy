@@ -80,6 +80,7 @@ const ButtonStyle = styled.button<{mode?: ButtonMode}>`
 
 export const Button = (props: {
   mode?: ButtonMode;
+  disabled?: boolean;
   onClick?: (event: MouseEvent) => void;
   children?: ComponentChildren;
 }) => {
@@ -92,7 +93,12 @@ export const Button = (props: {
   );
 
   return (
-    <ButtonStyle type="button" mode={props.mode} onClick={onClick as any}>
+    <ButtonStyle
+      type="button"
+      mode={props.mode}
+      onClick={onClick as any}
+      disabled={props.disabled}
+    >
       {props.children}
     </ButtonStyle>
   );
