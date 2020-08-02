@@ -6,10 +6,12 @@ describe('evaluate', () => {
     type: 'page',
     title: 'Test Title',
     pageURL: 'https://example.test/some/page',
+    content: '',
   };
 
   test('success', async () => {
     const result = await ev.evaluate({
+      command: 'eval',
       code: '(t) => `[${t.title}](${t.pageURL})`',
       target,
     });
@@ -20,6 +22,7 @@ describe('evaluate', () => {
 
   test('success with number', async () => {
     const result = await ev.evaluate({
+      command: 'eval',
       code: '(t) => t.title.length',
       target,
     });
@@ -30,6 +33,7 @@ describe('evaluate', () => {
 
   test('success with null', async () => {
     const result = await ev.evaluate({
+      command: 'eval',
       code: '() => null',
       target,
     });
@@ -40,6 +44,7 @@ describe('evaluate', () => {
 
   test('parse error with syntax error', async () => {
     const result = await ev.evaluate({
+      command: 'eval',
       code: '}',
       target,
     });
@@ -54,6 +59,7 @@ describe('evaluate', () => {
 
   test('parse error with not a function', async () => {
     const result = await ev.evaluate({
+      command: 'eval',
       code: '123',
       target,
     });
@@ -68,6 +74,7 @@ describe('evaluate', () => {
 
   test('execution error with error', async () => {
     const result = await ev.evaluate({
+      command: 'eval',
       code: '() => { throw new Error("simulated error") }',
       target,
     });
@@ -82,6 +89,7 @@ describe('evaluate', () => {
 
   test('execution error with unacceptable value', async () => {
     const result = await ev.evaluate({
+      command: 'eval',
       code: '() => ({ foo: "bar" })',
       target,
     });

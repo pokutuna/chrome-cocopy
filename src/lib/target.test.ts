@@ -21,6 +21,7 @@ describe('createTargetFromContextMenu', () => {
       type: 'page',
       title: 'the test page',
       pageURL: 'https://example.test/somepage',
+      content: '',
     });
   });
 

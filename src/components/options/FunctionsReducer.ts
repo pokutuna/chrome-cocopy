@@ -1,5 +1,4 @@
 import {CopyFunctionWithTheme} from '../../lib/function';
-import {time} from 'console';
 
 export interface State {
   activeId: string | undefined;

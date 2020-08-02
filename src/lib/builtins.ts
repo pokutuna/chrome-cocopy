@@ -10,8 +10,6 @@ const copyAsMarkdown: CopyFunctionWithTheme = {
   types: ['page'],
   code: copyAsMarkdownFn.toString(),
   pattern: undefined,
-  enabled: true,
-  isBuiltIn: true,
   version: 1,
   theme: {
     symbol: 'M⬇',
@@ -29,8 +27,6 @@ const copyAsScrapbox: CopyFunctionWithTheme = {
   types: ['page'],
   code: copyAsScrapboxFn.toString(),
   pattern: undefined,
-  enabled: true,
-  isBuiltIn: true,
   version: 1,
   theme: {
     symbol: 'S',
@@ -45,8 +41,6 @@ const copyAsHTML: CopyFunctionWithTheme = {
   types: ['page'],
   code: '(target) => render(\'<a href="{{&pageURL}}">{{title}}</a>\', target);',
   pattern: undefined,
-  enabled: true,
-  isBuiltIn: true,
   version: 1,
   theme: {
     symbol: 'H',
@@ -66,8 +60,6 @@ const copyAsSimplifiedAmazonURL: CopyFunctionWithTheme = {
   types: ['page'],
   code: simplifyAmazonFn.toString(),
   pattern: '^https://www.amazon.co.jp/.+/dp/.+$',
-  enabled: true,
-  isBuiltIn: true,
   version: 1,
   theme: {
     symbol: '🌴',
@@ -90,8 +82,6 @@ const debug: CopyFunctionWithTheme = {
   types: ['page'],
   code: f.toString(),
   pattern: undefined,
-  enabled: true,
-  isBuiltIn: true,
   version: 1,
   theme: {
     symbol: '🐜',

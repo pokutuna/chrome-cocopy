@@ -14,8 +14,6 @@ export interface CopyFunction {
   types: TargetType[];
   code: string;
   pattern?: string;
-  enabled: boolean;
-  isBuiltIn: boolean;
   version: number;
 }
 
@@ -36,7 +34,6 @@ export function filterFunctions(
 ): CopyFunction[] {
   return functions.filter(
     f =>
-      f.enabled &&
       f.types.includes(targetType) &&
       (f.pattern ? new RegExp(f.pattern).test(pageURL) : true)
   );

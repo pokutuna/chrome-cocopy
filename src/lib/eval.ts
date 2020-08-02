@@ -67,7 +67,7 @@ export async function evaluate(
     result = await Promise.resolve(fn.call(undefined, request.target));
     if (!isAcceptableResult(result)) {
       throw new Error(
-        'returning value is not a one of (string | number | null | undefined)'
+        'returning value is not one of (string | number | null | undefined)'
       );
     }
   } catch (e) {
