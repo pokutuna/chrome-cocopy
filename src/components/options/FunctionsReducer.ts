@@ -1,10 +1,10 @@
 import {CopyFunctionWithTheme} from '../../lib/function';
+import {time} from 'console';
 
 export interface State {
   activeId: string | undefined;
   functions: CopyFunctionWithTheme[];
   editing: CopyFunctionWithTheme | undefined;
-  editingBackup: CopyFunctionWithTheme | undefined;
   draggable: boolean;
 }
 
@@ -14,9 +14,9 @@ type Action =
   | {t: 'add'}
   // Editing
   | {t: 'edit'; function: Partial<CopyFunctionWithTheme>}
-  | {t: 'save'; functionId: string}
+  | {t: 'save'}
   | {t: 'cancel'}
-  | {t: 'delete'; functionId: string}
+  | {t: 'delete'}
   // Drag & Drop
   | {t: 'dragging'; dragIndex: number; hoverIndex: number}
   | {t: 'dropped'};
@@ -25,7 +25,6 @@ export const initialState = {
   activeId: undefined,
   functions: [],
   editing: undefined,
-  editingBackup: undefined,
   draggable: true,
 };
 
@@ -41,13 +40,29 @@ const dragging = (
   return functions;
 };
 
+function hasEdited(state: State): boolean {
+  const orig = state.functions.find(f => f.id === state.activeId)!;
+  const item = state.editing;
+  if (!item) return false;
+  return (
+    orig.name !== item.name ||
+    orig.code !== item.code ||
+    orig.pattern !== item.pattern ||
+    orig.theme.symbol !== item.theme.symbol ||
+    orig.theme.textColor !== item.theme.textColor ||
+    orig.theme.backgroundColor !== item.theme.backgroundColor
+  );
+}
+
 function reduce(state: State, action: Action): State {
   switch (action.t) {
     case 'init':
       return {...state, functions: action.functions};
     case 'select': {
-      const changed = state.activeId !== action.functionId;
-      const activeId = changed ? action.functionId : undefined;
+      const current = state.activeId === action.functionId;
+      if (current) return reduce(state, {t: 'cancel'});
+
+      const activeId = action.functionId;
       const editing = state.functions.find(f => f.id === activeId);
       return {...state, activeId, editing};
     }
@@ -57,15 +72,25 @@ function reduce(state: State, action: Action): State {
         editing: {...state.editing!, ...action.function},
       };
     case 'save': {
-      const next = {
-        ...state,
-      };
-      return next;
-    }
-    case 'cancel':
+      const idx = state.functions.findIndex(f => f.id === state.activeId);
+      state.functions[idx] = state.editing!;
       return {...state, activeId: undefined, editing: undefined};
-    case 'delete':
-      return state;
+    }
+    case 'cancel': {
+      const edited = hasEdited(state);
+      if (edited && !confirm('Are you sure you want to discard changes?')) {
+        return state;
+      }
+      return {...state, activeId: undefined, editing: undefined};
+    }
+    case 'delete': {
+      if (!confirm('Are you sure you want to delete this function?')) {
+        return state;
+      }
+      const functions = state.functions.filter(f => f.id !== state.activeId);
+      // TODO save
+      return {...state, functions, activeId: undefined, editing: undefined};
+    }
     case 'dragging':
       return {
         ...state,
@@ -77,6 +102,7 @@ function reduce(state: State, action: Action): State {
       };
     case 'dropped':
       console.log('dropped');
+      // TODO save
       return state;
     case 'add':
       return {...state};

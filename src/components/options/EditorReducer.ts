@@ -108,18 +108,6 @@ function handleEdit(state: State, action: EditAction): State {
   return next;
 }
 
-function hasEdited(state: State): boolean {
-  const orig = state.fn;
-  return (
-    orig.name !== state.name ||
-    orig.code !== state.code ||
-    orig.pattern !== state.pattern ||
-    orig.theme.symbol !== state.symbol ||
-    orig.theme.textColor !== state.textColor ||
-    orig.theme.backgroundColor !== state.backgroundColor
-  );
-}
-
 function canSave(state: State): boolean {
   return Object.values(state.errors).every(e => !e);
 }
@@ -137,20 +125,13 @@ function reduce(state: State, action: Action): State {
       return next;
     }
     case 'save':
-      state.fnDispatch({t: 'save', functionId: state.fn.id});
+      state.fnDispatch({t: 'save'});
       return state;
     case 'cancel':
-      if (
-        !hasEdited(state) ||
-        confirm('Are you sure you want to revert changes?')
-      ) {
-        state.fnDispatch({t: 'cancel'});
-      }
+      state.fnDispatch({t: 'cancel'});
       return state;
     case 'delete':
-      if (confirm('Are you sure you want to delete this function?')) {
-        state.fnDispatch({t: 'delete', functionId: state.fn.id});
-      }
+      state.fnDispatch({t: 'delete'});
       return state;
   }
 }
