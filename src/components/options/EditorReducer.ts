@@ -22,8 +22,9 @@ interface State {
   canSave: boolean;
 }
 
+type EditAction = {t: 'edit'; name: string; value: string};
 type Action =
-  | {t: 'edit'; name: string; value: string}
+  | EditAction
   | {t: 'palette'}
   | {t: 'parse'; error?: string}
   | {t: 'save'}
@@ -66,11 +67,7 @@ function stateToFn(state: State): Partial<CopyFunctionWithTheme> {
 
 function validateEdit(
   errors: State['errors'],
-  action: {
-    t: 'edit';
-    name: string;
-    value: string;
-  }
+  action: EditAction
 ): State['errors'] {
   switch (action.name) {
     case 'name':
@@ -93,21 +90,13 @@ function validateEdit(
   return errors;
 }
 
-function handleEdit(
-  state: State,
-  action: {
-    t: 'edit';
-    name: string;
-    value: string;
-  }
-): State {
+function handleEdit(state: State, action: EditAction): State {
   const next = {...state, [action.name]: action.value};
-
   if (action.name === 'backgroundColor') {
     if (/^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i.test(action.value)) {
       next.textColor = textColorFromBgColor(next.backgroundColor);
     } else {
-      next.textColor = '#000';
+      next.textColor = '#000'; // fallback when parsing failed
     }
   } else {
     next.openPalette = false;
@@ -119,34 +108,55 @@ function handleEdit(
   return next;
 }
 
+function hasEdited(state: State): boolean {
+  const orig = state.fn;
+  return (
+    orig.name !== state.name ||
+    orig.code !== state.code ||
+    orig.pattern !== state.pattern ||
+    orig.theme.symbol !== state.symbol ||
+    orig.theme.textColor !== state.textColor ||
+    orig.theme.backgroundColor !== state.backgroundColor
+  );
+}
+
 function canSave(state: State): boolean {
   return Object.values(state.errors).every(e => !e);
 }
 
-export function reducer(state: State, action: Action): State {
+function reduce(state: State, action: Action): State {
   console.log(action);
   switch (action.t) {
-    case 'edit': {
-      const next = handleEdit(state, action);
-      next.canSave = canSave(next);
-      return next;
-    }
+    case 'edit':
+      return handleEdit(state, action);
     case 'palette':
       return {...state, openPalette: !state.openPalette};
     case 'parse': {
       const next = {...state};
       next.errors.code = action.error;
-      next.canSave = canSave(next);
       return next;
     }
     case 'save':
       state.fnDispatch({t: 'save', functionId: state.fn.id});
       return state;
     case 'cancel':
-      state.fnDispatch({t: 'cancel'});
+      if (
+        !hasEdited(state) ||
+        confirm('Are you sure you want to revert changes?')
+      ) {
+        state.fnDispatch({t: 'cancel'});
+      }
       return state;
     case 'delete':
-      state.fnDispatch({t: 'delete', functionId: state.fn.id});
+      if (confirm('Are you sure you want to delete this function?')) {
+        state.fnDispatch({t: 'delete', functionId: state.fn.id});
+      }
       return state;
   }
+}
+
+export function reducer(state: State, action: Action): State {
+  const next = reduce(state, action);
+  next.canSave = canSave(next);
+  return next;
 }

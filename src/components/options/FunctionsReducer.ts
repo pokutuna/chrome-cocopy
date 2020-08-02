@@ -41,7 +41,7 @@ const dragging = (
   return functions;
 };
 
-export function reducer(state: State, action: Action): State {
+function reduce(state: State, action: Action): State {
   switch (action.t) {
     case 'init':
       return {...state, functions: action.functions};
@@ -49,18 +49,23 @@ export function reducer(state: State, action: Action): State {
       const changed = state.activeId !== action.functionId;
       const activeId = changed ? action.functionId : undefined;
       const editing = state.functions.find(f => f.id === activeId);
-      return {
-        ...state,
-        activeId,
-        editing,
-        draggable: activeId === undefined,
-      };
+      return {...state, activeId, editing};
     }
     case 'edit':
       return {
         ...state,
         editing: {...state.editing!, ...action.function},
       };
+    case 'save': {
+      const next = {
+        ...state,
+      };
+      return next;
+    }
+    case 'cancel':
+      return {...state, activeId: undefined, editing: undefined};
+    case 'delete':
+      return state;
     case 'dragging':
       return {
         ...state,
@@ -75,7 +80,11 @@ export function reducer(state: State, action: Action): State {
       return state;
     case 'add':
       return {...state};
-    default:
-      throw new Error(`unexpected action: ${action.t}`);
   }
+}
+
+export function reducer(state: State, action: Action): State {
+  const next = reduce(state, action);
+  next.draggable = next.activeId === undefined;
+  return next;
 }
