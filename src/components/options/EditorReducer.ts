@@ -25,9 +25,9 @@ type Action =
   | {t: 'edit'; name: string; value: string}
   | {t: 'palette'}
   | {t: 'parse'; error?: string}
-  | {t: 'save'; value: string}
-  | {t: 'cancel'; value: string}
-  | {t: 'delete'; value: string};
+  | {t: 'save'}
+  | {t: 'cancel'}
+  | {t: 'delete'};
 
 export function init(
   fn: CopyFunctionWithTheme,
@@ -127,7 +127,14 @@ export function reducer(state: State, action: Action): State {
     case 'parse':
       state.errors.code = action.error;
       return {...state};
-    default:
-      throw new Error(`unexpected action: ${action.t}`);
+    case 'save':
+      state.fnDispatch({t: 'save', functionId: state.fn.id});
+      return state;
+    case 'cancel':
+      state.fnDispatch({t: 'cancel'});
+      return state;
+    case 'delete':
+      state.fnDispatch({t: 'delete', functionId: state.fn.id});
+      return state;
   }
 }

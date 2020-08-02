@@ -22,10 +22,12 @@ export function useSandbox<Q, S>(onMessage: (s: S) => void) {
 
   const receiver = useCallback(
     (message: MessageResponse<S>) => {
-      if (message.data.channel !== channel) return;
+      if (message.data?.channel !== channel) {
+        throw new Error('invalid message received');
+      }
       onMessage(message.data);
     },
-    [onMessage]
+    [channel, onMessage]
   );
 
   useEffect(() => {

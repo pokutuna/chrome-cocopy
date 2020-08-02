@@ -46,12 +46,10 @@ export function Editor(props: EditorProps) {
     dispatch,
   ]);
 
-  const parse = useMemo(() => {
-    const evaluate = useSandbox<EvaluatePayload, EvaluateResult>(res =>
-      dispatch({t: 'parse', error: res.error ? res.error.message : undefined})
-    );
-    return debounce(evaluate, 200);
-  }, [dispatch]);
+  const _evaluate = useSandbox<EvaluatePayload, EvaluateResult>(res =>
+    dispatch({t: 'parse', error: res.error ? res.error.message : undefined})
+  );
+  const parse = useMemo(() => debounce(_evaluate, 200), [dispatch, _evaluate]);
 
   const onCodeEdit = useCallback(
     (value: string) => {
@@ -60,6 +58,10 @@ export function Editor(props: EditorProps) {
     },
     [dispatch, parse]
   );
+
+  const onClickSave = useCallback(() => dispatch({t: 'save'}), [dispatch]);
+  const onClickCancel = useCallback(() => dispatch({t: 'cancel'}), [dispatch]);
+  const onClickDelete = useCallback(() => dispatch({t: 'delete'}), [dispatch]);
 
   return (
     <form>
@@ -118,13 +120,13 @@ export function Editor(props: EditorProps) {
         </Row>
         <Row>
           <Item>
-            <Button>Save</Button>
+            <Button onClick={onClickSave}>Save</Button>
           </Item>
           <Item>
-            <Button>Cancel</Button>
+            <Button onClick={onClickCancel}>Cancel</Button>
           </Item>
           <Item style={{marginLeft: 'auto'}}>
-            <Button mode="danger">
+            <Button onClick={onClickDelete} mode="danger">
               <ButtonIcon>
                 <FontAwesomeIcon icon={faTrash} />
               </ButtonIcon>

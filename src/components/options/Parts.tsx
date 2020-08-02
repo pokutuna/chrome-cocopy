@@ -92,7 +92,7 @@ export const Button = (props: {
   );
 
   return (
-    <ButtonStyle mode={props.mode} onClick={onClick as any}>
+    <ButtonStyle type="button" mode={props.mode} onClick={onClick as any}>
       {props.children}
     </ButtonStyle>
   );

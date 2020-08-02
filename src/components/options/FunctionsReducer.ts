@@ -14,7 +14,7 @@ type Action =
   | {t: 'add'}
   // Editing
   | {t: 'edit'; function: Partial<CopyFunctionWithTheme>}
-  | {t: 'save'; function: CopyFunctionWithTheme}
+  | {t: 'save'; functionId: string}
   | {t: 'cancel'}
   | {t: 'delete'; functionId: string}
   // Drag & Drop
