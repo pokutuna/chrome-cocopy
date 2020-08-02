@@ -1,10 +1,14 @@
 import {h} from 'preact';
 import {useCallback} from 'preact/hooks';
 
+import {random} from 'chroma-js';
+
 import styled from 'styled-components';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {faPalette} from '@fortawesome/free-solid-svg-icons/faPalette';
+import {faRandom} from '@fortawesome/free-solid-svg-icons/faRandom';
 
+import {theme} from '../common/Theme';
 import {InputBox, Label, Input} from './Input';
 
 const palette = [
@@ -27,7 +31,6 @@ const palette = [
   '#795548',
   '#9E9E9E',
   '#607D8B',
-  '#212121',
 ];
 
 const InputWrap = styled.div`
@@ -36,13 +39,11 @@ const InputWrap = styled.div`
   align-items: center;
 `;
 
-const ColorPickerBox = styled.div<{show: boolean}>`
+const ColorPickerBox = styled.div`
   position: relative;
   margin-left: -${props => props.theme.size['2xl']};
   font-size: ${props => props.theme.size.lg};
   cursor: pointer;
-
-  color: ${p => (p.show ? p.theme.color.primary : 'inherit')};
 `;
 
 const PaletteBox = styled.div`
@@ -65,17 +66,31 @@ const PaletteColorBox = styled.div<{color: string}>`
   height: ${props => props.theme.size['2xl']};
   margin: ${props => props.theme.space[1]};
   cursor: pointer;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
 `;
 
 const PaletteColor = (props: {
   color: string;
   onClick: (color: string) => void;
 }) => {
+  const onClick = useCallback(() => props.onClick(props.color), [
+    props.onClick,
+    props.color,
+  ]);
+  return <PaletteColorBox color={props.color} onClick={onClick} />;
+};
+
+const PaletteColorRandom = (props: {onClick: (color: string) => void}) => {
+  const onClick = useCallback(() => props.onClick(random().hex()), [
+    props.onClick,
+  ]);
   return (
-    <PaletteColorBox
-      color={props.color}
-      onClick={() => props.onClick(props.color)}
-    />
+    <PaletteColorBox color="transparent" onClick={onClick}>
+      <FontAwesomeIcon icon={faRandom} />
+    </PaletteColorBox>
   );
 };
 
@@ -87,13 +102,18 @@ type ColorPickerProps = {
 
 export function ColorPicker(props: ColorPickerProps) {
   return (
-    <ColorPickerBox show={props.show}>
-      <FontAwesomeIcon icon={faPalette} onClick={props.onClickPalette} />
+    <ColorPickerBox>
+      <FontAwesomeIcon
+        icon={faPalette}
+        onClick={props.onClickPalette}
+        color={props.show ? theme.color.primary : undefined}
+      />
       {props.show && (
         <PaletteBox>
           {palette.map(c => (
             <PaletteColor key={c} color={c} onClick={props.onSelect} />
           ))}
+          <PaletteColorRandom onClick={props.onSelect} />
         </PaletteBox>
       )}
     </ColorPickerBox>
