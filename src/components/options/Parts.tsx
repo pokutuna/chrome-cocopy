@@ -1,7 +1,7 @@
 import {h, ComponentChildren} from 'preact';
 import {useCallback} from 'preact/hooks';
 import {memo} from 'preact/compat';
-import styled from 'styled-components';
+import styled, {css} from 'styled-components';
 
 export const MainColumn = styled.div`
   padding: 0;
@@ -60,15 +60,26 @@ export const Row = styled.div`
   }
 `;
 
-const ButtonStyle = styled.button<{color?: string}>`
+type ButtonMode = 'default' | 'danger';
+
+const danger = css`
+  color: ${p => p.theme.color.danger};
+  &:focus {
+    outline-color: ${p => p.theme.color.danger};
+  }
+`;
+
+const ButtonStyle = styled.button<{mode?: ButtonMode}>`
   padding: ${props => props.theme.space[2]};
   background-color: transparent;
   border: solid 1px;
   border-radius: ${props => props.theme.space[1]};
   cursor: pointer;
+  ${p => p.mode === 'danger' && danger};
 `;
 
 export const Button = (props: {
+  mode?: ButtonMode;
   onClick?: (event: MouseEvent) => void;
   children?: ComponentChildren;
 }) => {
@@ -80,5 +91,13 @@ export const Button = (props: {
     [props.onClick]
   );
 
-  return <ButtonStyle onClick={onClick as any}>{props.children}</ButtonStyle>;
+  return (
+    <ButtonStyle mode={props.mode} onClick={onClick as any}>
+      {props.children}
+    </ButtonStyle>
+  );
 };
+
+export const ButtonIcon = styled.i`
+  margin-right: ${p => p.theme.space[1]};
+`;

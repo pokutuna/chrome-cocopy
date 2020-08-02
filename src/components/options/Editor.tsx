@@ -3,9 +3,12 @@ import {useReducer, useMemo, useCallback} from 'preact/hooks';
 
 import debounce from 'lodash.debounce';
 
+import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
+import {faTrash} from '@fortawesome/free-solid-svg-icons/faTrash';
+
 import {CopyFunctionWithTheme} from '../../lib/function';
 import {EvaluatePayload, EvaluateResult} from '../../lib/eval';
-import {Box, Row, Item, Button} from './Parts';
+import {Box, Row, Item, Button, ButtonIcon} from './Parts';
 import {TextInput} from './Input';
 import {ColorInput} from './Color';
 import {CodeEditor} from './Code';
@@ -121,7 +124,12 @@ export function Editor(props: EditorProps) {
             <Button>Cancel</Button>
           </Item>
           <Item style={{marginLeft: 'auto'}}>
-            <Button>Delete</Button>
+            <Button mode="danger">
+              <ButtonIcon>
+                <FontAwesomeIcon icon={faTrash} />
+              </ButtonIcon>
+              Delete
+            </Button>
           </Item>
         </Row>
       </Box>

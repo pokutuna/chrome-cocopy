@@ -36,6 +36,8 @@ export const theme = {
     gray: '#666',
     codeBg: '#f5f2f0',
     error: '#F44336',
+    danger: '#F44336',
+    primary: '#007BFF',
   },
   fontFamily: {
     default: 'inherit',

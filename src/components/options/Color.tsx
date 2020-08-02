@@ -36,11 +36,13 @@ const InputWrap = styled.div`
   align-items: center;
 `;
 
-const ColorPickerBox = styled.div`
+const ColorPickerBox = styled.div<{show: boolean}>`
   position: relative;
   margin-left: -${props => props.theme.size['2xl']};
   font-size: ${props => props.theme.size.lg};
   cursor: pointer;
+
+  color: ${p => (p.show ? p.theme.color.primary : 'inherit')};
 `;
 
 const PaletteBox = styled.div`
@@ -85,7 +87,7 @@ type ColorPickerProps = {
 
 export function ColorPicker(props: ColorPickerProps) {
   return (
-    <ColorPickerBox>
+    <ColorPickerBox show={props.show}>
       <FontAwesomeIcon icon={faPalette} onClick={props.onClickPalette} />
       {props.show && (
         <PaletteBox>
