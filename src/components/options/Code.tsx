@@ -36,6 +36,8 @@ export const CodeEditor = (props: {
           fontFamily: theme.fontFamily.monospace,
           backgroundColor: theme.color.codeBg,
         }}
+        textareaClassName="editor-additional-styles"
+        preClassName="editor-additional-styles"
       />
       <ErrorMessage>{props.error}</ErrorMessage>
     </InputBox>

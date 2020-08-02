@@ -7,6 +7,7 @@ import {FunctionList} from './components/options/FunctionList';
 import {Links} from './components/options/Links';
 
 import './components/options/prism.css';
+import './components/options/code.css';
 
 const App = () => {
   return (
