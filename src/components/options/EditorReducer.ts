@@ -102,6 +102,10 @@ function handleEdit(state: State, action: EditAction): State {
     next.openPalette = false;
   }
 
+  if (action.name === 'pattern' && action.value === '') {
+    next.pattern = undefined;
+  }
+
   next.errors = validateEdit(state.errors, action);
 
   state.fnDispatch({t: 'edit', function: stateToFn(next)});

@@ -58,12 +58,13 @@ function reduce(state: State, action: Action): State {
     case 'init':
       return {...state, functions: action.functions};
     case 'select': {
-      const current = state.activeId === action.functionId;
-      if (current) return reduce(state, {t: 'cancel'});
+      const close = state.activeId === action.functionId;
+      const next = reduce(state, {t: 'cancel'});
+      if (close || next.activeId !== undefined) return next;
 
-      const activeId = action.functionId;
-      const editing = state.functions.find(f => f.id === activeId);
-      return {...state, activeId, editing};
+      next.activeId = action.functionId;
+      next.editing = state.functions.find(f => f.id === action.functionId);
+      return next;
     }
     case 'edit':
       return {
