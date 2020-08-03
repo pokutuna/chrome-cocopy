@@ -1,5 +1,4 @@
-import {CopyFunctionWithTheme, CopyFn} from './function';
-import {PageTarget} from './target';
+import {CopyFunctionWithTheme} from './function';
 
 const copyAsMarkdownFn = `
 /**

@@ -97,7 +97,7 @@ describe('evaluate', () => {
       result: null,
       error: {
         type: 'ExecutionError',
-        message: expect.stringContaining('returning value is not a one of'),
+        message: expect.stringContaining('returning value is not one of'),
       },
     });
   });
