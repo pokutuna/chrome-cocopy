@@ -1,14 +1,21 @@
 import {CopyFunctionWithTheme, CopyFn} from './function';
 import {PageTarget} from './target';
 
-export const copyAsMarkdownFn: CopyFn = (target: PageTarget) =>
-  `[${target.title}](${target.pageURL})`;
+const copyAsMarkdownFn = `
+/**
+ * Copy link as Markdown.
+ */
+({title, pageURL}) => {
+  const escaped = title.replace(/[\\[\\]]/g, '\\\\$&');
+  return \`[\${escaped}](\${pageURL})\`;
+};
+`.trim();
 
-const copyAsMarkdown: CopyFunctionWithTheme = {
+export const copyAsMarkdown: CopyFunctionWithTheme = {
   id: 'builtin-markdown',
   name: 'Markdown: [title](url)',
   types: ['page'],
-  code: copyAsMarkdownFn.toString(),
+  code: copyAsMarkdownFn,
   pattern: undefined,
   version: 1,
   theme: {
@@ -18,28 +25,20 @@ const copyAsMarkdown: CopyFunctionWithTheme = {
   },
 };
 
-export const copyAsScrapboxFn: CopyFn = ({title, pageURL}: PageTarget) =>
-  `[${title} ${pageURL}]`;
+const copyAsHTMLFn = `
+/**
+ * Copy as anchor element.
+ *
+ * You can use mustache template with \`render\` function.
+ * @see https://github.com/janl/mustache.js
+ */
+target => render('<a href="{{&pageURL}}">{{title}}</a>', target);`.trim();
 
-const copyAsScrapbox: CopyFunctionWithTheme = {
-  id: 'builtin-scrapbox',
-  name: 'Scrapbox: [title url]',
-  types: ['page'],
-  code: copyAsScrapboxFn.toString(),
-  pattern: undefined,
-  version: 1,
-  theme: {
-    symbol: 'S',
-    textColor: '#FFFFFF',
-    backgroundColor: '#06B632',
-  },
-};
-
-const copyAsHTML: CopyFunctionWithTheme = {
+export const copyAsHTML: CopyFunctionWithTheme = {
   id: 'builtin-html',
   name: 'HTML: <a href={url}>{title}</a>',
   types: ['page'],
-  code: '(target) => render(\'<a href="{{&pageURL}}">{{title}}</a>\', target);',
+  code: copyAsHTMLFn,
   pattern: undefined,
   version: 1,
   theme: {
@@ -49,17 +48,41 @@ const copyAsHTML: CopyFunctionWithTheme = {
   },
 };
 
-const simplifyAmazonFn: CopyFn = ({pageURL}: PageTarget) => {
-  const match = pageURL.match(/(\/dp\/\w+)[/?]?/);
-  return match ? new URL(pageURL).origin + match[1] : undefined;
+export const copyAsScrapboxFn =
+  '({title, pageURL}) => `[${title} ${pageURL}]`;';
+
+const copyAsScrapbox: CopyFunctionWithTheme = {
+  id: 'builtin-scrapbox',
+  name: 'Scrapbox: [title url]',
+  types: ['page'],
+  code: copyAsScrapboxFn,
+  pattern: undefined,
+  version: 1,
+  theme: {
+    symbol: 'S',
+    textColor: '#FFFFFF',
+    backgroundColor: '#06B632',
+  },
 };
 
-const copyAsSimplifiedAmazonURL: CopyFunctionWithTheme = {
+const simplifyAmazonFn = `
+/**
+ * Copy simplified amazon.co.jp item URL.
+ *
+ * Returning falsy value doesn't overwrite your clipboard.
+ */
+({pageURL}) => {
+  const match = pageURL.match(/(\\/dp\\/\\w+)[/?]?/);
+  return match ? new URL(pageURL).origin + match[1] : undefined;
+}
+`.trim();
+
+export const copyAsSimplifiedAmazonURL: CopyFunctionWithTheme = {
   id: 'builtin-amazon',
-  name: 'Simplify Amazon.co.jp Item URL',
+  name: 'amazon.co.jp: URL Simplify',
   types: ['page'],
-  code: simplifyAmazonFn.toString(),
-  pattern: '^https://www.amazon.co.jp/.+/dp/.+$',
+  code: simplifyAmazonFn,
+  pattern: '^https://www\\.amazon\\.co\\.jp/.+/dp/.+$',
   version: 1,
   theme: {
     symbol: '🌴',
@@ -68,32 +91,44 @@ const copyAsSimplifiedAmazonURL: CopyFunctionWithTheme = {
   },
 };
 
-const f: CopyFn = async (target: PageTarget) => {
-  const dom = new DOMParser().parseFromString(
-    target.content || '',
-    'text/html'
-  );
-  return dom.querySelector('h1')?.textContent;
-};
+const youtubeVideoWithViews = `
+/**
+ * Copy YouTube video title, views, likes and simple URL.
+ *
+ * You can access the page HTML with \`content\` property.
+ * And using \`DOMParser\` makes you query like a document object.
+ */
+({pageURL, content}) => {
+  const url = new URL(pageURL);
+  const id = new URLSearchParams(url.search).get('v');
+  const simple = \`\${url.origin}/watch?v=\${id}\`;
 
-const debug: CopyFunctionWithTheme = {
-  id: 'builtin-debug',
-  name: 'debugging',
+  const doc = new DOMParser().parseFromString(content, 'text/html');
+  const title = doc.querySelector('h1').textContent;
+  const views = doc.querySelector('#info-text .view-count').textContent;
+  const likes = doc.querySelector('#menu #text').getAttribute('aria-label');
+  return [title, views, likes, simple].join(' ');
+};
+`.trim();
+
+const youtubeInfo: CopyFunctionWithTheme = {
+  id: 'builtin-youtube',
+  name: 'YouTube: title, views, likes, url',
   types: ['page'],
-  code: f.toString(),
-  pattern: undefined,
+  code: youtubeVideoWithViews,
+  pattern: '^https://www.youtube.com/.+[?&]v=.+',
   version: 1,
   theme: {
-    symbol: '🐜',
-    textColor: '#000000',
-    backgroundColor: '#f5f5f5',
+    symbol: '📺',
+    textColor: '#FFFFFF',
+    backgroundColor: '#FF0000',
   },
 };
 
 export const defaultFunctions: CopyFunctionWithTheme[] = [
   copyAsMarkdown,
-  copyAsScrapbox,
   copyAsHTML,
+  copyAsScrapbox,
   copyAsSimplifiedAmazonURL,
-  debug,
+  youtubeInfo,
 ];
