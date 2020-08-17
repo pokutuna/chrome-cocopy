@@ -1,5 +1,5 @@
 {
   "extends": [
-    "github>pokutuna/renovate-config:app"
+    "github>pokutuna/renovate-config:major-or-else"
   ]
 }
