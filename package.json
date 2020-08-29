@@ -7,12 +7,12 @@
   "author": "pokutuna <popopopopokutuna@gmail.com>",
   "scripts": {
     "build": "webpack",
-    "build:watch": "webpack --watch",
     "check": "gts check",
     "clean": "gts clean",
     "fix": "gts fix",
     "test": "jest",
-    "posttest": "yarn run check"
+    "posttest": "yarn run check",
+    "watch": "webpack --watch"
   },
   "husky": {
     "hooks": {
