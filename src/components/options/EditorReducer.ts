@@ -114,7 +114,6 @@ function canSave(state: State): boolean {
 }
 
 function reduce(state: State, action: Action): State {
-  console.log(action);
   switch (action.t) {
     case 'edit':
       return handleEdit(state, action);

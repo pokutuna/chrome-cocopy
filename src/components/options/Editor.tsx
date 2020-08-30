@@ -11,7 +11,7 @@ import {EvaluatePayload, EvaluateResult} from '../../lib/eval';
 import {Box, Row, Item, Button, ButtonIcon} from './Parts';
 import {TextInput} from './Input';
 import {ColorInput} from './Color';
-import {CodeEditor} from './Code';
+import {CodeEditor} from './CodeEditor';
 import {DispatchType as FnDispatchType} from './FunctionsReducer';
 import {useSandbox} from '../common/Sandbox';
 import {reducer, init} from './EditorReducer';
@@ -46,8 +46,10 @@ export function Editor(props: EditorProps) {
     dispatch,
   ]);
 
-  const _evaluate = useSandbox<EvaluatePayload, EvaluateResult>(res =>
-    dispatch({t: 'parse', error: res.error ? res.error.message : undefined})
+  const _evaluate = useSandbox<EvaluatePayload, EvaluateResult>(
+    useCallback(res => dispatch({t: 'parse', error: res.error?.message}), [
+      dispatch,
+    ])
   );
   const parse = useMemo(() => debounce(_evaluate, 200), [dispatch, _evaluate]);
 

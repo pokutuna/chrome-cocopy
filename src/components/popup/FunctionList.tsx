@@ -25,7 +25,7 @@ async function availableFunctions(): Promise<CopyFunctionWithTheme[]> {
   return filterFunctions('page', url, fs);
 }
 
-function writeClipbaord(res: EvaluateResult) {
+function writeResultToClipboard(res: EvaluateResult) {
   if (res.result) {
     navigator.clipboard.writeText(res.result.toString());
   }
@@ -54,7 +54,7 @@ export const FunctionList = () => {
           code: c.code,
           target: await createPageTargetFromTab(tab),
         })
-          .then(writeClipbaord)
+          .then(writeResultToClipboard)
           .catch(r => setEvalError({id: c.id, error: r.error}));
       };
       run().catch(e => console.error(e));
