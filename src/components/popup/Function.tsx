@@ -2,7 +2,7 @@ import {h} from 'preact';
 import {useCallback, useMemo} from 'preact/hooks';
 import styled, {keyframes} from 'styled-components';
 
-import {FunctionBox, FunctionName} from '../common/FunctionParts';
+import {Shortcut, FunctionBox, FunctionName} from '../common/FunctionParts';
 import {CopyFunctionTheme, CopyFunctionWithTheme} from '../../lib/function';
 import {indexToKey} from '../../lib/util';
 
@@ -29,19 +29,6 @@ const FunctionBoxWithAnimation = styled(FunctionBox)<
     ${props => props.backgroundColor} 60%,
     ${props => props.backgroundColor} 100%
   );
-`;
-
-const Shortcut = styled.kbd<CopyFunctionTheme & {shortcut?: number}>`
-  display: ${props =>
-    typeof props.shortcut !== 'undefined' ? 'default' : 'none'};
-  margin-left: auto;
-  text-align: center;
-  padding: 0 ${props => props.theme.space[1]};
-  border-radius: ${props => props.theme.space[1]};
-  border: 2px solid ${props => props.textColor};
-  font-size: ${props => props.theme.size.lg};
-  font-family: ${props => props.theme.fontFamily.monospace};
-  box-shadow: 2px 2px 0px 0px rgba(0, 0, 0, 0.3);
 `;
 
 function wrapKeyDown(cb: () => void) {
@@ -71,12 +58,8 @@ export function FunctionItem(props: FunctionItemProps) {
       onKeyDown={onKeyDown as any}
       tabIndex={1}
     >
+      <Shortcut textColor={fn.theme.textColor} shortcut={shortcut} />
       <FunctionName>{fn.name}</FunctionName>
-      {shortcut && (
-        <Shortcut {...fn.theme} shortcut={shortcut}>
-          {shortcut}
-        </Shortcut>
-      )}
     </FunctionBoxWithAnimation>
   );
 }
