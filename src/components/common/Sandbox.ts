@@ -1,6 +1,8 @@
-import {useMemo, useCallback, useEffect} from 'preact/hooks';
+import {useMemo, useCallback, useEffect, useRef} from 'preact/hooks';
+import {EvaluatePayload, EvaluateResult} from '../../lib/eval';
 
 type Chan = {channel: number};
+
 interface MessageResponse<T> extends MessageEvent {
   readonly data: T & Chan;
 }
@@ -15,9 +17,12 @@ function nextChannel(): number {
 export function useSandbox<Q, S>(onMessage: (s: S) => void) {
   const channel = useMemo(nextChannel, []);
   const sender = useCallback((request: Q) => {
-    const withChan = {...request, channel};
     const sandbox = document.getElementById('sandbox') as HTMLIFrameElement;
-    sandbox?.contentWindow?.postMessage(withChan, '*');
+    if (sandbox.tagName !== 'IFRAME' || !sandbox.contentWindow) {
+      throw new Error('sandbox.contentWindow is falthy');
+    }
+    const withChan = {...request, channel};
+    sandbox.contentWindow.postMessage(withChan, '*');
   }, []);
 
   const receiver = useCallback(
@@ -31,13 +36,33 @@ export function useSandbox<Q, S>(onMessage: (s: S) => void) {
   );
 
   useEffect(() => {
-    const sandbox = document.getElementById('sandbox') as HTMLIFrameElement;
-    if (sandbox.tagName !== 'IFRAME' || !sandbox.contentWindow) {
-      throw new Error('sandbox.contentWindow is falthy');
-    }
     window.addEventListener('message', receiver);
     return () => window.removeEventListener('message', receiver);
   }, [receiver]);
 
   return sender;
+}
+
+/**
+ * Providing Promise interface for useSandbox
+ */
+export function useEvaluate(): (q: EvaluatePayload) => Promise<EvaluateResult> {
+  const promise = useRef([console.error, console.error]);
+  const onMessage = useCallback(
+    (s: EvaluateResult) => {
+      const [resolve, reject] = promise.current;
+      s.error ? reject(s) : resolve(s);
+    },
+    [promise]
+  );
+  const evaluate = useSandbox<EvaluatePayload, EvaluateResult>(onMessage);
+  return useCallback(
+    (q: EvaluatePayload) => {
+      return new Promise((resolve, reject) => {
+        promise.current = [resolve, reject];
+        evaluate(q);
+      });
+    },
+    [promise, evaluate]
+  );
 }
