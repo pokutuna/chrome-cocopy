@@ -1,5 +1,5 @@
 import {h} from 'preact';
-import {useCallback} from 'preact/hooks';
+import {useCallback, useEffect} from 'preact/hooks';
 
 import {default as SimpleCodeEditor} from 'react-simple-code-editor';
 import {highlight as hl, languages} from 'prismjs/components/prism-core';
@@ -9,6 +9,8 @@ import 'prismjs/components/prism-javascript';
 import {theme} from '../common/Theme';
 import {InputBox, Label, LabelSub, ErrorMessage} from './Input';
 
+const textareaId = 'code';
+
 export const CodeEditor = (props: {
   code: string;
   setCode: (code: string) => void;
@@ -17,6 +19,14 @@ export const CodeEditor = (props: {
   const highlight = useCallback((code: string) => {
     const result = hl(code, languages.js);
     return result;
+  }, []);
+
+  // preact ignores spellCheck props?
+  useEffect(() => {
+    setTimeout(() => {
+      const textarea = document.getElementById(textareaId);
+      if (textarea) textarea.spellcheck = false;
+    }, 50);
   }, []);
 
   return (
@@ -30,7 +40,7 @@ export const CodeEditor = (props: {
         onValueChange={props.setCode}
         highlight={highlight}
         padding={theme.space[2]}
-        textareaId="code"
+        textareaId={textareaId}
         style={{
           fontSize: theme.size.base,
           fontFamily: theme.fontFamily.monospace,
