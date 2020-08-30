@@ -46,7 +46,7 @@ export const copyAsHTML: CopyFunctionWithTheme = {
 };
 
 export const copyAsScrapboxFn =
-  '({title, pageURL}) => `[${title} ${pageURL}]`;';
+  "({title, pageURL}) => `[${title.replace(/\\s*[\\[\\]]\\s*/g, ' ')} ${pageURL}]`;";
 
 const copyAsScrapbox: CopyFunctionWithTheme = {
   id: 'builtin-scrapbox',
