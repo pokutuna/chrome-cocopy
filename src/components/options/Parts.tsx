@@ -5,7 +5,7 @@ import styled, {css} from 'styled-components';
 
 export const MainColumn = styled.div`
   padding: 0;
-  width: 700px;
+  width: 840px;
   margin: 20px auto;
 `;
 
