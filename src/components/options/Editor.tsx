@@ -67,15 +67,6 @@ export function Editor(props: EditorProps) {
     <form>
       <Box>
         <Row>
-          <Item style={{width: '4rem'}}>
-            <TextInput
-              label="Symbol"
-              name="symbol"
-              placeholder="☺"
-              value={state.symbol}
-              onInput={onEdit}
-            />
-          </Item>
           <Item grow={1}>
             <TextInput
               label="Name"

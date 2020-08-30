@@ -47,7 +47,6 @@ function hasEdited(state: State): boolean {
     orig.name !== item.name ||
     orig.code !== item.code ||
     orig.pattern !== item.pattern ||
-    orig.theme.symbol !== item.theme.symbol ||
     orig.theme.textColor !== item.theme.textColor ||
     orig.theme.backgroundColor !== item.theme.backgroundColor
   );

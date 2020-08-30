@@ -18,7 +18,6 @@ export interface CopyFunction {
 }
 
 export interface CopyFunctionTheme {
-  symbol: string;
   textColor: string;
   backgroundColor: string;
 }

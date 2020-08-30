@@ -18,7 +18,6 @@ export const copyAsMarkdown: CopyFunctionWithTheme = {
   pattern: undefined,
   version: 1,
   theme: {
-    symbol: 'M⬇',
     textColor: '#000000',
     backgroundColor: '#f5f5f5',
   },
@@ -41,7 +40,6 @@ export const copyAsHTML: CopyFunctionWithTheme = {
   pattern: undefined,
   version: 1,
   theme: {
-    symbol: 'H',
     textColor: '#FFFFFF',
     backgroundColor: '#ff5722',
   },
@@ -58,7 +56,6 @@ const copyAsScrapbox: CopyFunctionWithTheme = {
   pattern: undefined,
   version: 1,
   theme: {
-    symbol: 'S',
     textColor: '#FFFFFF',
     backgroundColor: '#06B632',
   },
@@ -84,7 +81,6 @@ export const copyAsSimplifiedAmazonURL: CopyFunctionWithTheme = {
   pattern: '^https://www\\.amazon\\.co\\.jp/.+/dp/.+$',
   version: 1,
   theme: {
-    symbol: '🌴',
     textColor: '#000000',
     backgroundColor: '#ffa724',
   },
@@ -118,7 +114,6 @@ const youtubeInfo: CopyFunctionWithTheme = {
   pattern: '^https://www.youtube.com/.+[?&]v=.+',
   version: 1,
   theme: {
-    symbol: '📺',
     textColor: '#FFFFFF',
     backgroundColor: '#FF0000',
   },

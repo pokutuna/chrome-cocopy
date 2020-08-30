@@ -5,7 +5,6 @@ interface State {
   fn: CopyFunctionWithTheme;
   fnDispatch: FnDispatchType;
 
-  symbol: string;
   name: string;
   textColor: string;
   backgroundColor: string;
@@ -38,7 +37,6 @@ export function init(
   return {
     fn,
     fnDispatch,
-    symbol: fn.theme.symbol,
     name: fn.name,
     textColor: fn.theme.textColor,
     backgroundColor: fn.theme.backgroundColor,
@@ -58,7 +56,6 @@ function stateToFn(state: State): Partial<CopyFunctionWithTheme> {
     code: state.code,
     pattern: state.pattern,
     theme: {
-      symbol: state.symbol,
       textColor: state.textColor,
       backgroundColor: state.backgroundColor,
     },

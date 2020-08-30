@@ -2,11 +2,7 @@ import {h} from 'preact';
 import {useCallback, useMemo} from 'preact/hooks';
 import styled, {keyframes} from 'styled-components';
 
-import {
-  FunctionBox,
-  FunctionSymbol,
-  FunctionName,
-} from '../common/FunctionParts';
+import {FunctionBox, FunctionName} from '../common/FunctionParts';
 import {CopyFunctionTheme, CopyFunctionWithTheme} from '../../lib/function';
 import {indexToKey} from '../../lib/util';
 
@@ -75,7 +71,6 @@ export function FunctionItem(props: FunctionItemProps) {
       onKeyDown={onKeyDown as any}
       tabIndex={1}
     >
-      <FunctionSymbol symbol={fn.theme.symbol} />
       <FunctionName>{fn.name}</FunctionName>
       {shortcut && (
         <Shortcut {...fn.theme} shortcut={shortcut}>
