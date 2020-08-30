@@ -26,11 +26,11 @@ export interface CopyFunctionWithTheme extends CopyFunction {
   theme: CopyFunctionTheme;
 }
 
-export function filterFunctions(
+export function filterFunctions<T extends CopyFunction>(
   targetType: TargetType,
   pageURL: string,
-  functions: CopyFunction[]
-): CopyFunction[] {
+  functions: T[]
+): T[] {
   return functions.filter(
     f =>
       f.types.includes(targetType) &&
