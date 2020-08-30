@@ -83,9 +83,10 @@ export const FunctionList = () => {
       {functions.map((r, idx) => (
         <FunctionItem
           key={r.id}
-          running={r.id === running}
           fn={r}
           index={idx}
+          running={r.id === running}
+          error={r.id === evalError?.id ? evalError.error : undefined}
           onClick={onClick}
         />
       ))}

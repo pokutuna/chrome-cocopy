@@ -5,6 +5,7 @@ import styled, {keyframes} from 'styled-components';
 import {Shortcut, FunctionBox, FunctionName} from '../common/FunctionParts';
 import {CopyFunctionTheme, CopyFunctionWithTheme} from '../../lib/function';
 import {indexToKey} from '../../lib/util';
+import {EvaluateResult} from '../../lib/eval';
 
 const scanning = keyframes`
   0% { background-position: 100% }
@@ -39,9 +40,10 @@ function wrapKeyDown(cb: () => void) {
 
 type FunctionItemProps = {
   fn: CopyFunctionWithTheme;
-  onClick: (fn: CopyFunctionWithTheme) => void;
-  running: boolean;
   index: number;
+  running: boolean;
+  error?: EvaluateResult['error'];
+  onClick: (fn: CopyFunctionWithTheme) => void;
 };
 
 export function FunctionItem(props: FunctionItemProps) {
