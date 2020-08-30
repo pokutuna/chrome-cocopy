@@ -24,8 +24,7 @@
   "permissions": [
     "activeTab",
     "storage",
-    "clipboardWrite",
-    "notifications"
+    "clipboardWrite"
   ],
 
   "commands": {

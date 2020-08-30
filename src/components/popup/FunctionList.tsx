@@ -3,35 +3,43 @@ import {useState, useEffect, useCallback} from 'preact/hooks';
 
 import {getCopyFunctions} from '../../lib/config';
 import {createPageTargetFromTab} from '../../lib/target';
-import {CopyFunction, CopyFunctionWithTheme} from '../../lib/function';
+import {
+  CopyFunction,
+  CopyFunctionWithTheme,
+  filterFunctions,
+} from '../../lib/function';
 import {getActiveTab, keyToIndex} from '../../lib/util';
-import {EvaluatePayload, EvaluateResult} from '../../lib/eval';
+import {EvaluateResult} from '../../lib/eval';
 
 import {FunctionItem} from './Function';
-import {useSandbox} from '../common/Sandbox';
+import {useEvaluate} from '../common/Sandbox';
 
-const receiver = (res: EvaluateResult) => {
+type EvaluateError = {
+  id: string;
+  error: EvaluateResult['error'];
+} | null;
+
+async function availableFunctions(): Promise<CopyFunctionWithTheme[]> {
+  const [tab, fs] = await Promise.all([getActiveTab(), getCopyFunctions()]);
+  const url = tab.url || tab.pendingUrl || '';
+  return filterFunctions('page', url, fs);
+}
+
+function writeClipbaord(res: EvaluateResult) {
   if (res.result) {
     navigator.clipboard.writeText(res.result.toString());
   }
-  // TODO collect error and copy rule
-  if (res.error) {
-    console.error(res);
-    new Notification('Error', {
-      icon: 'img/icon/128.png',
-      body: JSON.stringify(res),
-    });
-  }
-};
+}
 
 export const FunctionList = () => {
-  const evaluate = useSandbox<EvaluatePayload, EvaluateResult>(receiver);
-  const [rules, setRules] = useState<CopyFunctionWithTheme[]>([]);
+  const evaluate = useEvaluate();
+  const [functions, setFunctions] = useState<CopyFunctionWithTheme[]>([]);
   const [running, setRunning] = useState<string | null>(null);
+  const [evalError, setEvalError] = useState<EvaluateError>(null);
 
   useEffect(() => {
-    getCopyFunctions().then(setRules);
-  }, []);
+    availableFunctions().then(setFunctions);
+  }, [setFunctions]);
 
   const onClick = useCallback(
     (c: CopyFunction) => {
@@ -45,7 +53,9 @@ export const FunctionList = () => {
           command: 'eval',
           code: c.code,
           target: await createPageTargetFromTab(tab),
-        });
+        })
+          .then(writeClipbaord)
+          .catch(r => setEvalError({id: c.id, error: r.error}));
       };
       run().catch(e => console.error(e));
     },
@@ -55,10 +65,9 @@ export const FunctionList = () => {
   // Kyeboard Shortcut
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      // index
       if (/^\d$/.test(e.key)) {
         const index = keyToIndex(e.key);
-        const rule = rules[index];
+        const rule = functions[index];
         if (rule) onClick(rule);
       }
       if (e.key === 'Esc' || e.key === 'Escape') {
@@ -67,11 +76,11 @@ export const FunctionList = () => {
     };
     document.addEventListener('keydown', handler);
     return () => document.removeEventListener('keydown', handler);
-  }, [rules]);
+  }, [functions]);
 
   return (
     <div>
-      {rules.map((r, idx) => (
+      {functions.map((r, idx) => (
         <FunctionItem
           key={r.id}
           running={r.id === running}
