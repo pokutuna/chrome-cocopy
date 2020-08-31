@@ -54,6 +54,7 @@ export const FunctionName = styled.div`
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
+  user-select: none; /* prevent accidental selection for form */
 `;
 
 type FunctionItemProps = {
