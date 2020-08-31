@@ -1,5 +1,5 @@
 import {useMemo, useCallback, useEffect, useRef} from 'preact/hooks';
-import {EvaluatePayload, EvaluateResult} from '../../lib/eval';
+import {EvalPayload, EvalResult} from '../../lib/eval';
 
 type Chan = {channel: number};
 
@@ -46,18 +46,18 @@ export function useSandbox<Q, S>(onMessage: (s: S) => void) {
 /**
  * Providing Promise interface for useSandbox
  */
-export function useEvaluate(): (q: EvaluatePayload) => Promise<EvaluateResult> {
+export function useEvaluate(): (q: EvalPayload) => Promise<EvalResult> {
   const promise = useRef([console.error, console.error]);
   const onMessage = useCallback(
-    (s: EvaluateResult) => {
+    (s: EvalResult) => {
       const [resolve, reject] = promise.current;
       s.error ? reject(s) : resolve(s);
     },
     [promise]
   );
-  const evaluate = useSandbox<EvaluatePayload, EvaluateResult>(onMessage);
+  const evaluate = useSandbox<EvalPayload, EvalResult>(onMessage);
   return useCallback(
-    (q: EvaluatePayload) => {
+    (q: EvalPayload) => {
       return new Promise((resolve, reject) => {
         promise.current = [resolve, reject];
         evaluate(q);

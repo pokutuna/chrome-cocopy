@@ -9,14 +9,14 @@ import {
   filterFunctions,
 } from '../../lib/function';
 import {getActiveTab, keyToIndex} from '../../lib/util';
-import {EvaluateResult} from '../../lib/eval';
+import {EvalResult} from '../../lib/eval';
 
 import {FunctionItem} from './Function';
 import {useEvaluate} from '../common/Sandbox';
 
 type EvaluateError = {
   id: string;
-  error: EvaluateResult['error'];
+  error: EvalResult['error'];
 } | null;
 
 async function availableFunctions(): Promise<CopyFunctionWithTheme[]> {
@@ -25,7 +25,7 @@ async function availableFunctions(): Promise<CopyFunctionWithTheme[]> {
   return filterFunctions('page', url, fs);
 }
 
-function writeResultToClipboard(res: EvaluateResult) {
+function writeResultToClipboard(res: EvalResult) {
   if (res.result) {
     navigator.clipboard.writeText(res.result.toString());
   }

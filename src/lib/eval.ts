@@ -1,22 +1,25 @@
 import {PageTarget, TextTarget, ImageTarget, isTarget} from './target';
 import {CopyResult} from './function';
 
-export type EvaluatePayload =
+export type EvalPayload =
   | {
       command: 'eval';
       code: string;
       target: PageTarget | TextTarget | ImageTarget;
     }
   | {command: 'parse'; code: string};
-export interface EvaluateResult {
+
+export type EvalError = {
+  type: 'InternalError' | 'ParseError' | 'ExecutionError';
+  message: string;
+};
+
+export interface EvalResult {
   result: CopyResult;
-  error?: {
-    type: 'InternalError' | 'ParseError' | 'ExecutionError';
-    message: string;
-  };
+  error?: EvalError;
 }
 
-export function isEvaluatePayload(input: any): input is EvaluatePayload {
+export function isEvalPayload(input: any): input is EvalPayload {
   return (
     typeof input.code === 'string' &&
     (input.command === 'parse' ||
@@ -33,9 +36,7 @@ function isAcceptableResult(input: any): input is CopyResult {
   );
 }
 
-export async function evaluate(
-  request: EvaluatePayload
-): Promise<EvaluateResult> {
+export async function evaluate(request: EvalPayload): Promise<EvalResult> {
   if (request.command !== 'parse' && request.command !== 'eval') {
     throw Error('unexpected command');
   }

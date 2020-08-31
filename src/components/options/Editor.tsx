@@ -7,7 +7,7 @@ import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {faTrash} from '@fortawesome/free-solid-svg-icons/faTrash';
 
 import {CopyFunctionWithTheme} from '../../lib/function';
-import {EvaluatePayload, EvaluateResult} from '../../lib/eval';
+import {EvalPayload, EvalResult} from '../../lib/eval';
 import {Box, Row, Item, Button, ButtonIcon} from './Parts';
 import {TextInput} from './Input';
 import {ColorInput} from './Color';
@@ -46,7 +46,7 @@ export function Editor(props: EditorProps) {
     dispatch,
   ]);
 
-  const _evaluate = useSandbox<EvaluatePayload, EvaluateResult>(
+  const _evaluate = useSandbox<EvalPayload, EvalResult>(
     useCallback(res => dispatch({t: 'parse', error: res.error?.message}), [
       dispatch,
     ])

@@ -5,7 +5,7 @@
  * @packageDocumentation
  */
 
-import {isEvaluatePayload, evaluate} from './lib/eval';
+import {isEvalPayload, evaluate} from './lib/eval';
 import * as library from './lib/library';
 
 Object.assign(window, library);
@@ -20,7 +20,7 @@ const doneDOMContentLoaded = new Promise(resolve => {
 
 window.addEventListener('message', (event: MessageEvent) => {
   if (!event.data) return;
-  if (!isEvaluatePayload(event.data)) return;
+  if (!isEvalPayload(event.data)) return;
 
   doneDOMContentLoaded.then(async () => {
     const result = await evaluate(event.data);
