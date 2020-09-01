@@ -45,7 +45,7 @@ export function PopupHeader() {
   return (
     <HeaderBox>
       <Title />
-      <OptionLink href="options.html" target="_blank">
+      <OptionLink href="/options.html" target="_blank">
         <FontAwesomeIcon icon={faCog} />
       </OptionLink>
     </HeaderBox>

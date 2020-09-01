@@ -9,20 +9,21 @@ import {
   filterFunctions,
 } from '../../lib/function';
 import {getActiveTab, keyToIndex} from '../../lib/util';
-import {EvalResult} from '../../lib/eval';
+import {EvalResult, EvalError} from '../../lib/eval';
 
 import {FunctionItem} from './Function';
 import {useEvaluate} from '../common/Sandbox';
 
 type EvaluateError = {
   id: string;
-  error: EvalResult['error'];
+  error: EvalError;
 } | null;
 
 async function availableFunctions(): Promise<CopyFunctionWithTheme[]> {
   const [tab, fs] = await Promise.all([getActiveTab(), getCopyFunctions()]);
   const url = tab.url || tab.pendingUrl || '';
-  return filterFunctions('page', url, fs);
+  // return filterFunctions('page', url, fs);
+  return fs;
 }
 
 function writeResultToClipboard(res: EvalResult) {

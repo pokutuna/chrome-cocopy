@@ -2,10 +2,17 @@ import {h} from 'preact';
 import {useCallback, useMemo} from 'preact/hooks';
 import styled, {keyframes} from 'styled-components';
 
-import {Shortcut, FunctionBox, FunctionName} from '../common/FunctionParts';
 import {CopyFunctionTheme, CopyFunctionWithTheme} from '../../lib/function';
 import {indexToKey} from '../../lib/util';
-import {EvaluateResult} from '../../lib/eval';
+import {EvalError} from '../../lib/eval';
+import {Shortcut, FunctionBox, FunctionName} from '../common/FunctionParts';
+import {FunctionError} from './Error';
+
+function wrapKeyDown(cb: () => void) {
+  return (e: KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') cb();
+  };
+}
 
 const scanning = keyframes`
   0% { background-position: 100% }
@@ -32,36 +39,35 @@ const FunctionBoxWithAnimation = styled(FunctionBox)<
   );
 `;
 
-function wrapKeyDown(cb: () => void) {
-  return (e: KeyboardEvent) => {
-    if (e.key === 'Enter' || e.key === ' ') cb();
-  };
-}
-
 type FunctionItemProps = {
   fn: CopyFunctionWithTheme;
   index: number;
   running: boolean;
-  error?: EvaluateResult['error'];
+  error?: EvalError;
   onClick: (fn: CopyFunctionWithTheme) => void;
 };
 
 export function FunctionItem(props: FunctionItemProps) {
-  const {fn} = props;
-  const shortcut = useMemo(() => indexToKey(props.index), [props.index]);
+  const {fn, index, running, error} = props;
   const onClick = useCallback(() => props.onClick(fn), [props]);
+  const shortcut = useMemo(() => indexToKey(index), [index]);
   const onKeyDown = useCallback(wrapKeyDown(onClick), [onClick]);
 
   return (
     <FunctionBoxWithAnimation
       {...fn.theme}
       onClick={onClick}
-      running={props.running}
+      running={running}
       onKeyDown={onKeyDown as any}
       tabIndex={1}
     >
       <Shortcut textColor={fn.theme.textColor} shortcut={shortcut} />
-      <FunctionName>{fn.name}</FunctionName>
+
+      {!error ? (
+        <FunctionName>{fn.name}</FunctionName>
+      ) : (
+        <FunctionError error={error} />
+      )}
     </FunctionBoxWithAnimation>
   );
 }
