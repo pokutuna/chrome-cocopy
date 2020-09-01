@@ -10,7 +10,8 @@ export type EvalPayload =
   | {command: 'parse'; code: string};
 
 export type EvalError = {
-  type: 'InternalError' | 'ParseError' | 'ExecutionError';
+  type: 'ParseError' | 'ExecutionError';
+  name: string;
   message: string;
 };
 
@@ -36,6 +37,14 @@ function isAcceptableResult(input: any): input is CopyResult {
   );
 }
 
+function error(type: EvalError['type'], err: Error): EvalError {
+  return {
+    type,
+    name: err.name,
+    message: err.message,
+  };
+}
+
 export async function evaluate(request: EvalPayload): Promise<EvalResult> {
   if (request.command !== 'parse' && request.command !== 'eval') {
     throw Error('unexpected command');
@@ -50,10 +59,7 @@ export async function evaluate(request: EvalPayload): Promise<EvalResult> {
   } catch (e) {
     return {
       result: null,
-      error: {
-        type: 'ParseError',
-        message: e.message,
-      },
+      error: error('ParseError', e),
     };
   }
 
@@ -65,6 +71,7 @@ export async function evaluate(request: EvalPayload): Promise<EvalResult> {
   try {
     // currently type is not public
     delete request.target['type'];
+
     result = await Promise.resolve(fn.call(undefined, request.target));
     if (!isAcceptableResult(result)) {
       throw new Error(
@@ -74,10 +81,7 @@ export async function evaluate(request: EvalPayload): Promise<EvalResult> {
   } catch (e) {
     return {
       result: null,
-      error: {
-        type: 'ExecutionError',
-        message: e.message,
-      },
+      error: error('ExecutionError', e),
     };
   }
 
