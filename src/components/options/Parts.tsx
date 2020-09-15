@@ -47,12 +47,12 @@ export const Section = (props: {
 );
 
 export const TextList = styled.ul`
-  font-size: ${props => props.theme.size.base};
+  font-size: ${props => props.theme.size.sm};
   li {
     margin-bottom: ${props => props.theme.space[2]};
   }
   code {
-    font-size: ${props => props.theme.size.sm};
+    font-size: ${props => props.theme.size.xs};
     font-family: ${props => props.theme.fontFamily.monospace};
     background-color: ${props => props.theme.color.codeBg};
   }
