@@ -51,7 +51,7 @@ export const FunctionList = () => {
         const tab = await getActiveTab();
         evaluate({
           command: 'eval',
-          code: c.code,
+          code: c.code + `\n//# sourceURL=${encodeURI(c.name)}.js`,
           target: await createPageTargetFromTab(tab),
         })
           .then(writeResultToClipboard)
