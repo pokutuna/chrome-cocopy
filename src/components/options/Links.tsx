@@ -1,10 +1,11 @@
 import {h} from 'preact';
-import {Section} from '../options/Parts';
+import {memo} from 'preact/compat';
+import {Section, TextList} from '../options/Parts';
 
-export function Links() {
+export const Links = memo(() => {
   return (
     <Section title="Links">
-      <ul>
+      <TextList>
         <li>
           <a href="#TODO" target="_blank" rel="noreferrer noopener">
             Chrome Web Store
@@ -21,10 +22,10 @@ export function Links() {
         </li>
         <li>
           <a href="#TODO" target="_blank" rel="noreferrer noopener">
-            Copyright notice
+            Copyright Notice
           </a>
         </li>
-      </ul>
+      </TextList>
     </Section>
   );
-}
+});

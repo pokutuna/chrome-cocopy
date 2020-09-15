@@ -23,6 +23,10 @@ export const Title = memo(() => {
   );
 });
 
+const SectionBox = styled.div`
+  margin-bottom: ${props => props.theme.space[8]};
+`;
+
 const SectionTitleHeader = styled.h2`
   font-family: ${props => props.theme.fontFamily.monospace};
   font-size: ${props => props.theme.size['xl']};
@@ -36,11 +40,23 @@ export const Section = (props: {
   title: string;
   children?: ComponentChildren;
 }) => (
-  <div>
+  <SectionBox>
     <SectionTitleHeader>{props.title}</SectionTitleHeader>
     <SectionInner>{props.children}</SectionInner>
-  </div>
+  </SectionBox>
 );
+
+export const TextList = styled.ul`
+  font-size: ${props => props.theme.size.base};
+  li {
+    margin-bottom: ${props => props.theme.space[2]};
+  }
+  code {
+    font-size: ${props => props.theme.size.sm};
+    font-family: ${props => props.theme.fontFamily.monospace};
+    background-color: ${props => props.theme.color.codeBg};
+  }
+`;
 
 export const Box = styled.div`
   display: flex;
