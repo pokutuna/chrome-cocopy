@@ -14,7 +14,7 @@ import {EvalResult, EvalError} from '../../lib/eval';
 import {FunctionItem} from './Function';
 import {useEvaluate} from '../common/Sandbox';
 
-type EvaluateError = {
+type FunctionError = {
   id: string;
   error: EvalError;
 } | null;
@@ -36,7 +36,7 @@ export const FunctionList = () => {
   const evaluate = useEvaluate();
   const [functions, setFunctions] = useState<CopyFunctionWithTheme[]>([]);
   const [running, setRunning] = useState<string | null>(null);
-  const [evalError, setEvalError] = useState<EvaluateError>(null);
+  const [fnError, setFnError] = useState<FunctionError>(null);
 
   useEffect(() => {
     availableFunctions().then(setFunctions);
@@ -44,7 +44,6 @@ export const FunctionList = () => {
 
   const onClick = useCallback(
     (c: CopyFunction) => {
-      // XXX fix canceling animation when other function running.
       setRunning(c.id);
       setTimeout(() => setRunning(null), 300);
 
@@ -56,11 +55,11 @@ export const FunctionList = () => {
           target: await createPageTargetFromTab(tab),
         })
           .then(writeResultToClipboard)
-          .catch(r => setEvalError({id: c.id, error: r.error}));
+          .catch(r => setFnError({id: c.id, error: r.error}));
       };
       run().catch(e => console.error(e));
     },
-    [evaluate]
+    [evaluate, setRunning, setFnError]
   );
 
   // Kyeboard Shortcut
@@ -87,7 +86,7 @@ export const FunctionList = () => {
           fn={r}
           index={idx}
           running={r.id === running}
-          error={r.id === evalError?.id ? evalError.error : undefined}
+          error={r.id === fnError?.id ? fnError.error : undefined}
           onClick={onClick}
         />
       ))}
