@@ -22,8 +22,7 @@ type FunctionError = {
 async function availableFunctions(): Promise<CopyFunctionWithTheme[]> {
   const [tab, fs] = await Promise.all([getActiveTab(), getCopyFunctions()]);
   const url = tab.url || tab.pendingUrl || '';
-  // return filterFunctions('page', url, fs);
-  return fs;
+  return filterFunctions('page', url, fs);
 }
 
 function writeResultToClipboard(res: EvalResult) {
