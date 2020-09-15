@@ -24,12 +24,7 @@
     "chrome": true
   },
   "rules": {
-    "no-unused-vars": [
-      "warn",
-      {
-        "argsIgnorePattern": "^_"
-      }
-    ],
+    "no-unused-vars": "off",
     "node/no-unpublished-import": "off",
     "node/no-unpublished-require": "off",
     "@typescript-eslint/no-explicit-any": "off",
