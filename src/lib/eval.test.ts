@@ -39,6 +39,11 @@ describe('evaluate', () => {
     });
     expect(result).toEqual({
       result: null,
+      error: {
+        type: 'ReturnsEmpty',
+        name: 'Error',
+        message: 'returning value is empty (undefined or null)',
+      },
     });
   });
 
@@ -52,6 +57,7 @@ describe('evaluate', () => {
       result: null,
       error: {
         type: 'ParseError',
+        name: 'SyntaxError',
         message: expect.stringContaining('Unexpected token'),
       },
     });
@@ -67,6 +73,7 @@ describe('evaluate', () => {
       result: null,
       error: {
         type: 'ParseError',
+        name: 'Error',
         message: expect.stringContaining('not a function'),
       },
     });
@@ -79,9 +86,10 @@ describe('evaluate', () => {
       target,
     });
     expect(result).toEqual({
-      result: null,
+      result: undefined,
       error: {
         type: 'ExecutionError',
+        name: 'Error',
         message: expect.stringContaining('simulated error'),
       },
     });
@@ -94,9 +102,10 @@ describe('evaluate', () => {
       target,
     });
     expect(result).toEqual({
-      result: null,
+      result: {foo: 'bar'},
       error: {
         type: 'ExecutionError',
+        name: 'Error',
         message: expect.stringContaining('returning value is not one of'),
       },
     });

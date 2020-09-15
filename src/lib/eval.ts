@@ -10,7 +10,7 @@ export type EvalPayload =
   | {command: 'parse'; code: string};
 
 export type EvalError = {
-  type: 'ParseError' | 'ExecutionError';
+  type: 'ParseError' | 'ExecutionError' | 'ReturnsEmpty';
   name: string;
   message: string;
 };
@@ -35,6 +35,10 @@ function isAcceptableResult(input: any): input is CopyResult {
     typeof input === 'undefined' ||
     input === null
   );
+}
+
+function isEmpty(input: any): boolean {
+  return typeof input === 'undefined' || input === null;
 }
 
 function error(type: EvalError['type'], err: Error): EvalError {
@@ -80,8 +84,18 @@ export async function evaluate(request: EvalPayload): Promise<EvalResult> {
     }
   } catch (e) {
     return {
-      result: null,
+      result,
       error: error('ExecutionError', e),
+    };
+  }
+
+  if (isEmpty(result)) {
+    return {
+      result,
+      error: error(
+        'ReturnsEmpty',
+        new Error('returning value is empty (undefined or null)')
+      ),
     };
   }
 
