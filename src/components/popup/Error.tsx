@@ -8,18 +8,7 @@ const FunctionErrorBox = styled.div`
   justify-content: space-between;
   align-items: center;
 `;
-const MessageBox = styled.div`
-  flex-grow: 1;
-  overflow: hidden;
-`;
-const DetailBox = styled.div`
-  display: flex;
-  flex-grow: 0;
-  flex-shrink: 0;
-  align-items: center;
-  margin-left: auto;
-  padding: ${props => props.theme.space[2]};
-`;
+const MessageBox = styled.div``;
 
 export function FunctionError(props: {error: EvalError}) {
   return (
@@ -27,11 +16,6 @@ export function FunctionError(props: {error: EvalError}) {
       <MessageBox>
         {props.error.name}: {props.error.message}
       </MessageBox>
-      <DetailBox>
-        <a href="/options.html#errors" target="_blank" tabIndex={1}>
-          detail
-        </a>
-      </DetailBox>
     </FunctionErrorBox>
   );
 }
