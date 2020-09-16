@@ -1,5 +1,5 @@
 import {CopyFunctionWithTheme} from './function';
-import {defaultFunctions} from './builtins';
+import {defaultFunctions} from './builtin';
 
 export const getCopyFunctions = (): Promise<CopyFunctionWithTheme[]> => {
   return new Promise(resolve => {

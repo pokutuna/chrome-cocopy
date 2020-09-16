@@ -8,30 +8,9 @@ import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {faPalette} from '@fortawesome/free-solid-svg-icons/faPalette';
 import {faRandom} from '@fortawesome/free-solid-svg-icons/faRandom';
 
+import {colorPalette} from '../../lib/function';
 import {theme} from '../common/Theme';
 import {InputBox, Label, Input} from './Input';
-
-const palette = [
-  '#F44336',
-  '#E91E63',
-  '#9C27B0',
-  '#673AB7',
-  '#3F51B5',
-  '#2196F3',
-  '#03A9F4',
-  '#00BCD4',
-  '#009688',
-  '#4CAF50',
-  '#8BC34A',
-  '#CDDC39',
-  '#FFEB3B',
-  '#FFC107',
-  '#FFC107',
-  '#FF5722',
-  '#795548',
-  '#9E9E9E',
-  '#607D8B',
-];
 
 const InputWrap = styled.div`
   display: flex;
@@ -123,7 +102,7 @@ export function ColorPicker(props: ColorPickerProps) {
       />
       {props.show && (
         <PaletteBox ref={ref}>
-          {palette.map(c => (
+          {colorPalette.map(c => (
             <PaletteColor key={c} color={c} onClick={props.onSelect} />
           ))}
           <PaletteColorRandom onClick={props.onSelect} />

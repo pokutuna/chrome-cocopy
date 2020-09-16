@@ -71,16 +71,14 @@ const AddFunctionBox = styled.div`
 
 function AddFunction(props: {onClick: () => void}) {
   return (
-    <AddFunctionBox>
-      <FunctionItemBox>
-        <ItemButton onClick={props.onClick}>
-          <FontAwesomeIcon icon={faPlus} />
-        </ItemButton>
-        <ItemBody>
-          <AddFunctionItem onClick={props.onClick} />
-        </ItemBody>
-      </FunctionItemBox>
-    </AddFunctionBox>
+    <FunctionItemBox>
+      <ItemButton onClick={props.onClick}>
+        <FontAwesomeIcon icon={faPlus} />
+      </ItemButton>
+      <ItemBody>
+        <AddFunctionItem onClick={props.onClick} />
+      </ItemBody>
+    </FunctionItemBox>
   );
 }
 
@@ -163,8 +161,22 @@ export function FunctionList() {
             dispatch={dispatch}
           />
         ))}
+
+        {/* New Function */}
+        <AddFunctionBox>
+          {state.activeId !== 'new' ? (
+            <AddFunction onClick={add} />
+          ) : (
+            <FunctionListItem
+              index={-1}
+              fn={state.editing!}
+              active={true}
+              draggable={false}
+              dispatch={dispatch}
+            />
+          )}
+        </AddFunctionBox>
       </DnDWrapper>
-      <AddFunction onClick={add} />
     </Section>
   );
 }

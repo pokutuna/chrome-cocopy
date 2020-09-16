@@ -1,5 +1,16 @@
 import {CopyFunctionWithTheme} from './function';
 
+export const initialCode = `
+/**
+ * Return value will be copied to clipboard.
+ * @param {Object} target
+ * @returns {(string|undefined|Promise)}
+ */
+({title, pageURL, content}) => {
+  return [title, pageURL].join(' ');
+}
+`.trim();
+
 const copyAsMarkdownFn = `
 /**
  * Copy link as Markdown.

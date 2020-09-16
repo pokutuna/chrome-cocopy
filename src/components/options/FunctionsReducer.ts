@@ -1,4 +1,4 @@
-import {CopyFunctionWithTheme} from '../../lib/function';
+import {CopyFunctionWithTheme, newFunction} from '../../lib/function';
 
 export interface State {
   activeId: string | undefined;
@@ -29,6 +29,8 @@ export const initialState = {
 
 export type DispatchType = (action: Action) => void;
 
+const newId = 'new';
+
 const dragging = (
   functions: CopyFunctionWithTheme[],
   dragIndex: number,
@@ -40,6 +42,8 @@ const dragging = (
 };
 
 function hasEdited(state: State): boolean {
+  if (state.activeId === newId) return true;
+
   const orig = state.functions.find(f => f.id === state.activeId)!;
   const item = state.editing;
   if (!item) return false;
@@ -71,8 +75,13 @@ function reduce(state: State, action: Action): State {
         editing: {...state.editing!, ...action.function},
       };
     case 'save': {
-      const idx = state.functions.findIndex(f => f.id === state.activeId);
-      state.functions[idx] = state.editing!;
+      if (state.activeId === newId) {
+        state.functions.push(state.editing!);
+      } else {
+        const idx = state.functions.findIndex(f => f.id === state.activeId);
+        state.functions[idx] = state.editing!;
+      }
+      // save
       return {...state, activeId: undefined, editing: undefined};
     }
     case 'cancel': {
@@ -105,7 +114,8 @@ function reduce(state: State, action: Action): State {
       return state;
     case 'add': {
       const next = reduce(state, {t: 'cancel'});
-      return next;
+      const newFn = newFunction();
+      return {...next, editing: newFn, activeId: newId};
     }
   }
 }

@@ -16,17 +16,6 @@ import {DispatchType as FnDispatchType} from './FunctionsReducer';
 import {useSandbox} from '../common/Sandbox';
 import {reducer, init} from './EditorReducer';
 
-const initialCode = `
-/**
- * Return value will be copied to clipboard.
- * @param {Object} target
- * @returns {(string|undefined|Promise)}
- */
-({title, pageURL, content}) => {
-  return [title, pageURL].join(' ');
-}
-`.trim();
-
 type EditorProps = {
   function: CopyFunctionWithTheme;
   dispatch: FnDispatchType;
