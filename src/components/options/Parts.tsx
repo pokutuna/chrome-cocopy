@@ -123,3 +123,15 @@ export const Button = (props: {
 export const ButtonIcon = styled.i`
   margin-right: ${p => p.theme.space[1]};
 `;
+
+export const Divider = styled.div`
+  margin: ${props => props.theme.space[2]} 0;
+  height: ${props => props.theme.space[1]};
+  background: linear-gradient(
+    90deg,
+    transparent 20%,
+    ${props => props.theme.color.lightgray} 20%,
+    ${props => props.theme.color.lightgray} 80%,
+    transparent 80%
+  );
+`;

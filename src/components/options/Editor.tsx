@@ -8,7 +8,7 @@ import {faTrash} from '@fortawesome/free-solid-svg-icons/faTrash';
 
 import {CopyFunctionWithTheme} from '../../lib/function';
 import {EvalPayload, EvalResult} from '../../lib/eval';
-import {Box, Row, Item, Button, ButtonIcon} from './Parts';
+import {Box, Row, Item, Button, ButtonIcon, Divider} from './Parts';
 import {TextInput} from './Input';
 import {ColorInput} from './Color';
 import {CodeEditor} from './CodeEditor';
@@ -128,6 +128,7 @@ export function Editor(props: EditorProps) {
           </Item>
         </Row>
       </Box>
+      <Divider />
     </form>
   );
 }
