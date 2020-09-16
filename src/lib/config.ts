@@ -1,13 +1,15 @@
 import {CopyFunctionWithTheme, isCopyFunctionWithTheme} from './function';
 import {defaultFunctions} from './builtin';
 
-export const getCopyFunctions = (): Promise<CopyFunctionWithTheme[]> => {
+const storage: chrome.storage.StorageArea = chrome.storage.sync;
+
+export async function getCopyFunctions(): Promise<CopyFunctionWithTheme[]> {
   return new Promise(resolve => {
-    chrome.storage.sync.get({functions: defaultFunctions}, (value: any) => {
+    storage.get({functions: defaultFunctions}, (value: any) => {
       Array.isArray(value.functions) ? resolve(value.functions) : resolve([]);
     });
   });
-};
+}
 
 /**
  * Save functions to the straoge by chrome.storage.sync.
@@ -17,15 +19,15 @@ export const getCopyFunctions = (): Promise<CopyFunctionWithTheme[]> => {
  *
  * @param functions
  */
-export const setCopyFunctions = (
+export async function setCopyFunctions(
   functions: CopyFunctionWithTheme[]
-): Promise<void> => {
+): Promise<void> {
   if (!functions.every(isCopyFunctionWithTheme)) {
     throw new Error('function validation failed when saving');
   }
 
   return new Promise((resolve, reject) => {
-    chrome.storage.sync.set({functions}, () => {
+    storage.set({functions}, () => {
       if (chrome.runtime.lastError) {
         reject(chrome.runtime.lastError);
         return;
@@ -33,4 +35,4 @@ export const setCopyFunctions = (
       resolve();
     });
   });
-};
+}
