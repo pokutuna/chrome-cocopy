@@ -21,7 +21,7 @@ export const Links = memo(() => {
           </a>
         </li>
         <li>
-          <a href="#TODO" target="_blank" rel="noreferrer noopener">
+          <a href="./licenses.txt" target="_blank" rel="noreferrer noopener">
             Copyright Notice
           </a>
         </li>

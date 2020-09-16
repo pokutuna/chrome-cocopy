@@ -2,6 +2,7 @@ const exec = require('child_process').exec;
 const {CleanWebpackPlugin} = require('clean-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const {LicenseWebpackPlugin} = require('license-webpack-plugin');
 
 function versionName() {
   return new Promise((resolve, reject) => {
@@ -85,6 +86,14 @@ module.exports = {
       chunks: ['options'],
       template: 'src/options.html',
       filename: 'options.html',
+    }),
+    new LicenseWebpackPlugin({
+      perChunkOutput: false,
+      licenseTextOverrides: {
+        // LICENSE file is not included in the package
+        'styled-components':
+          'https://github.com/styled-components/styled-components/blob/master/LICENSE',
+      },
     }),
   ],
   performance: {
