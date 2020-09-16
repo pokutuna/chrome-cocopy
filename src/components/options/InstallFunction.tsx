@@ -3,6 +3,10 @@ import {memo} from 'preact/compat';
 import {useReducer, useMemo} from 'preact/hooks';
 import {useLocation} from 'react-router-dom';
 
+import styled from 'styled-components';
+import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
+import {faDizzy} from '@fortawesome/free-solid-svg-icons/faDizzy';
+
 import {
   CopyFunctionWithTheme,
   decodeSharable,
@@ -51,6 +55,21 @@ const Notice = memo(() => {
   );
 });
 
+const Center = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+`;
+
+const FailedMessage = memo(() => {
+  return (
+    <Center>
+      <FontAwesomeIcon icon={faDizzy} size="10x" />
+      <h3>This URL is broken.</h3>
+    </Center>
+  );
+});
+
 function useSahredFunction(): CopyFunctionWithTheme | undefined {
   const location = useLocation();
   const fn = useMemo<CopyFunctionWithTheme | undefined>(() => {
@@ -67,14 +86,18 @@ export function InstallFunction() {
 
   return (
     <Section title="Install Function">
-      <Notice />
-      {state.fn && (
-        <EditorBox>
-          <FunctionBox>
-            <FunctionItem fn={state.fn} />
-          </FunctionBox>
-          <Editor function={state.fn} dispatch={dispatch} install />
-        </EditorBox>
+      {state.fn ? (
+        <div>
+          <Notice />
+          <EditorBox>
+            <FunctionBox>
+              <FunctionItem fn={state.fn} />
+            </FunctionBox>
+            <Editor function={state.fn} dispatch={dispatch} install />
+          </EditorBox>
+        </div>
+      ) : (
+        <FailedMessage />
       )}
     </Section>
   );
