@@ -16,6 +16,7 @@ import {DnDWrapper, useDnDItem} from './DnD';
 import {Section} from './Parts';
 import {Editor} from './Editor';
 import {reducer, initialState, DispatchType} from './FunctionsReducer';
+import {useSubscribeFunctions} from './Subscribe';
 
 const FunctionItemBox = styled.div<{isDragging?: boolean}>`
   opacity: ${props => (props.isDragging ? 0.5 : 1)};
@@ -140,25 +141,19 @@ function FunctionListItem(props: FunctionListItemProps) {
 export function FunctionList() {
   const [state, dispatch] = useReducer(reducer, initialState);
 
-  const add = useCallback(() => {
-    dispatch({t: 'add'});
-  }, [dispatch]);
-
+  // load functions
   useEffect(() => {
     getCopyFunctions().then(functions => dispatch({t: 'init', functions}));
   }, [dispatch]);
 
-  // for opening options page with multiple tabs.
-  useEffect(() => {
-    const onChangeStorage = (changes: {
-      [key: string]: chrome.storage.StorageChange;
-    }) => {
-      if ('functions' in changes)
-        dispatch({t: 'refresh', functions: changes['functions'].newValue});
-    };
-    chrome.storage.onChanged.addListener(onChangeStorage);
-    return () => chrome.storage.onChanged.removeListener(onChangeStorage);
-  }, [dispatch]);
+  const onClickAdd = useCallback(() => dispatch({t: 'add'}), [dispatch]);
+
+  // refresh when functions are updated with opening multiple options pages.
+  const onUpdateFunctionsBackground = useCallback(
+    (functions: CopyFunctionWithTheme[]) => dispatch({t: 'refresh', functions}),
+    [dispatch]
+  );
+  useSubscribeFunctions(onUpdateFunctionsBackground);
 
   return (
     <Section title="Functions">
@@ -177,7 +172,7 @@ export function FunctionList() {
         {/* New Function */}
         <AddFunctionBox>
           {state.activeId !== 'new' ? (
-            <AddFunction onClick={add} />
+            <AddFunction onClick={onClickAdd} />
           ) : (
             <FunctionListItem
               index={-1}
