@@ -139,11 +139,24 @@ export const ButtonIcon = styled.i`
   margin-right: ${p => p.theme.space[1]};
 `;
 
-export const Divider = styled.div`
-  margin: ${props => props.theme.space[2]} 0;
+export const DividerH = styled.div`
+  margin: ${props => props.theme.space[4]} 0;
   height: ${props => props.theme.space[1]};
   background: linear-gradient(
     90deg,
+    transparent 20%,
+    ${props => props.theme.color.lightgray} 20%,
+    ${props => props.theme.color.lightgray} 80%,
+    transparent 80%
+  );
+`;
+
+export const DividerV = styled.div`
+  margin: 0 ${props => props.theme.space[2]};
+  width: ${props => props.theme.space[1]};
+  height: 100%;
+  background: linear-gradient(
+    180deg,
     transparent 20%,
     ${props => props.theme.color.lightgray} 20%,
     ${props => props.theme.color.lightgray} 80%,

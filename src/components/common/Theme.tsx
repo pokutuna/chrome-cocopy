@@ -36,7 +36,7 @@ export const theme = {
   },
   color: {
     gray: '#666',
-    lightgray: '#CCC',
+    lightgray: '#DDD',
     codeBg: '#f5f2f0',
     error: '#F44336',
     danger: '#F44336',
