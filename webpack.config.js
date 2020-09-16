@@ -67,11 +67,6 @@ module.exports = {
         },
       ],
     }),
-    // new HtmlWebpackPlugin({
-    //   chunks: ['eventpage'],
-    //   template: 'src/eventpage.html',
-    //   filename: 'eventpage.html',
-    // }),
     new HtmlWebpackPlugin({
       chunks: ['sandbox'],
       template: 'src/sandbox.html',
