@@ -20,6 +20,7 @@ import {reducer, init, stateToFn} from './EditorReducer';
 type EditorProps = {
   function: CopyFunctionWithTheme;
   dispatch: FnDispatchType;
+  install?: boolean;
 };
 
 export function Editor(props: EditorProps) {
@@ -107,12 +108,14 @@ export function Editor(props: EditorProps) {
         <Row>
           <Item>
             <Button onClick={onClickSave} disabled={!state.canSave}>
-              Save
+              {!props.install ? 'Save' : 'Install'}
             </Button>
           </Item>
-          <Item>
-            <Button onClick={onClickCancel}>Cancel</Button>
-          </Item>
+          {!props.install && (
+            <Item>
+              <Button onClick={onClickCancel}>Cancel</Button>
+            </Item>
+          )}
           <Item>
             <DividerV />
           </Item>
@@ -124,14 +127,16 @@ export function Editor(props: EditorProps) {
               Share
             </Button>
           </Item>
-          <Item style={{marginLeft: 'auto'}}>
-            <Button onClick={onClickDelete} mode="danger">
-              <ButtonIcon>
-                <FontAwesomeIcon icon={faTrash} />
-              </ButtonIcon>
-              Delete
-            </Button>
-          </Item>
+          {!props.install && (
+            <Item style={{marginLeft: 'auto'}}>
+              <Button onClick={onClickDelete} mode="danger">
+                <ButtonIcon>
+                  <FontAwesomeIcon icon={faTrash} />
+                </ButtonIcon>
+                Delete
+              </Button>
+            </Item>
+          )}
         </Row>
       </Box>
     </form>

@@ -43,7 +43,7 @@ const Caret = (props: {active: boolean; onClick: () => void}) => {
   );
 };
 
-const ItemBody = styled.div`
+export const ItemBody = styled.div`
   width: ${props => props.theme.constants.popupWidth};
 `;
 
@@ -61,7 +61,7 @@ const DragKnob = (props: {draggable: boolean}) => {
   );
 };
 
-const EditorBox = styled.div`
+export const EditorBox = styled.div`
   margin-left: ${props => props.theme.size['4xl']};
   margin-bottom: ${props => props.theme.size['4xl']};
 `;

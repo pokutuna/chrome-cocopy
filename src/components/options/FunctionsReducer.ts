@@ -8,7 +8,7 @@ export interface State {
   draggable: boolean;
 }
 
-type Action =
+export type Action =
   | {t: 'init'; functions: CopyFunctionWithTheme[]}
   | {t: 'select'; functionId: string}
   | {t: 'add'}

@@ -123,13 +123,16 @@ export function encodeSharable(fn: CopyFunctionWithTheme): string {
   return toBase64(JSON.stringify(data));
 }
 
-export function decodeSharable(encoded: string): CopyFunctionWithTheme | null {
+export function decodeSharable(
+  encoded: string
+): CopyFunctionWithTheme | undefined {
   try {
     const data = JSON.parse(fromBase64(encoded));
     data.id = generateId();
     data.types = ['page'];
-    return isCopyFunctionWithTheme(data) ? data : null;
+    return isCopyFunctionWithTheme(data) ? data : undefined;
   } catch (e) {
-    return null;
+    console.error(e);
+    return undefined;
   }
 }

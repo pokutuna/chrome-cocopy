@@ -36,3 +36,11 @@ export async function setCopyFunctions(
     });
   });
 }
+
+export async function addCopyFunctions(
+  fn: CopyFunctionWithTheme
+): Promise<void> {
+  const functions = await getCopyFunctions();
+  functions.push(fn);
+  return setCopyFunctions(functions);
+}

@@ -8,6 +8,7 @@ import {MainColumn, Title} from './components/options/Parts';
 import {FunctionList} from './components/options/FunctionList';
 import {Links} from './components/options/Links';
 import {Hint, DebuggingHint} from './components/options/Hints';
+import {InstallFunction} from './components/options/InstallFunction';
 
 import './components/options/prism.css';
 import './components/options/code.css';
@@ -25,7 +26,7 @@ const App = () => {
               <DebuggingHint />
             </Route>
             <Route path="/install">
-              <p>hello</p>
+              <InstallFunction />
             </Route>
           </Switch>
           <Links />
