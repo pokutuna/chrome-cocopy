@@ -42,9 +42,7 @@ export function Editor(props: EditorProps) {
     (name: string, value: string) => dispatch({t: 'edit', name, value}),
     [dispatch]
   );
-  const onClickPalette = useCallback(() => dispatch({t: 'palette'}), [
-    dispatch,
-  ]);
+  const togglePalette = useCallback(() => dispatch({t: 'palette'}), [dispatch]);
 
   const _evaluate = useSandbox<EvalPayload, EvalResult>(
     useCallback(res => dispatch({t: 'parse', error: res.error?.message}), [
@@ -83,7 +81,7 @@ export function Editor(props: EditorProps) {
             <ColorInput
               value={state.backgroundColor}
               onInput={onEdit}
-              onClickPalette={onClickPalette}
+              togglePalette={togglePalette}
               showPalette={state.openPalette}
               error={state.errors.backgroundColor}
             />

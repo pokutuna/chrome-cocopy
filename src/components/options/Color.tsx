@@ -1,5 +1,5 @@
 import {h} from 'preact';
-import {useCallback} from 'preact/hooks';
+import {useCallback, useEffect, useRef} from 'preact/hooks';
 
 import {random} from 'chroma-js';
 
@@ -97,19 +97,31 @@ const PaletteColorRandom = (props: {onClick: (color: string) => void}) => {
 type ColorPickerProps = {
   show: boolean;
   onSelect: (color: string) => void;
-  onClickPalette: () => void;
+  togglePalette: () => void;
 };
 
 export function ColorPicker(props: ColorPickerProps) {
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const onClickBody = (event: MouseEvent) => {
+      if (props.show && !ref.current.contains(event.target as Node)) {
+        props.togglePalette();
+      }
+    };
+    document.body.addEventListener('click', onClickBody);
+    return () => document.body.removeEventListener('click', onClickBody);
+  }, [props.show, props.togglePalette]);
+
   return (
     <ColorPickerBox>
       <FontAwesomeIcon
         icon={faPalette}
-        onClick={props.onClickPalette}
+        onClick={props.togglePalette}
         color={props.show ? theme.color.primary : undefined}
       />
       {props.show && (
-        <PaletteBox>
+        <PaletteBox ref={ref}>
           {palette.map(c => (
             <PaletteColor key={c} color={c} onClick={props.onSelect} />
           ))}
@@ -124,7 +136,7 @@ type ColorInputProps = {
   value: string;
   error?: boolean;
   onInput: (name: string, value: string) => void;
-  onClickPalette: () => void;
+  togglePalette: () => void;
   showPalette: boolean;
 };
 
@@ -161,7 +173,7 @@ export function ColorInput(props: ColorInputProps) {
         <ColorPicker
           show={props.showPalette}
           onSelect={onSelect}
-          onClickPalette={props.onClickPalette}
+          togglePalette={props.togglePalette}
         />
       </InputWrap>
     </InputBox>
