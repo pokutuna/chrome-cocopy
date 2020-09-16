@@ -16,6 +16,7 @@ export const FunctionBox = styled.div<CopyFunctionTheme>`
   &:hover {
     filter: brightness(110%);
   }
+  cursor: pointer;
 `;
 
 const ShortcutBox = styled.div`
@@ -72,5 +73,26 @@ export function FunctionItem(props: FunctionItemProps) {
       <ShortcutBox />
       <FunctionName>{props.fn.name}</FunctionName>
     </FunctionBox>
+  );
+}
+
+const AddNewFunctionBox = styled(FunctionBox)`
+  border: 1px solid ${p => p.textColor};
+  &:hover {
+    color: ${p => p.theme.color.primary};
+    border-color: ${p => p.theme.color.primary};
+  }
+`;
+
+export function AddFunctionItem(props: {onClick?: () => void}) {
+  return (
+    <AddNewFunctionBox
+      textColor="#010203"
+      backgroundColor="#FFF"
+      onClick={props.onClick}
+    >
+      <ShortcutBox />
+      <FunctionName>Create New Function</FunctionName>
+    </AddNewFunctionBox>
   );
 }

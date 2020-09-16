@@ -78,8 +78,18 @@ export const Row = styled.div`
 
 type ButtonMode = 'default' | 'danger';
 
+const primary = css`
+  &:hover,
+  &:focus {
+    color: ${props => props.theme.color.primary};
+    border-color: ${props => props.theme.color.primary};
+    outline-color: ${p => p.theme.color.primary};
+  }
+`;
+
 const danger = css`
   color: ${p => p.theme.color.danger};
+  &:hover,
   &:focus {
     outline-color: ${p => p.theme.color.danger};
   }
@@ -91,7 +101,7 @@ const ButtonStyle = styled.button<{mode?: ButtonMode}>`
   border: solid 1px;
   border-radius: ${props => props.theme.space[1]};
   cursor: pointer;
-  ${p => p.mode === 'danger' && danger};
+  ${p => (p.mode === 'danger' ? danger : primary)};
 `;
 
 export const Button = (props: {

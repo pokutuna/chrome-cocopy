@@ -103,8 +103,10 @@ function reduce(state: State, action: Action): State {
       console.log('dropped');
       // TODO save
       return state;
-    case 'add':
-      return {...state};
+    case 'add': {
+      const next = reduce(state, {t: 'cancel'});
+      return next;
+    }
   }
 }
 

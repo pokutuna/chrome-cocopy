@@ -6,17 +6,18 @@ import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {faBars} from '@fortawesome/free-solid-svg-icons/faBars';
 import {faCaretRight} from '@fortawesome/free-solid-svg-icons/faCaretRight';
 import {faCaretDown} from '@fortawesome/free-solid-svg-icons/faCaretDown';
+import {faPlus} from '@fortawesome/free-solid-svg-icons/faPlus';
 
 import {getCopyFunctions} from '../../lib/config';
 import {CopyFunctionWithTheme} from '../../lib/function';
 
-import {FunctionItem} from '../common/FunctionParts';
+import {FunctionItem, AddFunctionItem} from '../common/FunctionParts';
 import {DnDWrapper, useDnDItem} from './DnD';
 import {Section} from './Parts';
 import {Editor} from './Editor';
 import {reducer, initialState, DispatchType} from './FunctionsReducer';
 
-const FunctionBox = styled.div<{isDragging?: boolean}>`
+const FunctionItemBox = styled.div<{isDragging?: boolean}>`
   opacity: ${props => (props.isDragging ? 0.5 : 1)};
   display: flex;
   flex-direction: row;
@@ -27,20 +28,17 @@ const ItemButton = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  height: ${props => props.theme.constants.functionHeight};
-`;
-
-const CaretBox = styled(ItemButton)`
   width: ${props => props.theme.size['4xl']};
-  font-size: ${props => props.theme.size.xl};
+  height: ${props => props.theme.constants.functionHeight};
+  cursor: pointer;
 `;
 
 const Caret = (props: {active: boolean; onClick: () => void}) => {
   const {active, onClick} = props;
   return (
-    <CaretBox onClick={onClick}>
-      <FontAwesomeIcon icon={active ? faCaretDown : faCaretRight} />
-    </CaretBox>
+    <ItemButton onClick={onClick}>
+      <FontAwesomeIcon icon={active ? faCaretDown : faCaretRight} size="lg" />
+    </ItemButton>
   );
 };
 
@@ -66,6 +64,25 @@ const EditorBox = styled.div`
   margin-left: ${props => props.theme.size['4xl']};
   margin-bottom: ${props => props.theme.size['4xl']};
 `;
+
+const AddFunctionBox = styled.div`
+  margin-top: ${props => props.theme.space[2]};
+`;
+
+function AddFunction(props: {onClick: () => void}) {
+  return (
+    <AddFunctionBox>
+      <FunctionItemBox>
+        <ItemButton onClick={props.onClick}>
+          <FontAwesomeIcon icon={faPlus} />
+        </ItemButton>
+        <ItemBody>
+          <AddFunctionItem onClick={props.onClick} />
+        </ItemBody>
+      </FunctionItemBox>
+    </AddFunctionBox>
+  );
+}
 
 type FunctionListItemProps = {
   fn: CopyFunctionWithTheme;
@@ -104,7 +121,7 @@ function FunctionListItem(props: FunctionListItemProps) {
 
   return (
     <div ref={ref}>
-      <FunctionBox isDragging={isDragging}>
+      <FunctionItemBox isDragging={isDragging}>
         <Caret active={active} onClick={onClick} />
         <ItemBody>
           <FunctionItem fn={fn} onClick={onClick} />
@@ -112,7 +129,7 @@ function FunctionListItem(props: FunctionListItemProps) {
         <div ref={drag}>
           <DragKnob draggable={draggable} />
         </div>
-      </FunctionBox>
+      </FunctionItemBox>
       {active && (
         <EditorBox>
           <Editor function={fn} dispatch={dispatch} />
@@ -124,6 +141,10 @@ function FunctionListItem(props: FunctionListItemProps) {
 
 export function FunctionList() {
   const [state, dispatch] = useReducer(reducer, initialState);
+
+  const add = useCallback(() => {
+    dispatch({t: 'add'});
+  }, [dispatch]);
 
   useEffect(() => {
     getCopyFunctions().then(functions => dispatch({t: 'init', functions}));
@@ -143,6 +164,7 @@ export function FunctionList() {
           />
         ))}
       </DnDWrapper>
+      <AddFunction onClick={add} />
     </Section>
   );
 }
