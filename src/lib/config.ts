@@ -1,4 +1,4 @@
-import {CopyFunctionWithTheme} from './function';
+import {CopyFunctionWithTheme, isCopyFunctionWithTheme} from './function';
 import {defaultFunctions} from './builtin';
 
 export const getCopyFunctions = (): Promise<CopyFunctionWithTheme[]> => {
@@ -9,10 +9,28 @@ export const getCopyFunctions = (): Promise<CopyFunctionWithTheme[]> => {
   });
 };
 
+/**
+ * Save functions to the straoge by chrome.storage.sync.
+ *
+ * TODO feedback errors to reach the limitation.
+ * https://developer.chrome.com/extensions/storage
+ *
+ * @param functions
+ */
 export const setCopyFunctions = (
   functions: CopyFunctionWithTheme[]
 ): Promise<void> => {
-  return new Promise(resolve => {
-    chrome.storage.sync.set({functions}, resolve);
+  if (!functions.every(isCopyFunctionWithTheme)) {
+    throw new Error('function validation failed when saving');
+  }
+
+  return new Promise((resolve, reject) => {
+    chrome.storage.sync.set({functions}, () => {
+      if (chrome.runtime.lastError) {
+        reject(chrome.runtime.lastError);
+        return;
+      }
+      resolve();
+    });
   });
 };

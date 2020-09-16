@@ -1,4 +1,5 @@
 import {CopyFunctionWithTheme, newFunction} from '../../lib/function';
+import {setCopyFunctions} from '../../lib/config';
 
 export interface State {
   activeId: string | undefined;
@@ -81,7 +82,7 @@ function reduce(state: State, action: Action): State {
         const idx = state.functions.findIndex(f => f.id === state.activeId);
         state.functions[idx] = state.editing!;
       }
-      // save
+      setCopyFunctions(state.functions);
       return {...state, activeId: undefined, editing: undefined};
     }
     case 'cancel': {
@@ -96,7 +97,7 @@ function reduce(state: State, action: Action): State {
         return state;
       }
       const functions = state.functions.filter(f => f.id !== state.activeId);
-      // TODO save
+      setCopyFunctions(functions);
       return {...state, functions, activeId: undefined, editing: undefined};
     }
     case 'dragging':
@@ -109,8 +110,7 @@ function reduce(state: State, action: Action): State {
         ),
       };
     case 'dropped':
-      console.log('dropped');
-      // TODO save
+      setCopyFunctions(state.functions);
       return state;
     case 'add': {
       const next = reduce(state, {t: 'cancel'});
