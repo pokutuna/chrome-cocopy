@@ -7,7 +7,11 @@ export const Links = memo(() => {
     <Section title="Links">
       <TextList>
         <li>
-          <a href="#TODO" target="_blank" rel="noreferrer noopener">
+          <a
+            href="https://chrome.google.com/webstore/detail/COCOPY/ihnfodlbkhgjnbheemjhkjfkfglgbdgc"
+            target="_blank"
+            rel="noreferrer noopener"
+          >
             Chrome Web Store
           </a>
         </li>
