@@ -1,6 +1,8 @@
 import {h, ComponentChildren} from 'preact';
 import {useCallback} from 'preact/hooks';
 import {memo} from 'preact/compat';
+
+import {Link} from 'react-router-dom';
 import styled, {css} from 'styled-components';
 
 export const MainColumn = styled.div`
@@ -10,6 +12,7 @@ export const MainColumn = styled.div`
 `;
 
 const TitleIcon = styled.div`
+  display: inline-block;
   background: no-repeat center/contain url('img/logo.png');
   width: 123px;
   height: 60px;
@@ -18,7 +21,9 @@ const TitleIcon = styled.div`
 export const Title = memo(() => {
   return (
     <header>
-      <TitleIcon />
+      <Link to="/">
+        <TitleIcon />
+      </Link>
     </header>
   );
 });
