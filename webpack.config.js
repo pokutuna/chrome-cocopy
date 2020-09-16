@@ -88,6 +88,7 @@ module.exports = {
         // LICENSE file is not included in the package
         'styled-components':
           'https://github.com/styled-components/styled-components/blob/master/LICENSE',
+        isarray: 'https://github.com/juliangruber/isarray/blob/master/LICENSE',
       },
     }),
   ],
