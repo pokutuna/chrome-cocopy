@@ -25,6 +25,10 @@ export const Hint = memo(() => {
           </a>{' '}
           to query the page document.
         </li>
+        <li>
+          To feedback an error, use <code>throw new Error(...)</code>. It will
+          be displayed at the function that produced that.
+        </li>
       </TextList>
     </Section>
   );
