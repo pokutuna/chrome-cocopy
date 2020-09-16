@@ -12,6 +12,7 @@ type Action =
   | {t: 'init'; functions: CopyFunctionWithTheme[]}
   | {t: 'select'; functionId: string}
   | {t: 'add'}
+  | {t: 'refresh'; functions: CopyFunctionWithTheme[]}
   // Editing
   | {t: 'edit'; function: Partial<CopyFunctionWithTheme>}
   | {t: 'save'}
@@ -70,6 +71,13 @@ function reduce(state: State, action: Action): State {
       next.editing = state.functions.find(f => f.id === action.functionId);
       return next;
     }
+    case 'add': {
+      const next = reduce(state, {t: 'cancel'});
+      const newFn = newFunction();
+      return {...next, editing: newFn, activeId: newId};
+    }
+    case 'refresh':
+      return {...state, functions: action.functions};
     case 'edit':
       return {
         ...state,
@@ -112,11 +120,6 @@ function reduce(state: State, action: Action): State {
     case 'dropped':
       setCopyFunctions(state.functions);
       return state;
-    case 'add': {
-      const next = reduce(state, {t: 'cancel'});
-      const newFn = newFunction();
-      return {...next, editing: newFn, activeId: newId};
-    }
   }
 }
 

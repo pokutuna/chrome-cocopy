@@ -146,7 +146,19 @@ export function FunctionList() {
 
   useEffect(() => {
     getCopyFunctions().then(functions => dispatch({t: 'init', functions}));
-  }, []); // TODO refresh
+  }, [dispatch]);
+
+  // for opening options page with multiple tabs.
+  useEffect(() => {
+    const onChangeStorage = (changes: {
+      [key: string]: chrome.storage.StorageChange;
+    }) => {
+      if ('functions' in changes)
+        dispatch({t: 'refresh', functions: changes['functions'].newValue});
+    };
+    chrome.storage.onChanged.addListener(onChangeStorage);
+    return () => chrome.storage.onChanged.removeListener(onChangeStorage);
+  }, [dispatch]);
 
   return (
     <Section title="Functions">
