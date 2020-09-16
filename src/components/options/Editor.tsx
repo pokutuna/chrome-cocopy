@@ -7,7 +7,7 @@ import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {faTrash} from '@fortawesome/free-solid-svg-icons/faTrash';
 import {faShareSquare} from '@fortawesome/free-solid-svg-icons/faShareSquare';
 
-import {CopyFunctionWithTheme} from '../../lib/function';
+import {CopyFunctionWithTheme, encodeSharable} from '../../lib/function';
 import {EvalPayload, EvalResult} from '../../lib/eval';
 import {Box, Row, Item, Button, ButtonIcon, DividerV} from './Parts';
 import {TextInput} from './Input';
@@ -15,7 +15,7 @@ import {ColorInput} from './Color';
 import {CodeEditor} from './CodeEditor';
 import {DispatchType as FnDispatchType} from './FunctionsReducer';
 import {useSandbox} from '../common/Sandbox';
-import {reducer, init} from './EditorReducer';
+import {reducer, init, stateToFn} from './EditorReducer';
 
 type EditorProps = {
   function: CopyFunctionWithTheme;
@@ -52,7 +52,11 @@ export function Editor(props: EditorProps) {
   const onClickSave = useCallback(() => dispatch({t: 'save'}), [dispatch]);
   const onClickCancel = useCallback(() => dispatch({t: 'cancel'}), [dispatch]);
   const onClickDelete = useCallback(() => dispatch({t: 'delete'}), [dispatch]);
-  const onClickShare = useCallback(() => {}, []);
+  const onClickShare = useCallback(() => {
+    const fn = stateToFn(state);
+    const encoded = encodeSharable({id: '', ...fn}); // XXX filled dummy id
+    window.open(`/options.html#/install?f=${encodeURIComponent(encoded)}`);
+  }, [state]);
 
   return (
     <form>
@@ -113,7 +117,7 @@ export function Editor(props: EditorProps) {
             <DividerV />
           </Item>
           <Item>
-            <Button onClick={onClickCancel}>
+            <Button onClick={onClickShare}>
               <ButtonIcon>
                 <FontAwesomeIcon icon={faShareSquare} />
               </ButtonIcon>

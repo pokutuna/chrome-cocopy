@@ -3,7 +3,7 @@ import {Library} from './library';
 import {initialCode} from './builtin';
 import {textColorFromBgColor} from './util';
 
-const currentVersion = 1;
+export const currentVersion = 1;
 
 export type CopyResult = string | null | undefined;
 export type CopyFn =
@@ -95,11 +95,11 @@ export function newFunction(): CopyFunctionWithTheme {
     types: ['page'],
     code: initialCode,
     pattern: '',
-    version: currentVersion,
     theme: {
       textColor,
       backgroundColor,
     },
+    version: currentVersion,
   };
 }
 

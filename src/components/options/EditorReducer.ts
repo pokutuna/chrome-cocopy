@@ -1,5 +1,5 @@
 import {DispatchType as FnDispatchType} from './FunctionsReducer';
-import {CopyFunctionWithTheme} from '../../lib/function';
+import {CopyFunctionWithTheme, currentVersion} from '../../lib/function';
 import {textColorFromBgColor} from '../../lib/util';
 interface State {
   fn: CopyFunctionWithTheme;
@@ -50,15 +50,17 @@ export function init(
 
 export type DispatchType = (action: Action) => void;
 
-function stateToFn(state: State): Partial<CopyFunctionWithTheme> {
+export function stateToFn(state: State): Omit<CopyFunctionWithTheme, 'id'> {
   return {
     name: state.name,
+    types: ['page'],
     code: state.code,
     pattern: state.pattern,
     theme: {
       textColor: state.textColor,
       backgroundColor: state.backgroundColor,
     },
+    version: currentVersion,
   };
 }
 
