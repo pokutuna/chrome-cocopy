@@ -57,6 +57,7 @@ const PaletteBox = styled.div`
 
   width: 130px;
   margin-top: ${props => props.theme.space[2]};
+  padding: ${props => props.theme.space[1]};
   border: 1px solid ${props => props.theme.color.gray};
 `;
 
