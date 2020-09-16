@@ -53,6 +53,7 @@ export const Section = (props: {
 
 export const TextList = styled.ul`
   font-size: ${props => props.theme.size.sm};
+  margin-bottom: ${props => props.theme.space[4]};
   li {
     margin-bottom: ${props => props.theme.space[2]};
   }

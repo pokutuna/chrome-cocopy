@@ -1,4 +1,5 @@
 import {h} from 'preact';
+import {memo} from 'preact/compat';
 import {useReducer, useMemo} from 'preact/hooks';
 import {useLocation} from 'react-router-dom';
 
@@ -9,7 +10,7 @@ import {
 } from '../../lib/function';
 import {addCopyFunctions} from '../../lib/config';
 import {FunctionItem} from '../common/FunctionParts';
-import {Section} from './Parts';
+import {Section, TextList} from './Parts';
 import {Editor} from './Editor';
 import {ItemBody as FunctionBox, EditorBox} from './FunctionList';
 import {Action} from './FunctionsReducer';
@@ -41,6 +42,15 @@ function reduce(state: State, action: Action): State {
   }
 }
 
+const Notice = memo(() => {
+  return (
+    <TextList>
+      <li>Sharing this URL makes others can use this function.</li>
+      <li>You can edit the code and every fields before installing.</li>
+    </TextList>
+  );
+});
+
 function useSahredFunction(): CopyFunctionWithTheme | undefined {
   const location = useLocation();
   const fn = useMemo<CopyFunctionWithTheme | undefined>(() => {
@@ -56,7 +66,8 @@ export function InstallFunction() {
   const [state, dispatch] = useReducer(reduce, {fn});
 
   return (
-    <Section title="Install">
+    <Section title="Install Function">
+      <Notice />
       {state.fn && (
         <EditorBox>
           <FunctionBox>

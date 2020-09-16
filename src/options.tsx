@@ -24,12 +24,14 @@ const App = () => {
               <FunctionList />
               <Hint />
               <DebuggingHint />
+              <Links />
             </Route>
             <Route path="/install">
               <InstallFunction />
+              <Hint />
+              <Links />
             </Route>
           </Switch>
-          <Links />
         </MainColumn>
       </ThemeProvider>
     </Router>
