@@ -6,6 +6,7 @@ exports.app = (req, res) => {
   if (!f) {
     return res.status(404).send('given no function.');
   }
+  console.log(JSON.stringify({f}));
 
   const url = new URL(optionsPage);
   const hash = new URL('/install', 'http://host.invalid');
