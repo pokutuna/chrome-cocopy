@@ -12,7 +12,8 @@
     "fix": "gts fix",
     "test": "jest",
     "posttest": "yarn run check",
-    "watch": "webpack --watch"
+    "watch": "webpack --watch",
+    "zip": "yarn build && zip -r build-$(cat build/manifest.json | jq -r '.version').zip ./build"
   },
   "husky": {
     "hooks": {
