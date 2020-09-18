@@ -4,7 +4,7 @@ const optionsPage = `chrome-extension://${extensionId}/options.html`;
 exports.app = (req, res) => {
   const f = req.query.f;
   if (!f) {
-    return res.status(404).send('given no function.');
+    return res.status(404).send('no function given');
   }
   console.log(JSON.stringify({f}));
 
