@@ -84,14 +84,17 @@ function reduce(state: State, action: Action): State {
         editing: {...state.editing!, ...action.function},
       };
     case 'save': {
-      if (state.activeId === newId) {
+      const isNew = state.activeId === newId;
+      if (isNew) {
         state.functions.push(state.editing!);
       } else {
         const idx = state.functions.findIndex(f => f.id === state.activeId);
         state.functions[idx] = state.editing!;
       }
       saveCopyFunctions(state.functions);
-      return {...state, activeId: undefined, editing: undefined};
+      return isNew
+        ? {...state, activeId: undefined, editing: undefined}
+        : {...state};
     }
     case 'cancel': {
       const edited = hasEdited(state);

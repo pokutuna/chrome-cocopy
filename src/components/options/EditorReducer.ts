@@ -19,6 +19,7 @@ interface State {
     code?: string;
   };
   canSave: boolean;
+  hasSaved: boolean;
 }
 
 type EditAction = {t: 'edit'; name: string; value: string};
@@ -42,6 +43,7 @@ export function init(fn: CopyFunction, fnDispatch: FnDispatchType): State {
     openPalette: false,
     errors: {},
     canSave: true,
+    hasSaved: false,
   };
 }
 
@@ -86,7 +88,7 @@ function validateEdit(
 }
 
 function handleEdit(state: State, action: EditAction): State {
-  const next = {...state, [action.name]: action.value};
+  const next = {...state, [action.name]: action.value, hasSaved: false};
   if (action.name === 'backgroundColor') {
     if (/^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i.test(action.value)) {
       next.textColor = textColorFromBgColor(next.backgroundColor);
@@ -124,7 +126,7 @@ function reduce(state: State, action: Action): State {
     }
     case 'save':
       state.fnDispatch({t: 'save'});
-      return state;
+      return {...state, hasSaved: true};
     case 'cancel':
       state.fnDispatch({t: 'cancel'});
       return state;

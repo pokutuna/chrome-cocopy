@@ -109,9 +109,15 @@ export function Editor(props: EditorProps) {
         </Row>
         <Row>
           <Item>
-            <Button onClick={onClickSave} disabled={!state.canSave}>
-              {!props.install ? 'Save' : 'Install'}
-            </Button>
+            {props.install ? (
+              <Button onClick={onClickSave} disabled={!state.canSave}>
+                Install
+              </Button>
+            ) : (
+              <Button onClick={onClickSave} disabled={!state.canSave}>
+                {state.hasSaved ? 'Saved' : 'Save'}
+              </Button>
+            )}
           </Item>
           {!props.install && (
             <Item>

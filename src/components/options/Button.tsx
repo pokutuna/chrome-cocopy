@@ -5,8 +5,8 @@ import styled, {css} from 'styled-components';
 type ButtonMode = 'default' | 'danger';
 
 const primary = css`
-  &:hover,
-  &:focus {
+  &:hover:not(:disabled),
+  &:focus:not(:disabled) {
     color: ${props => props.theme.color.primary};
     border-color: ${props => props.theme.color.primary};
     outline-color: ${p => p.theme.color.primary};
@@ -15,8 +15,8 @@ const primary = css`
 
 const danger = css`
   color: ${p => p.theme.color.danger};
-  &:hover,
-  &:focus {
+  &:hover:not(:disabled),
+  &:focus:not(:disabled) {
     outline-color: ${p => p.theme.color.danger};
   }
 `;
