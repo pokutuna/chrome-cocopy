@@ -9,7 +9,7 @@ import {faCaretDown} from '@fortawesome/free-solid-svg-icons/faCaretDown';
 import {faPlus} from '@fortawesome/free-solid-svg-icons/faPlus';
 
 import {getCopyFunctions} from '../../lib/config';
-import {CopyFunctionWithTheme} from '../../lib/function';
+import {CopyFunction} from '../../lib/function';
 
 import {FunctionItem, AddFunctionItem} from '../common/FunctionParts';
 import {DnDWrapper, useDnDItem} from './DnD';
@@ -84,7 +84,7 @@ function AddFunction(props: {onClick: () => void}) {
 }
 
 type FunctionListItemProps = {
-  fn: CopyFunctionWithTheme;
+  fn: CopyFunction;
   index: number;
   active: boolean;
   draggable: boolean;
@@ -150,7 +150,7 @@ export function FunctionList() {
 
   // refresh when functions are updated with opening multiple options pages.
   const onUpdateFunctionsBackground = useCallback(
-    (functions: CopyFunctionWithTheme[]) => dispatch({t: 'refresh', functions}),
+    (functions: CopyFunction[]) => dispatch({t: 'refresh', functions}),
     [dispatch]
   );
   useSubscribeFunctions(onUpdateFunctionsBackground);

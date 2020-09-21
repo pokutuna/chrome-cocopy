@@ -1,9 +1,9 @@
-import {CopyFunctionWithTheme, isCopyFunctionWithTheme} from './function';
+import {CopyFunction, isCopyFunction} from './function';
 import {defaultFunctions} from './builtin';
 
 const storage: chrome.storage.StorageArea = chrome.storage.sync;
 
-export async function getCopyFunctions(): Promise<CopyFunctionWithTheme[]> {
+export async function getCopyFunctions(): Promise<CopyFunction[]> {
   return new Promise(resolve => {
     storage.get({functions: defaultFunctions}, (value: any) => {
       Array.isArray(value.functions) ? resolve(value.functions) : resolve([]);
@@ -20,9 +20,9 @@ export async function getCopyFunctions(): Promise<CopyFunctionWithTheme[]> {
  * @param functions
  */
 export async function setCopyFunctions(
-  functions: CopyFunctionWithTheme[]
+  functions: CopyFunction[]
 ): Promise<void> {
-  if (!functions.every(isCopyFunctionWithTheme)) {
+  if (!functions.every(isCopyFunction)) {
     throw new Error('function validation failed when saving');
   }
 
@@ -37,9 +37,7 @@ export async function setCopyFunctions(
   });
 }
 
-export async function addCopyFunctions(
-  fn: CopyFunctionWithTheme
-): Promise<void> {
+export async function addCopyFunctions(fn: CopyFunction): Promise<void> {
   const functions = await getCopyFunctions();
   functions.push(fn);
   return setCopyFunctions(functions);

@@ -3,11 +3,7 @@ import {useState, useEffect, useCallback} from 'preact/hooks';
 
 import {getCopyFunctions} from '../../lib/config';
 import {createPageTargetFromTab} from '../../lib/target';
-import {
-  CopyFunction,
-  CopyFunctionWithTheme,
-  filterFunctions,
-} from '../../lib/function';
+import {CopyFunction, filterFunctions} from '../../lib/function';
 import {getActiveTab, keyToIndex} from '../../lib/util';
 import {EvalResult, EvalError} from '../../lib/eval';
 
@@ -19,7 +15,7 @@ type FunctionError = {
   error: EvalError;
 } | null;
 
-async function availableFunctions(): Promise<CopyFunctionWithTheme[]> {
+async function availableFunctions(): Promise<CopyFunction[]> {
   const [tab, fs] = await Promise.all([getActiveTab(), getCopyFunctions()]);
   const url = tab.url || tab.pendingUrl || '';
   return filterFunctions('page', url, fs);
@@ -33,7 +29,7 @@ function writeResultToClipboard(res: EvalResult) {
 
 export const FunctionList = () => {
   const evaluate = useEvaluate();
-  const [functions, setFunctions] = useState<CopyFunctionWithTheme[]>([]);
+  const [functions, setFunctions] = useState<CopyFunction[]>([]);
   const [running, setRunning] = useState<string | null>(null);
   const [fnError, setFnError] = useState<FunctionError>(null);
 

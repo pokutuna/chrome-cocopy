@@ -7,7 +7,7 @@ import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {faTrash} from '@fortawesome/free-solid-svg-icons/faTrash';
 import {faShareSquare} from '@fortawesome/free-solid-svg-icons/faShareSquare';
 
-import {CopyFunctionWithTheme} from '../../lib/function';
+import {CopyFunction} from '../../lib/function';
 import {encodeSharable} from '../../lib/share';
 import {EvalPayload, EvalResult} from '../../lib/eval';
 import {Box, Row, Item, Button, ButtonIcon, DividerV} from './Parts';
@@ -19,7 +19,7 @@ import {useSandbox} from '../common/Sandbox';
 import {reducer, init, stateToFn} from './EditorReducer';
 
 type EditorProps = {
-  function: CopyFunctionWithTheme;
+  function: CopyFunction;
   dispatch: FnDispatchType;
   install?: boolean;
 };

@@ -1,20 +1,20 @@
-import {CopyFunctionWithTheme, newFunction} from '../../lib/function';
+import {CopyFunction, newFunction} from '../../lib/function';
 import {setCopyFunctions} from '../../lib/config';
 
 export interface State {
   activeId: string | undefined;
-  functions: CopyFunctionWithTheme[];
-  editing: CopyFunctionWithTheme | undefined;
+  functions: CopyFunction[];
+  editing: CopyFunction | undefined;
   draggable: boolean;
 }
 
 export type Action =
-  | {t: 'init'; functions: CopyFunctionWithTheme[]}
+  | {t: 'init'; functions: CopyFunction[]}
   | {t: 'select'; functionId: string}
   | {t: 'add'}
-  | {t: 'refresh'; functions: CopyFunctionWithTheme[]}
+  | {t: 'refresh'; functions: CopyFunction[]}
   // Editing
-  | {t: 'edit'; function: Partial<CopyFunctionWithTheme>}
+  | {t: 'edit'; function: Partial<CopyFunction>}
   | {t: 'save'}
   | {t: 'cancel'}
   | {t: 'delete'}
@@ -34,7 +34,7 @@ export type DispatchType = (action: Action) => void;
 const newId = 'new';
 
 const dragging = (
-  functions: CopyFunctionWithTheme[],
+  functions: CopyFunction[],
   dragIndex: number,
   hoverIndex: number
 ) => {

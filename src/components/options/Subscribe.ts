@@ -1,8 +1,8 @@
 import {useEffect} from 'preact/hooks';
-import {CopyFunctionWithTheme} from '../../lib/function';
+import {CopyFunction} from '../../lib/function';
 
 export function useSubscribeFunctions(
-  update: (functions: CopyFunctionWithTheme[]) => void
+  update: (functions: CopyFunction[]) => void
 ) {
   useEffect(() => {
     const onChange = (changes: {

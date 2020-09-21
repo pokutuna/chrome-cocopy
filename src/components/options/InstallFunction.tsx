@@ -7,10 +7,7 @@ import styled from 'styled-components';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {faDizzy} from '@fortawesome/free-solid-svg-icons/faDizzy';
 
-import {
-  CopyFunctionWithTheme,
-  isCopyFunctionWithTheme,
-} from '../../lib/function';
+import {CopyFunction, isCopyFunction} from '../../lib/function';
 import {decodeSharable} from '../../lib/share';
 import {addCopyFunctions} from '../../lib/config';
 import {FunctionItem} from '../common/FunctionParts';
@@ -20,7 +17,7 @@ import {ItemBody as FunctionBox, EditorBox} from './FunctionList';
 import {Action} from './FunctionsReducer';
 
 interface State {
-  fn?: CopyFunctionWithTheme;
+  fn?: CopyFunction;
 }
 
 // partially emulate FunctionsReducer
@@ -70,12 +67,12 @@ const FailedMessage = memo(() => {
   );
 });
 
-function useSahredFunction(): CopyFunctionWithTheme | undefined {
+function useSahredFunction(): CopyFunction | undefined {
   const location = useLocation();
-  const fn = useMemo<CopyFunctionWithTheme | undefined>(() => {
+  const fn = useMemo<CopyFunction | undefined>(() => {
     const params = new URLSearchParams(location.search);
     const decoded = decodeSharable(params.get('f') || '');
-    return isCopyFunctionWithTheme(decoded) ? decoded : undefined;
+    return isCopyFunction(decoded) ? decoded : undefined;
   }, [location]);
   return fn;
 }

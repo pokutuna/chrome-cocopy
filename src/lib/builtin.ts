@@ -1,4 +1,4 @@
-import {CopyFunctionWithTheme} from './function';
+import {CopyFunction} from './function';
 
 export const initialCode = `
 /**
@@ -21,7 +21,7 @@ const copyAsMarkdownFn = `
 };
 `.trim();
 
-export const copyAsMarkdown: CopyFunctionWithTheme = {
+export const copyAsMarkdown: CopyFunction = {
   id: 'builtin-markdown',
   name: 'Markdown: [title](url)',
   types: ['page'],
@@ -43,7 +43,7 @@ const copyAsHTMLFn = `
  */
 target => render('<a href="{{&pageURL}}">{{title}}</a>', target);`.trim();
 
-export const copyAsHTML: CopyFunctionWithTheme = {
+export const copyAsHTML: CopyFunction = {
   id: 'builtin-html',
   name: 'HTML: <a href={url}>{title}</a>',
   types: ['page'],
@@ -56,7 +56,4 @@ export const copyAsHTML: CopyFunctionWithTheme = {
   },
 };
 
-export const defaultFunctions: CopyFunctionWithTheme[] = [
-  copyAsMarkdown,
-  copyAsHTML,
-];
+export const defaultFunctions: CopyFunction[] = [copyAsMarkdown, copyAsHTML];

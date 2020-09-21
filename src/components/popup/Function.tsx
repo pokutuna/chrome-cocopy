@@ -2,7 +2,7 @@ import {h} from 'preact';
 import {useCallback, useMemo} from 'preact/hooks';
 import styled, {keyframes} from 'styled-components';
 
-import {CopyFunctionTheme, CopyFunctionWithTheme} from '../../lib/function';
+import {CopyFunction} from '../../lib/function';
 import {indexToKey} from '../../lib/util';
 import {EvalError} from '../../lib/eval';
 import {Shortcut, FunctionBox, FunctionName} from '../common/FunctionParts';
@@ -21,7 +21,7 @@ const scanning = keyframes`
 `;
 
 const FunctionBoxWithAnimation = styled(FunctionBox)<
-  CopyFunctionTheme & {running: boolean}
+  CopyFunction['theme'] & {running: boolean}
 >`
   animation-name: ${props => (props.running ? scanning : 'none')};
   animation-duration: 0.3s;
@@ -40,11 +40,11 @@ const FunctionBoxWithAnimation = styled(FunctionBox)<
 `;
 
 type FunctionItemProps = {
-  fn: CopyFunctionWithTheme;
+  fn: CopyFunction;
   index: number;
   running: boolean;
   error?: EvalError;
-  onClick: (fn: CopyFunctionWithTheme) => void;
+  onClick: (fn: CopyFunction) => void;
 };
 
 export function FunctionItem(props: FunctionItemProps) {

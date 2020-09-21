@@ -2,9 +2,9 @@ import {h} from 'preact';
 import {useCallback} from 'preact/hooks';
 import styled from 'styled-components';
 
-import {CopyFunctionTheme, CopyFunctionWithTheme} from '../../lib/function';
+import {CopyFunction} from '../../lib/function';
 
-export const FunctionBox = styled.div<CopyFunctionTheme>`
+export const FunctionBox = styled.div<CopyFunction['theme']>`
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -59,8 +59,8 @@ export const FunctionName = styled.div`
 `;
 
 type FunctionItemProps = {
-  fn: CopyFunctionWithTheme;
-  onClick?: (fn: CopyFunctionWithTheme) => void;
+  fn: CopyFunction;
+  onClick?: (fn: CopyFunction) => void;
 };
 
 export function FunctionItem(props: FunctionItemProps) {

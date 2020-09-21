@@ -1,8 +1,8 @@
 import {DispatchType as FnDispatchType} from './FunctionsReducer';
-import {CopyFunctionWithTheme, currentVersion} from '../../lib/function';
+import {CopyFunction, currentVersion} from '../../lib/function';
 import {textColorFromBgColor} from '../../lib/util';
 interface State {
-  fn: CopyFunctionWithTheme;
+  fn: CopyFunction;
   fnDispatch: FnDispatchType;
 
   name: string;
@@ -30,10 +30,7 @@ type Action =
   | {t: 'cancel'}
   | {t: 'delete'};
 
-export function init(
-  fn: CopyFunctionWithTheme,
-  fnDispatch: FnDispatchType
-): State {
+export function init(fn: CopyFunction, fnDispatch: FnDispatchType): State {
   return {
     fn,
     fnDispatch,
@@ -50,7 +47,7 @@ export function init(
 
 export type DispatchType = (action: Action) => void;
 
-export function stateToFn(state: State): Omit<CopyFunctionWithTheme, 'id'> {
+export function stateToFn(state: State): Omit<CopyFunction, 'id'> {
   return {
     name: state.name,
     types: ['page'],

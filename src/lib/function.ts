@@ -20,22 +20,17 @@ export interface CopyFunction {
   code: string;
   pattern?: string;
   version: number;
-}
-
-export interface CopyFunctionTheme {
-  textColor: string;
-  backgroundColor: string;
-}
-
-export interface CopyFunctionWithTheme extends CopyFunction {
-  theme: CopyFunctionTheme;
+  theme: {
+    textColor: string;
+    backgroundColor: string;
+  };
 }
 
 export function generateId(): string {
   return `function-${new Date().getTime()}`;
 }
 
-export function newFunction(): CopyFunctionWithTheme {
+export function newFunction(): CopyFunction {
   const id = generateId();
   const backgroundColor =
     colorPalette[Math.floor(Math.random() * colorPalette.length)];
@@ -89,6 +84,6 @@ export const colorPalette = [
   '#607D8B',
 ];
 
-export function isCopyFunctionWithTheme(f: any): f is CopyFunctionWithTheme {
+export function isCopyFunction(f: any): f is CopyFunction {
   return validate(f) as boolean;
 }
