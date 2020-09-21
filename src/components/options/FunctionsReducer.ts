@@ -1,5 +1,5 @@
 import {CopyFunction, newFunction} from '../../lib/function';
-import {setCopyFunctions} from '../../lib/config';
+import {saveCopyFunctions} from '../../lib/config';
 
 export interface State {
   activeId: string | undefined;
@@ -90,7 +90,7 @@ function reduce(state: State, action: Action): State {
         const idx = state.functions.findIndex(f => f.id === state.activeId);
         state.functions[idx] = state.editing!;
       }
-      setCopyFunctions(state.functions);
+      saveCopyFunctions(state.functions);
       return {...state, activeId: undefined, editing: undefined};
     }
     case 'cancel': {
@@ -105,7 +105,7 @@ function reduce(state: State, action: Action): State {
         return state;
       }
       const functions = state.functions.filter(f => f.id !== state.activeId);
-      setCopyFunctions(functions);
+      saveCopyFunctions(functions);
       return {...state, functions, activeId: undefined, editing: undefined};
     }
     case 'dragging':
@@ -118,7 +118,7 @@ function reduce(state: State, action: Action): State {
         ),
       };
     case 'dropped':
-      setCopyFunctions(state.functions);
+      saveCopyFunctions(state.functions);
       return state;
   }
 }

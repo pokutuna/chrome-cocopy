@@ -19,7 +19,7 @@ export async function getCopyFunctions(): Promise<CopyFunction[]> {
  *
  * @param functions
  */
-export async function setCopyFunctions(
+export async function saveCopyFunctions(
   functions: CopyFunction[]
 ): Promise<void> {
   if (!functions.every(isCopyFunction)) {
@@ -40,5 +40,5 @@ export async function setCopyFunctions(
 export async function addCopyFunctions(fn: CopyFunction): Promise<void> {
   const functions = await getCopyFunctions();
   functions.push(fn);
-  return setCopyFunctions(functions);
+  return saveCopyFunctions(functions);
 }
