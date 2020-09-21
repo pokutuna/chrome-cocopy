@@ -9,9 +9,9 @@ import {faDizzy} from '@fortawesome/free-solid-svg-icons/faDizzy';
 
 import {
   CopyFunctionWithTheme,
-  decodeSharable,
   isCopyFunctionWithTheme,
 } from '../../lib/function';
+import {decodeSharable} from '../../lib/share';
 import {addCopyFunctions} from '../../lib/config';
 import {FunctionItem} from '../common/FunctionParts';
 import {Section, TextList} from './Parts';
@@ -23,7 +23,7 @@ interface State {
   fn?: CopyFunctionWithTheme;
 }
 
-// emulate FunctionsReducer partially
+// partially emulate FunctionsReducer
 function reduce(state: State, action: Action): State {
   switch (action.t) {
     case 'edit':

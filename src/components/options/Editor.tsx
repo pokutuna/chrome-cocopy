@@ -7,7 +7,8 @@ import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {faTrash} from '@fortawesome/free-solid-svg-icons/faTrash';
 import {faShareSquare} from '@fortawesome/free-solid-svg-icons/faShareSquare';
 
-import {CopyFunctionWithTheme, encodeSharable} from '../../lib/function';
+import {CopyFunctionWithTheme} from '../../lib/function';
+import {encodeSharable} from '../../lib/share';
 import {EvalPayload, EvalResult} from '../../lib/eval';
 import {Box, Row, Item, Button, ButtonIcon, DividerV} from './Parts';
 import {TextInput} from './Input';
