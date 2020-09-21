@@ -11,7 +11,6 @@ import {Hint, DebuggingHint} from './components/options/Hints';
 import {InstallFunction} from './components/options/InstallFunction';
 
 import './components/options/prism.css';
-import './components/options/code.css';
 
 const App = () => {
   return (

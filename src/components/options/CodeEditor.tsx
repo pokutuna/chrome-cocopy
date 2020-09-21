@@ -9,6 +9,8 @@ import 'prismjs/components/prism-javascript';
 import {theme} from '../common/Theme';
 import {InputBox, Label, LabelSub, ErrorMessage} from './Input';
 
+import './code.css';
+
 const textareaId = 'code';
 
 export const CodeEditor = (props: {
