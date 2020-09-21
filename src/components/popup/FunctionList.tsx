@@ -4,7 +4,8 @@ import {useState, useEffect, useCallback} from 'preact/hooks';
 import {getCopyFunctions} from '../../lib/config';
 import {createPageTargetFromTab} from '../../lib/target';
 import {CopyFunction, filterFunctions} from '../../lib/function';
-import {getActiveTab, keyToIndex} from '../../lib/util';
+import {getActiveTab} from '../../lib/tab';
+import {keyToIndex} from '../../lib/util';
 import {EvalResult, EvalError} from '../../lib/eval';
 
 import {FunctionItem} from './Function';

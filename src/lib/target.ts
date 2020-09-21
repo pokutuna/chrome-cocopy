@@ -1,4 +1,4 @@
-import {getTabContent} from './util';
+import {getTabContent} from './tab';
 
 export type TargetType = 'page' | 'text' | 'image';
 
