@@ -13,7 +13,10 @@ function fromBase64(data: string): string {
 }
 
 export function encodeSharable(fn: CopyFunction): string {
-  // TODO remove extra properties
+  if (!isCopyFunction(fn)) {
+    throw new Error('fn is not a CopyFunction');
+  }
+
   const data = {...fn};
   delete data.id;
   return toBase64(JSON.stringify(data));
