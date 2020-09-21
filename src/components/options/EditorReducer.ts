@@ -1,6 +1,6 @@
 import {DispatchType as FnDispatchType} from './FunctionsReducer';
 import {CopyFunction, currentVersion} from '../../lib/function';
-import {textColorFromBgColor} from '../../lib/util';
+import {textColorFromBgColor, isColorCode} from '../../lib/util';
 interface State {
   fn: CopyFunction;
   fnDispatch: FnDispatchType;
@@ -70,7 +70,7 @@ function validateEdit(
       errors.name = action.value.length === 0 ? 'Cannot be empty.' : undefined;
       break;
     case 'backgroundColor': {
-      const valid = /^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i.test(action.value);
+      const valid = isColorCode(action.value);
       errors.backgroundColor = !valid;
       break;
     }

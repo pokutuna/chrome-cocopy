@@ -43,10 +43,6 @@ const Caret = (props: {active: boolean; onClick: () => void}) => {
   );
 };
 
-export const ItemBody = styled.div`
-  width: ${props => props.theme.constants.popupWidth};
-`;
-
 const DragKnobBox = styled(ItemButton)<{draggable?: boolean}>`
   width: ${props => props.theme.size['4xl']};
   opacity: ${props => (props.draggable ? 1 : 0.3)};
@@ -76,9 +72,7 @@ function AddFunction(props: {onClick: () => void}) {
       <ItemButton onClick={props.onClick}>
         <FontAwesomeIcon icon={faPlus} />
       </ItemButton>
-      <ItemBody>
-        <AddFunctionItem onClick={props.onClick} />
-      </ItemBody>
+      <AddFunctionItem onClick={props.onClick} />
     </FunctionItemBox>
   );
 }
@@ -122,9 +116,7 @@ function FunctionListItem(props: FunctionListItemProps) {
     <div ref={ref}>
       <FunctionItemBox isDragging={isDragging}>
         <Caret active={active} onClick={onClick} />
-        <ItemBody>
-          <FunctionItem fn={fn} onClick={onClick} />
-        </ItemBody>
+        <FunctionItem fn={fn} onClick={onClick} />
         <div ref={drag}>
           <DragKnob draggable={draggable} />
         </div>

@@ -48,7 +48,7 @@ export const theme = {
       'Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
   },
   constants: {
-    popupWidth: '380px',
+    functionWidth: '380px',
     functionHeight: '32px',
   },
 } as const;

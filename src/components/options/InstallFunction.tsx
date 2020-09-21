@@ -13,7 +13,7 @@ import {addCopyFunctions} from '../../lib/config';
 import {FunctionItem} from '../common/FunctionParts';
 import {Section, TextList} from './Parts';
 import {Editor} from './Editor';
-import {ItemBody as FunctionBox, EditorBox} from './FunctionList';
+import {EditorBox} from './FunctionList';
 import {Action} from './FunctionsReducer';
 
 interface State {
@@ -87,9 +87,7 @@ export function InstallFunction() {
         <div>
           <Notice />
           <EditorBox>
-            <FunctionBox>
-              <FunctionItem fn={state.fn} />
-            </FunctionBox>
+            <FunctionItem fn={state.fn} />
             <Editor function={state.fn} dispatch={dispatch} install />
           </EditorBox>
         </div>

@@ -55,7 +55,6 @@ export function textColorFromBgColor(hex: string): string {
   }
 }
 
-export function charLength(s: string): number {
-  // TODO UAX#29
-  return Array.from(s).length;
+export function isColorCode(input: string): boolean {
+  return /^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i.test(input);
 }

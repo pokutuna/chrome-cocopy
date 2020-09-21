@@ -8,6 +8,7 @@ export const FunctionBox = styled.div<CopyFunction['theme']>`
   display: flex;
   flex-direction: row;
   align-items: center;
+  width: ${props => props.theme.constants.functionWidth};
   height: ${props => props.theme.constants.functionHeight};
   padding: ${props => props.theme.space[1]} ${props => props.theme.space[2]};
   color: ${props => props.textColor};
