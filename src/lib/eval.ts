@@ -1,11 +1,11 @@
-import {PageTarget, TextTarget, ImageTarget, isTarget} from './target';
+import {Page, isPage} from './page';
 import {CopyResult} from './function';
 
 export type EvalPayload =
   | {
       command: 'eval';
       code: string;
-      target: PageTarget | TextTarget | ImageTarget;
+      page: Page;
     }
   | {command: 'parse'; code: string};
 
@@ -24,7 +24,7 @@ export function isEvalPayload(input: any): input is EvalPayload {
   return (
     typeof input.code === 'string' &&
     (input.command === 'parse' ||
-      (input.command === 'eval' && isTarget(input.target)))
+      (input.command === 'eval' && isPage(input.page)))
   );
 }
 
@@ -73,10 +73,7 @@ export async function evaluate(request: EvalPayload): Promise<EvalResult> {
 
   let result: any;
   try {
-    // currently type is not public
-    delete request.target['type'];
-
-    result = await Promise.resolve(fn.call(undefined, request.target));
+    result = await Promise.resolve(fn.call(undefined, request.page));
     if (!isAcceptableResult(result)) {
       throw new Error(
         'returning value is not one of (string | number | null | undefined)'

@@ -2,9 +2,9 @@ import {h} from 'preact';
 import {useState, useEffect, useCallback} from 'preact/hooks';
 
 import {getCopyFunctions} from '../../lib/config';
-import {createPageTargetFromTab} from '../../lib/target';
 import {CopyFunction, filterFunctions} from '../../lib/function';
 import {getActiveTab} from '../../lib/tab';
+import {createPageTargetFromTab} from '../../lib/page';
 import {keyToIndex} from '../../lib/util';
 import {EvalResult, EvalError} from '../../lib/eval';
 
@@ -19,7 +19,7 @@ type FunctionError = {
 async function availableFunctions(): Promise<CopyFunction[]> {
   const [tab, fs] = await Promise.all([getActiveTab(), getCopyFunctions()]);
   const url = tab.url || tab.pendingUrl || '';
-  return filterFunctions('page', url, fs);
+  return filterFunctions(url, fs);
 }
 
 function writeResultToClipboard(res: EvalResult) {
@@ -48,7 +48,7 @@ export const FunctionList = () => {
         evaluate({
           command: 'eval',
           code: c.code + `\n//# sourceURL=${encodeURI(c.name)}.js`,
-          target: await createPageTargetFromTab(tab),
+          page: await createPageTargetFromTab(tab),
         })
           .then(writeResultToClipboard)
           .catch(r => setFnError({id: c.id, error: r.error}));
