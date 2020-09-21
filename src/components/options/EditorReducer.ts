@@ -50,7 +50,6 @@ export type DispatchType = (action: Action) => void;
 export function stateToFn(state: State): Omit<CopyFunction, 'id'> {
   return {
     name: state.name,
-    types: ['page'],
     code: state.code,
     pattern: state.pattern,
     theme: {

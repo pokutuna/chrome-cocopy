@@ -1,4 +1,4 @@
-import {TargetType, PageTarget, TextTarget, ImageTarget} from './target';
+import {Page} from './page';
 import {Library} from './library';
 import {initialCode} from './builtin';
 import {textColorFromBgColor} from './util';
@@ -7,16 +7,14 @@ import validate from './function.ajv';
 export const currentVersion = 1;
 
 export type CopyResult = string | null | undefined;
-export type CopyFn =
-  | ((this: Library) => CopyResult | Promise<CopyResult>)
-  | ((this: Library, t: PageTarget) => CopyResult | Promise<CopyResult>)
-  | ((this: Library, t: TextTarget) => CopyResult | Promise<CopyResult>)
-  | ((this: Library, t: ImageTarget) => CopyResult | Promise<CopyResult>);
+export type CopyFn = (
+  this: Library,
+  t: Page
+) => CopyResult | Promise<CopyResult>;
 
 export interface CopyFunction {
   id: string;
   name: string;
-  types: TargetType[];
   code: string;
   pattern?: string;
   version: number;
@@ -39,7 +37,6 @@ export function newFunction(): CopyFunction {
   return {
     id,
     name: 'function name',
-    types: ['page'],
     code: initialCode,
     pattern: '',
     theme: {
@@ -51,14 +48,11 @@ export function newFunction(): CopyFunction {
 }
 
 export function filterFunctions<T extends CopyFunction>(
-  targetType: TargetType,
-  pageURL: string,
+  url: string,
   functions: T[]
 ): T[] {
-  return functions.filter(
-    f =>
-      f.types.includes(targetType) &&
-      (f.pattern ? new RegExp(f.pattern).test(pageURL) : true)
+  return functions.filter(f =>
+    f.pattern ? new RegExp(f.pattern).test(url) : true
   );
 }
 

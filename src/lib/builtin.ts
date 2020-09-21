@@ -3,11 +3,11 @@ import {CopyFunction} from './function';
 export const initialCode = `
 /**
  * Return value will be copied to clipboard.
- * @param {Object} target
+ * @param {Object} page
  * @returns {(string|undefined|Promise)}
  */
-({title, pageURL, content}) => {
-  return [title, pageURL].join(' ');
+({title, url, content, selectingText}) => {
+  return [title, url].join(' ');
 }
 `.trim();
 
@@ -15,16 +15,15 @@ const copyAsMarkdownFn = `
 /**
  * Copy link as Markdown.
  */
-({title, pageURL}) => {
+({title, url}) => {
   const escaped = title.replace(/[\\[\\]]/g, '\\\\$&');
-  return \`[\${escaped}](\${pageURL})\`;
+  return \`[\${escaped}](\${url})\`;
 };
 `.trim();
 
 export const copyAsMarkdown: CopyFunction = {
   id: 'builtin-markdown',
   name: 'Markdown: [title](url)',
-  types: ['page'],
   code: copyAsMarkdownFn,
   pattern: undefined,
   version: 1,
@@ -41,12 +40,11 @@ const copyAsHTMLFn = `
  * You can use mustache template with \`render\` function.
  * @see https://github.com/janl/mustache.js
  */
-target => render('<a href="{{&pageURL}}">{{title}}</a>', target);`.trim();
+page => render('<a href="{{&url}}">{{title}}</a>', page);`.trim();
 
 export const copyAsHTML: CopyFunction = {
   id: 'builtin-html',
   name: 'HTML: <a href={url}>{title}</a>',
-  types: ['page'],
   code: copyAsHTMLFn,
   pattern: undefined,
   version: 1,

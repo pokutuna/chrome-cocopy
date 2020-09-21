@@ -1,19 +1,18 @@
 import * as ev from './eval';
-import {PageTarget} from './target';
+import {Page} from './page';
 
 describe('evaluate', () => {
-  const target: PageTarget = {
-    type: 'page',
+  const page: Page = {
     title: 'Test Title',
-    pageURL: 'https://example.test/some/page',
+    url: 'https://example.test/some/page',
     content: '',
   };
 
   test('success', async () => {
     const result = await ev.evaluate({
       command: 'eval',
-      code: '(t) => `[${t.title}](${t.pageURL})`',
-      target,
+      code: '(t) => `[${t.title}](${t.url})`',
+      page,
     });
     expect(result).toEqual({
       result: '[Test Title](https://example.test/some/page)',
@@ -24,7 +23,7 @@ describe('evaluate', () => {
     const result = await ev.evaluate({
       command: 'eval',
       code: '(t) => t.title.length',
-      target,
+      page,
     });
     expect(result).toEqual({
       result: 10,
@@ -35,7 +34,7 @@ describe('evaluate', () => {
     const result = await ev.evaluate({
       command: 'eval',
       code: '() => null',
-      target,
+      page,
     });
     expect(result).toEqual({
       result: null,
@@ -51,7 +50,7 @@ describe('evaluate', () => {
     const result = await ev.evaluate({
       command: 'eval',
       code: '}',
-      target,
+      page,
     });
     expect(result).toEqual({
       result: null,
@@ -67,7 +66,7 @@ describe('evaluate', () => {
     const result = await ev.evaluate({
       command: 'eval',
       code: '123',
-      target,
+      page,
     });
     expect(result).toEqual({
       result: null,
@@ -83,7 +82,7 @@ describe('evaluate', () => {
     const result = await ev.evaluate({
       command: 'eval',
       code: '() => { throw new Error("simulated error") }',
-      target,
+      page,
     });
     expect(result).toEqual({
       result: undefined,
@@ -99,7 +98,7 @@ describe('evaluate', () => {
     const result = await ev.evaluate({
       command: 'eval',
       code: '() => ({ foo: "bar" })',
-      target,
+      page,
     });
     expect(result).toEqual({
       result: {foo: 'bar'},

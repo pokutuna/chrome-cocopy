@@ -5,13 +5,6 @@
       "type": "string",
       "minLength": 1
     },
-    "types": {
-      "type": "array",
-      "items": {
-        "type": "string",
-        "enum": ["page", "text", "image"]
-      }
-    },
     "name": {
       "type": "string",
       "minLength": 1
