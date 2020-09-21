@@ -19,7 +19,13 @@ export function encodeSharable(fn: CopyFunction): string {
 
   const data = {...fn};
   delete data.id;
-  return toBase64(JSON.stringify(data));
+
+  return toBase64(
+    JSON.stringify(data).replace(
+      /[^\x00-\x7F]/g, // eslint-disable-line no-control-regex
+      c => `\\u${c.charCodeAt(0).toString(16)}`
+    )
+  );
 }
 
 export function decodeSharable(encoded: string): CopyFunction | undefined {
