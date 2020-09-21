@@ -1,0 +1,46 @@
+{
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "types": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["page", "text", "image"]
+      }
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "code": {
+      "type": "string"
+    },
+    "pattern": {
+      "type": "string"
+    },
+    "theme": {
+      "type": "object",
+      "properties": {
+        "textColor": {
+          "type": "string",
+          "pattern": "^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$"
+        },
+        "backgroundColor": {
+          "type": "string",
+          "pattern": "^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$"
+        }
+      },
+      "required": ["textColor", "backgroundColor"],
+      "additionalProperties": false
+    },
+    "version": {
+      "const": 1
+    }
+  },
+  "required": ["id", "name", "code", "theme", "version"],
+  "additionalProperties": false
+}

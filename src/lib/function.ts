@@ -2,6 +2,7 @@ import {TargetType, PageTarget, TextTarget, ImageTarget} from './target';
 import {Library} from './library';
 import {initialCode} from './builtin';
 import {textColorFromBgColor} from './util';
+import validate from './function.ajv';
 
 export const currentVersion = 1;
 
@@ -28,6 +29,30 @@ export interface CopyFunctionTheme {
 
 export interface CopyFunctionWithTheme extends CopyFunction {
   theme: CopyFunctionTheme;
+}
+
+export function generateId(): string {
+  return `function-${new Date().getTime()}`;
+}
+
+export function newFunction(): CopyFunctionWithTheme {
+  const id = generateId();
+  const backgroundColor =
+    colorPalette[Math.floor(Math.random() * colorPalette.length)];
+  const textColor = textColorFromBgColor(backgroundColor);
+
+  return {
+    id,
+    name: 'function name',
+    types: ['page'],
+    code: initialCode,
+    pattern: '',
+    theme: {
+      textColor,
+      backgroundColor,
+    },
+    version: currentVersion,
+  };
 }
 
 export function filterFunctions<T extends CopyFunction>(
@@ -65,40 +90,5 @@ export const colorPalette = [
 ];
 
 export function isCopyFunctionWithTheme(f: any): f is CopyFunctionWithTheme {
-  return (
-    typeof f === 'object' &&
-    typeof f.id === 'string' &&
-    typeof f.name === 'string' &&
-    Array.isArray(f.types) &&
-    typeof f.code === 'string' &&
-    (typeof f.pattern === 'string' || typeof f.pattern === 'undefined') &&
-    f.version === currentVersion &&
-    typeof f.theme === 'object' &&
-    typeof f.theme.textColor === 'string' &&
-    typeof f.theme.backgroundColor === 'string'
-  );
-}
-
-export function generateId(): string {
-  return `function-${new Date().getTime()}`;
-}
-
-export function newFunction(): CopyFunctionWithTheme {
-  const id = generateId();
-  const backgroundColor =
-    colorPalette[Math.floor(Math.random() * colorPalette.length)];
-  const textColor = textColorFromBgColor(backgroundColor);
-
-  return {
-    id,
-    name: 'function name',
-    types: ['page'],
-    code: initialCode,
-    pattern: '',
-    theme: {
-      textColor,
-      backgroundColor,
-    },
-    version: currentVersion,
-  };
+  return validate(f) as boolean;
 }

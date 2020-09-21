@@ -146,7 +146,7 @@ export function ColorInput(props: ColorInputProps) {
           id="color"
           name="color"
           placeholder="#F0F0F0"
-          pattern="#([0-9A-F]{3}|[0-9A-F]{6})"
+          pattern="#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})"
           maxLength={7}
           error={props.error}
         />

@@ -5,6 +5,7 @@
       "dom",
       "ES2020"
     ],
+    "allowJs": true,
     "esModuleInterop": true,
     "declaration": false,
     "jsx": "react",
