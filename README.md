@@ -1,13 +1,21 @@
-COCOPY
+cocopy
 ===
 
-![logo](./sozai/cocopy.png)
+![logo](./sozai/img/logo.png)
 
-a chrome extension to copy link by your code.
+a chrome extension to copy text by your code.
 
 ## Install
 
+Install from [Chrome Web Store](#)
+
 ## Usage
+
+
+### Keyboard Shortcut (optional)
+
+`chrome://extensions/shortcuts`
+
 
 ## Function Gallery
 

@@ -8,7 +8,7 @@ export const Links = memo(() => {
       <TextList>
         <li>
           <a
-            href="https://chrome.google.com/webstore/detail/COCOPY/ihnfodlbkhgjnbheemjhkjfkfglgbdgc"
+            href="https://chrome.google.com/webstore/detail/cocopy/ihnfodlbkhgjnbheemjhkjfkfglgbdgc"
             target="_blank"
             rel="noreferrer noopener"
           >
