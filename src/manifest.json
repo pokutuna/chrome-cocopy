@@ -1,10 +1,10 @@
 {
   "manifest_version": 2,
-  "name": "COCOPY",
+  "name": "cocopy",
   "version": "<from package.json>",
   "version_name": "<from git tag & revision>",
 
-  "description": "a chrome extension to copy link by your code.",
+  "description": "a chrome extension to copy text by your code.",
   "icons": {
     "16": "img/icon/16.png",
     "48": "img/icon/48.png",
@@ -29,10 +29,9 @@
 
   "commands": {
     "_execute_browser_action": {
-      "description": "Open COCOPY",
+      "description": "open cocopy",
       "suggested_key": {
-        "default": "Ctrl+Shift+L",
-        "mac": "Ctrl+Shift+L"
+        "default": "Ctrl+Shift+L"
       }
     }
   }
