@@ -29,6 +29,11 @@ export const Hint = memo(() => {
           To feedback an error, use <code>throw new Error(...)</code>. It will
           be displayed at the function that produced that.
         </li>
+        <li>
+          The code runs safely under the{' '}
+          <a href="https://developer.chrome.com/apps/sandboxingEval">sandbox</a>
+          , not under the page.
+        </li>
       </TextList>
     </Section>
   );
