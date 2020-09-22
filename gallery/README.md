@@ -41,3 +41,26 @@ Function Gallery
   return match ? new URL(url).origin + match[1] : undefined;
 }
 ```
+
+## BigQuery
+
+- [BigQuery project.dataset.table as Markdown](https://us-central1-cocopy.cloudfunctions.net/redirect?f=eyJuYW1lIjoiQmlnUXVlcnkgcHJvamVjdC5kYXRhc2V0LnRhYmxlIGFzIE1hcmtkb3duIiwiY29kZSI6Ii8qKlxuICogQ29weSBwcm9qZWN0LmRhdGFzZXQudGFibGUgYXMgTWFya2Rvd25cbiAqIFxuICogVGhpcyByZW1vdmVzIHRoZSB3b3JraW5nIHByb2plY3QoYD9wcm9qZWN0PWApIHBhcmFtcy5cbiAqL1xuKHBhZ2UpID0%2BIHtcbiAgY29uc3Qgb3JpZyA9IG5ldyBVUkwocGFnZS51cmwpO1xuICBjb25zdCB1cmwgPSBuZXcgVVJMKG9yaWcucGF0aCwgb3JpZy5vcmlnaW4pO1xuICBjb25zdCBwYXJ0cyA9IFtdO1xuICBbJ3AnLCAnZCcsICd0J10uZm9yRWFjaChrID0%2BIHtcbiAgICBjb25zdCBwYXJhbSA9IG9yaWcuc2VhcmNoUGFyYW1zLmdldChrKTtcbiAgICBwYXJ0cy5wdXNoKHBhcmFtKTtcbiAgICB1cmwuc2VhcmNoUGFyYW1zLnNldChrLCBwYXJhbSk7XG4gIH0pO1xuICByZXR1cm4gYFske3BhcnRzLmpvaW4oJy4nKX0gLSBCaWdRdWVyeV0oJHt1cmwudG9TdHJpbmcoKX0pYDtcbn0iLCJwYXR0ZXJuIjoiaHR0cHM6Ly9jb25zb2xlLmNsb3VkLmdvb2dsZS5jb20vYmlncXVlcnkiLCJ0aGVtZSI6eyJ0ZXh0Q29sb3IiOiIjRkZGRkZGIiwiYmFja2dyb3VuZENvbG9yIjoiIzFhNzNlOCJ9LCJ2ZXJzaW9uIjoxfQ%3D%3D)
+
+```js
+/**
+ * Copy project.dataset.table as Markdown
+ *
+ * This removes the working project(`?project=`) params.
+ */
+(page) => {
+  const orig = new URL(page.url);
+  const url = new URL(orig.path, orig.origin);
+  const parts = [];
+  ['p', 'd', 't'].forEach(k => {
+    const param = orig.searchParams.get(k);
+    parts.push(param);
+    url.searchParams.set(k, param);
+  });
+  return `[${parts.join('.')} - BigQuery](${url.toString()})`;
+}
+```
