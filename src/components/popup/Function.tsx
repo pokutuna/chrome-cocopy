@@ -1,6 +1,6 @@
 import {h} from 'preact';
 import {useCallback, useMemo} from 'preact/hooks';
-import styled, {keyframes} from 'styled-components';
+import styled, {css, keyframes} from 'styled-components';
 
 import {CopyFunction} from '../../lib/function';
 import {indexToKey} from '../../lib/util';
@@ -20,10 +20,8 @@ const scanning = keyframes`
   100% { background-position: 0% }
 `;
 
-const FunctionBoxWithAnimation = styled(FunctionBox)<
-  CopyFunction['theme'] & {running: boolean}
->`
-  animation-name: ${props => (props.running ? scanning : 'none')};
+const execAnimation = css<CopyFunction['theme']>`
+  animation-name: ${scanning};
   animation-duration: 0.3s;
   animation-timing-function: linear;
   animation-iteration-count: 1;
@@ -31,12 +29,27 @@ const FunctionBoxWithAnimation = styled(FunctionBox)<
   background-position: 0%;
   background-image: linear-gradient(
     90deg,
-    ${props => props.backgroundColor} 0%,
-    ${props => props.backgroundColor} 35%,
-    ${props => props.textColor} 60%,
-    ${props => props.backgroundColor} 60%,
-    ${props => props.backgroundColor} 100%
+    ${p => p.backgroundColor} 0%,
+    ${p => p.backgroundColor} 35%,
+    ${p => p.textColor} 60%,
+    ${p => p.backgroundColor} 60%,
+    ${p => p.backgroundColor} 100%
   );
+`;
+
+// XXX sometime scanning animation stops accidentally.
+// GPU & CSS animation problem? I met this when using this ext on sub display.
+const cancelAnimation = css<CopyFunction['theme']>`
+  animation-name: none !important;
+  background-color: ${p => p.backgroundColor};
+  background-image: none;
+  background-position: 0% !important;
+`;
+
+const FunctionBoxWithAnimation = styled(FunctionBox)<
+  CopyFunction['theme'] & {running: boolean}
+>`
+  ${p => (p.running ? execAnimation : cancelAnimation)};
 `;
 
 type FunctionItemProps = {
@@ -49,8 +62,8 @@ type FunctionItemProps = {
 
 export function FunctionItem(props: FunctionItemProps) {
   const {fn, index, running, error} = props;
-  const onClick = useCallback(() => props.onClick(fn), [props]);
   const shortcut = useMemo(() => indexToKey(index), [index]);
+  const onClick = useCallback(() => props.onClick(fn), [props.onClick, fn]);
   const onKeyDown = useCallback(wrapKeyDown(onClick), [onClick]);
 
   return (
