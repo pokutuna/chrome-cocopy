@@ -39,7 +39,7 @@ Install from [Chrome Web Store](https://chrome.google.com/webstore/detail/cocopy
 
 Set it up in `chrome://extensions/shortcuts` .
 
-The default suggeste keys to open popup are <kbd>Ctrl+Shift+L</kbd> or <kbd>Cmd+Shift+L</kbd>(Mac). 
+The default suggested keys to open popup are <kbd>Ctrl+Shift+L</kbd> or <kbd>Cmd+Shift+L</kbd>(Mac).
 
 Check for the settings conflicts with other extensions if it doesn't work. (e.g. [1Password X](https://chrome.google.com/webstore/detail/1password-x-%E2%80%93-password-ma/aeblfdkhhhdcdjpifhhbdiojplfjncoa))
 
