@@ -1,6 +1,13 @@
 Function Gallery
 ===
 
+## Notice
+- These links work if you installed this extension.
+- Links use a redirector to link with special url scheme `chrome-extension://`.
+- Welcome your addition. See [add.md](./add.md) & give me your pull request.
+
+
+
 ## Scrapbox
 
 - [Scrapbox: [title url]](https://us-central1-cocopy.cloudfunctions.net/redirect?f=eyJuYW1lIjoiU2NyYXBib3g6IFt0aXRsZSB1cmxdIiwiY29kZSI6Iih7dGl0bGUsIHVybH0pID0%2BIGBbJHt0aXRsZS5yZXBsYWNlKC9cXHMqW1xcW1xcXV1cXHMqL2csICcgJyl9ICR7dXJsfV1gOyIsInRoZW1lIjp7InRleHRDb2xvciI6IiNGRkZGRkYiLCJiYWNrZ3JvdW5kQ29sb3IiOiIjMDZCNjMyIn0sInZlcnNpb24iOjF9)
