@@ -9,7 +9,7 @@ a chrome extension to copy text by your code.
 
 ## Install
 
-Install from [Chrome Web Store](#)
+Install from [Chrome Web Store](https://chrome.google.com/webstore/detail/cocopy/ihnfodlbkhgjnbheemjhkjfkfglgbdgc)
 
 ## Usage
 
