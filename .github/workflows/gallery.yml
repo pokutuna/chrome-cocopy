@@ -1,0 +1,46 @@
+name: gallery
+on:
+  push:
+    paths:
+    - 'gallery/gallery.yaml'
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [12]
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node }}
+    - name: Get yarn cache directory path
+      id: yarn-cache-dir-path
+      run: echo "::set-output name=dir::$(yarn cache dir)"
+    - uses: actions/cache@v2
+      with:
+        path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+        key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-yarn-
+    - run: yarn install
+    - run: yarn update-gallery
+    - id: vars
+      run: |
+        FILES=$(git status --porcelain -- gallery | wc -l)
+        echo ::set-output name=updated::${FILES}
+        echo ::set-output name=branch::${GITHUB_REF#refs/*/}
+    - name: Commit update files
+      if: steps.vars.outputs.updated != 0
+      run: |
+        git config --local user.name $(git log -n1 --format="%an")
+        git config --local user.email $(git log -n1 --format="%ae")
+        git add gallery
+        git commit -m 'update gallery pages'
+    - name: Push
+      if: steps.diff.outputs.updated != 0
+      uses: ad-m/github-push-action@master
+      with:
+        branch: ${{ steps.vars.outputs.branch }}
+        github_token: ${{ secrets.GITHUB_TOKEN }}
