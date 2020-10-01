@@ -97,9 +97,9 @@ Link notations for various formats and services.
 
 
 
-## GCP
+## Google Cloud Platform
 
-Create a link to Google Cloud Platform. Linking to a resource considers whether should have &#x60;?project&#x3D;&#x60; parameters or not.
+Linking to a resource considers whether should have &#x60;?project&#x3D;&#x60; parameters or not.
 
 ### Document
 
@@ -274,6 +274,46 @@ Create a link to Google Cloud Platform. Linking to a resource considers whether 
 ({url}) => {
   const match = url.match(/(\/dp\/\w+)[/?]?/);
   return match ? new URL(url).origin + match[1] : undefined;
+}
+```
+</details>
+
+
+
+### YouTube
+
+
+
+#### [YouTube: Video URL with seek position](https://us-central1-cocopy.cloudfunctions.net/redirect?f=eyJuYW1lIjoiWW91VHViZTogVmlkZW8gVVJMIHdpdGggc2VlayBwb3NpdGlvbiIsImNvZGUiOiIvKipcbiAqIENvcHkgYSBZb3VUdWJlIHZpZGVvIFVSTCB3aXRoIGN1cnJlbnQgcGxheWdpbmcgcG9zaXRpb24uXG4gKiBHZXR0aW5nIHNlZWsgcG9zaXRpb24gZnJvbSBET00gbmVlZHMgdG8gc2hvdyB0aGUgcGxheWVyIGludGVyZmFjZSBvbmNlLlxuICovXG4oe3VybCwgY29udGVudH0pID0%2BIHtcbiAgY29uc3QgZG9jID0gbmV3IERPTVBhcnNlcigpLnBhcnNlRnJvbVN0cmluZyhjb250ZW50LCAndGV4dC9odG1sJyk7XG4gIGNvbnN0IHBvcyA9IGRvYy5xdWVyeVNlbGVjdG9yKCcueXRwLXRpbWUtY3VycmVudCcpLnRleHRDb250ZW50O1xuXG4gIGNvbnN0IHVuaXQgPSBbJ3MnLCAnbScsICdoJ107XG4gIGNvbnN0IHRpbWUgPSBwb3Muc3BsaXQoJzonKVxuICAgIC5yZXZlcnNlKClcbiAgICAubWFwKChuLCBpKSA9PiBwYXJzZUludChuLCAxMCkgKyB1bml0W2ldKVxuICAgIC5yZXZlcnNlKClcbiAgICAuam9pbignJyk7XG4gIFxuICBjb25zdCBvcmlnID0gbmV3IFVSTCh1cmwpO1xuICBjb25zdCB1ID0gbmV3IFVSTCgnL3dhdGNoJywgb3JpZy5vcmlnaW4pO1xuICB1LnNlYXJjaFBhcmFtcy5zZXQoJ3YnLCBvcmlnLnNlYXJjaFBhcmFtcy5nZXQoJ3YnKSk7XG4gIHUuc2VhcmNoUGFyYW1zLnNldCgndCcsIHRpbWUpO1xuICByZXR1cm4gdS50b1N0cmluZygpO1xufSIsInBhdHRlcm4iOiJ5b3V0dWJlLmNvbS93YXRjaCIsInRoZW1lIjp7InRleHRDb2xvciI6IiNGRkZGRkYiLCJiYWNrZ3JvdW5kQ29sb3IiOiIjRkYwMDAwIn0sInZlcnNpb24iOjF9)
+
+
+
+<details>
+<summary>detail</summary>
+
+- color: <span style="color:#FFFFFF; background-color:#FF0000">#FF0000</span>
+- pattern: `youtube.com/watch`
+```js
+/**
+ * Copy a YouTube video URL with current playging position.
+ * Getting seek position from DOM needs to show the player interface once.
+ */
+({url, content}) => {
+  const doc = new DOMParser().parseFromString(content, 'text/html');
+  const pos = doc.querySelector('.ytp-time-current').textContent;
+
+  const unit = ['s', 'm', 'h'];
+  const time = pos.split(':')
+    .reverse()
+    .map((n, i) => parseInt(n, 10) + unit[i])
+    .reverse()
+    .join('');
+  
+  const orig = new URL(url);
+  const u = new URL('/watch', orig.origin);
+  u.searchParams.set('v', orig.searchParams.get('v'));
+  u.searchParams.set('t', time);
+  return u.toString();
 }
 ```
 </details>
