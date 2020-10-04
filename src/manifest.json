@@ -31,7 +31,10 @@
     "_execute_browser_action": {
       "description": "open cocopy",
       "suggested_key": {
-        "default": "Ctrl+Shift+L"
+        "default": "Ctrl+Shift+L",
+        "mac": "Ctrl+Shift+L",
+        "windows": "Ctrl+Shift+L",
+        "linux": "Ctrl+Shift+L"
       }
     }
   },
