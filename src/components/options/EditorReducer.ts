@@ -87,6 +87,13 @@ function validateEdit(
   return errors;
 }
 
+function removeTrailingSpace(code: string): string {
+  return code
+    .split('\n')
+    .map(l => l.trimEnd())
+    .join('\n');
+}
+
 function handleEdit(state: State, action: EditAction): State {
   const next = {...state, [action.name]: action.value, hasSaved: false};
   if (action.name === 'backgroundColor') {
@@ -124,9 +131,16 @@ function reduce(state: State, action: Action): State {
       next.errors.code = action.error;
       return next;
     }
-    case 'save':
+    case 'save': {
+      // remove trailing space
+      const next = handleEdit(state, {
+        t: 'edit',
+        name: 'code',
+        value: removeTrailingSpace(state.code),
+      });
       state.fnDispatch({t: 'save'});
-      return {...state, hasSaved: true};
+      return {...next, hasSaved: true};
+    }
     case 'cancel':
       state.fnDispatch({t: 'cancel'});
       return state;
