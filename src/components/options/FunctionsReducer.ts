@@ -63,7 +63,8 @@ function reduce(state: State, action: Action): State {
     case 'init':
       return {...state, functions: action.functions};
     case 'select': {
-      const close = state.activeId === action.functionId;
+      const close =
+        state.activeId === action.functionId || state.activeId === newId;
       const next = reduce(state, {t: 'cancel'});
       if (close || next.activeId !== undefined) return next;
 
