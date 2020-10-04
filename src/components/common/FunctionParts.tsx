@@ -3,6 +3,7 @@ import {useCallback} from 'preact/hooks';
 import styled from 'styled-components';
 
 import {CopyFunction} from '../../lib/function';
+import {PatternIcon} from './Icon';
 
 export const FunctionBox = styled.div<CopyFunction['theme']>`
   display: flex;
@@ -59,6 +60,12 @@ export const FunctionName = styled.div`
   user-select: none; /* prevent accidental selection for form */
 `;
 
+export const RigthIconBox = styled.div<{color: string}>`
+  margin-left: auto;
+  width: ${p => p.theme.size.lg};
+  color: ${p => p.color};
+`;
+
 type FunctionItemProps = {
   fn: CopyFunction;
   onClick?: (fn: CopyFunction) => void;
@@ -73,6 +80,11 @@ export function FunctionItem(props: FunctionItemProps) {
     <FunctionBox {...props.fn.theme} onClick={onClick} tabIndex={-1}>
       <ShortcutBox />
       <FunctionName>{props.fn.name}</FunctionName>
+      {props.fn.pattern && (
+        <RigthIconBox color={props.fn.theme.textColor}>
+          <PatternIcon />
+        </RigthIconBox>
+      )}
     </FunctionBox>
   );
 }
