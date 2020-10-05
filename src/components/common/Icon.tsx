@@ -1,7 +1,5 @@
 import {h} from 'preact';
 
-import styled from 'styled-components';
-
 interface IconDef {
   viewBox: string;
   d: string;

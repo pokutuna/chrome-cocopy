@@ -1,0 +1,346 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`render options 1`] = `
+<body>
+  <div>
+    <div
+      class="sc-bdnylx fEgBwR"
+    >
+      <header>
+        <a
+          href="#/"
+        >
+          <div
+            class="sc-gtssRu kruGRM"
+          />
+        </a>
+      </header>
+      <div
+        class="sc-dlnjPT bKMytf"
+      >
+        <h2
+          class="sc-hKFyIo kqHCXE"
+        >
+          Functions
+        </h2>
+        <div
+          class="sc-eCApGN fsKIHg"
+        >
+          <div>
+            <div
+              class="sc-iwaifL fiPkhR"
+            >
+              <div
+                class="sc-cxNIbT exoMFU"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="svg-inline--fa fa-caret-right fa-w-6 fa-lg "
+                  data-icon="caret-right"
+                  data-prefix="fas"
+                  focusable="false"
+                  role="img"
+                  viewBox="0 0 192 512"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M0 384.662V127.338c0-17.818 21.543-26.741 34.142-14.142l128.662 128.662c7.81 7.81 7.81 20.474 0 28.284L34.142 398.804C21.543 411.404 0 402.48 0 384.662z"
+                    fill="currentColor"
+                  />
+                </svg>
+              </div>
+              <div
+                class="sc-kEqYlL gzwrWt"
+                tabindex="-1"
+              >
+                <div
+                  class="sc-iqAbSa gGSkkq"
+                />
+                <div
+                  class="sc-dIsAE gcDpLS"
+                >
+                  Markdown: [title](url)
+                </div>
+              </div>
+              <div
+                draggable="true"
+              >
+                <div
+                  class="sc-cxNIbT sc-lmgQde exoMFU iwSAIt"
+                  draggable="true"
+                >
+                  <svg
+                    aria-hidden="true"
+                    class="svg-inline--fa fa-bars fa-w-14 "
+                    data-icon="bars"
+                    data-prefix="fas"
+                    focusable="false"
+                    role="img"
+                    viewBox="0 0 448 512"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M16 132h416c8.837 0 16-7.163 16-16V76c0-8.837-7.163-16-16-16H16C7.163 60 0 67.163 0 76v40c0 8.837 7.163 16 16 16zm0 160h416c8.837 0 16-7.163 16-16v-40c0-8.837-7.163-16-16-16H16c-8.837 0-16 7.163-16 16v40c0 8.837 7.163 16 16 16zm0 160h416c8.837 0 16-7.163 16-16v-40c0-8.837-7.163-16-16-16H16c-8.837 0-16 7.163-16 16v40c0 8.837 7.163 16 16 16z"
+                      fill="currentColor"
+                    />
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div
+              class="sc-iwaifL fiPkhR"
+            >
+              <div
+                class="sc-cxNIbT exoMFU"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="svg-inline--fa fa-caret-right fa-w-6 fa-lg "
+                  data-icon="caret-right"
+                  data-prefix="fas"
+                  focusable="false"
+                  role="img"
+                  viewBox="0 0 192 512"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M0 384.662V127.338c0-17.818 21.543-26.741 34.142-14.142l128.662 128.662c7.81 7.81 7.81 20.474 0 28.284L34.142 398.804C21.543 411.404 0 402.48 0 384.662z"
+                    fill="currentColor"
+                  />
+                </svg>
+              </div>
+              <div
+                class="sc-kEqYlL dgIvBg"
+                tabindex="-1"
+              >
+                <div
+                  class="sc-iqAbSa gGSkkq"
+                />
+                <div
+                  class="sc-dIsAE gcDpLS"
+                >
+                  HTML: &lt;a href={url}&gt;{title}&lt;/a&gt;
+                </div>
+              </div>
+              <div
+                draggable="true"
+              >
+                <div
+                  class="sc-cxNIbT sc-lmgQde exoMFU iwSAIt"
+                  draggable="true"
+                >
+                  <svg
+                    aria-hidden="true"
+                    class="svg-inline--fa fa-bars fa-w-14 "
+                    data-icon="bars"
+                    data-prefix="fas"
+                    focusable="false"
+                    role="img"
+                    viewBox="0 0 448 512"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M16 132h416c8.837 0 16-7.163 16-16V76c0-8.837-7.163-16-16-16H16C7.163 60 0 67.163 0 76v40c0 8.837 7.163 16 16 16zm0 160h416c8.837 0 16-7.163 16-16v-40c0-8.837-7.163-16-16-16H16c-8.837 0-16 7.163-16 16v40c0 8.837 7.163 16 16 16zm0 160h416c8.837 0 16-7.163 16-16v-40c0-8.837-7.163-16-16-16H16c-8.837 0-16 7.163-16 16v40c0 8.837 7.163 16 16 16z"
+                      fill="currentColor"
+                    />
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="sc-giAqnE hvOJsj"
+          >
+            <div
+              class="sc-iwaifL fiPkhR"
+            >
+              <div
+                class="sc-cxNIbT exoMFU"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="svg-inline--fa fa-plus fa-w-14 "
+                  data-icon="plus"
+                  data-prefix="fas"
+                  focusable="false"
+                  role="img"
+                  viewBox="0 0 448 512"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M416 208H272V64c0-17.67-14.33-32-32-32h-32c-17.67 0-32 14.33-32 32v144H32c-17.67 0-32 14.33-32 32v32c0 17.67 14.33 32 32 32h144v144c0 17.67 14.33 32 32 32h32c17.67 0 32-14.33 32-32V304h144c17.67 0 32-14.33 32-32v-32c0-17.67-14.33-32-32-32z"
+                    fill="currentColor"
+                  />
+                </svg>
+              </div>
+              <div
+                class="sc-kEqYlL sc-ksluoS dGsTjY cocZqc"
+              >
+                <div
+                  class="sc-iqAbSa gGSkkq"
+                />
+                <div
+                  class="sc-dIsAE gcDpLS"
+                >
+                  Create New Function
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        class="sc-dlnjPT bKMytf"
+      >
+        <h2
+          class="sc-hKFyIo kqHCXE"
+        >
+          Hints
+        </h2>
+        <div
+          class="sc-eCApGN fsKIHg"
+        >
+          <ul
+            class="sc-jSFkmK dAHTJM"
+          >
+            <li>
+              The code must be a single function that returns a string value to be copied.
+            </li>
+            <li>
+              <code>
+                render(template, view)
+              </code>
+               - You can render
+               
+              <a
+                href="https://github.com/janl/mustache.js"
+              >
+                mustache
+              </a>
+               templates.
+            </li>
+            <li>
+              <code>
+                new DOMParser().parseFromString(content, 'text/html')
+              </code>
+              - You can use
+               
+              <a
+                href="https://developer.mozilla.org/docs/Web/API/DOMParser"
+              >
+                <code>
+                  DOMParser
+                </code>
+              </a>
+               
+              to query the page document.
+            </li>
+            <li>
+              To feedback an error, use 
+              <code>
+                throw new Error(...)
+              </code>
+              . It will be displayed at the function that produced that.
+            </li>
+            <li>
+              The code runs safely under the
+               
+              <a
+                href="https://developer.chrome.com/apps/sandboxingEval"
+              >
+                sandbox
+              </a>
+              , not under the page.
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div
+        class="sc-dlnjPT bKMytf"
+      >
+        <h2
+          class="sc-hKFyIo kqHCXE"
+        >
+          Debugging
+        </h2>
+        <div
+          class="sc-eCApGN fsKIHg"
+        >
+          <ul
+            class="sc-jSFkmK dAHTJM"
+          >
+            <li>
+              To open the developer console by right clicking on the popup & selecting "Inspect"
+            </li>
+            <li>
+              You can find the code on the "Sources" panel, in
+               
+              <code>
+                sandbox.html
+              </code>
+               &gt; 
+              <code>
+                (no domain)
+              </code>
+               after executing it.
+            </li>
+            <li>
+              You also can use 
+              <code>
+                debugger;
+              </code>
+               in the code.
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div
+        class="sc-dlnjPT bKMytf"
+      >
+        <h2
+          class="sc-hKFyIo kqHCXE"
+        >
+          Links
+        </h2>
+        <div
+          class="sc-eCApGN fsKIHg"
+        >
+          <ul
+            class="sc-jSFkmK dAHTJM"
+          >
+            <li>
+              <a
+                href="https://chrome.google.com/webstore/detail/cocopy/ihnfodlbkhgjnbheemjhkjfkfglgbdgc"
+                rel="noreferrer noopener"
+                target="_blank"
+              >
+                Chrome Web Store
+              </a>
+            </li>
+            <li>
+              <a
+                href="https://github.com/pokutuna/chrome-cocopy"
+                rel="noreferrer noopener"
+                target="_blank"
+              >
+                GitHub Repository
+              </a>
+            </li>
+            <li>
+              <a
+                href="./licenses.txt"
+                rel="noreferrer noopener"
+                target="_blank"
+              >
+                Copyright Notice
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+`;

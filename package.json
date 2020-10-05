@@ -44,6 +44,8 @@
     "styled-components": "5.2.0"
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "^5.11.4",
+    "@testing-library/preact": "^2.0.0",
     "@types/chroma-js": "2.1.0",
     "@types/chrome": "0.0.124",
     "@types/jest": "26.0.14",
@@ -62,6 +64,7 @@
     "gts": "2.0.2",
     "html-webpack-plugin": "4.5.0",
     "husky": "4.3.0",
+    "identity-obj-proxy": "^3.0.0",
     "jest": "26.4.2",
     "jest-chrome": "0.7.0",
     "js-yaml": "3.14.0",
