@@ -1,33 +1,28 @@
 import {h} from 'preact';
 import {memo} from 'preact/compat';
-import {Section, TextList} from '../options/Parts';
+import {Section, TextList, ExternalLink} from '../options/Parts';
 
 export const Links = memo(() => {
   return (
     <Section title="Links">
       <TextList>
         <li>
-          <a
-            href="https://chrome.google.com/webstore/detail/cocopy/ihnfodlbkhgjnbheemjhkjfkfglgbdgc"
-            target="_blank"
-            rel="noreferrer noopener"
-          >
+          <ExternalLink href="https://chrome.google.com/webstore/detail/cocopy/ihnfodlbkhgjnbheemjhkjfkfglgbdgc">
             Chrome Web Store
-          </a>
+          </ExternalLink>
         </li>
         <li>
-          <a
-            href="https://github.com/pokutuna/chrome-cocopy"
-            target="_blank"
-            rel="noreferrer noopener"
-          >
+          <ExternalLink href="https://github.com/pokutuna/chrome-cocopy">
             GitHub Repository
-          </a>
+          </ExternalLink>
         </li>
         <li>
-          <a href="./licenses.txt" target="_blank" rel="noreferrer noopener">
-            Copyright Notice
-          </a>
+          <ExternalLink href="https://github.com/pokutuna/chrome-cocopy/blob/master/gallery/README.md">
+            Function Gallery
+          </ExternalLink>
+        </li>
+        <li>
+          <ExternalLink href="./licenses.txt">Copyright Notice</ExternalLink>
         </li>
       </TextList>
     </Section>

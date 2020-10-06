@@ -24,7 +24,7 @@ Install from [Chrome Web Store](https://chrome.google.com/webstore/detail/cocopy
 
 ### Create & Edit Function
 
-- You can open the options page from the cog icon on the popup and define & edit a function
+- You can open the options page from the cog icon ⚙️ on the popup and define & edit a function
 - The function receives an object having these properties.
   - `title`: same as `document.title`.
   - `url`: same as `location.href`.
@@ -41,9 +41,14 @@ Set it up in `chrome://extensions/shortcuts` .
 
 The default suggested keys to open popup are <kbd>Ctrl+Shift+L</kbd> or <kbd>Cmd+Shift+L</kbd>(Mac).
 
-Check for the settings conflicts with other extensions if it doesn't work. (e.g. [1Password X](https://chrome.google.com/webstore/detail/1password-x-%E2%80%93-password-ma/aeblfdkhhhdcdjpifhhbdiojplfjncoa))
+Check for the settings conflicts with other extensions and re-input your shortcut keys if it doesn't work. (e.g. [1Password X](https://chrome.google.com/webstore/detail/1password-x-%E2%80%93-password-ma/aeblfdkhhhdcdjpifhhbdiojplfjncoa))
 
 
 ## Function Gallery
 
 [Go to the gallery](./gallery/README.md) to add more functions and see sample codes.
+
+There are functions to ...
+
+- Simplify Amazon.co.jp URL.
+- Copy current playing position on YouTube video.

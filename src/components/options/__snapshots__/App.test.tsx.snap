@@ -206,7 +206,7 @@ exports[`render options 1`] = `
             class="sc-jSFkmK dAHTJM"
           >
             <li>
-              The code must be a single function that returns a string value to be copied.
+              The code must be a single function that returns a string value to copy.
             </li>
             <li>
               <code>
@@ -216,10 +216,13 @@ exports[`render options 1`] = `
                
               <a
                 href="https://github.com/janl/mustache.js"
+                rel="noreferrer noopener"
+                target="_blank"
               >
                 mustache
               </a>
-               templates.
+               
+              templates.
             </li>
             <li>
               <code>
@@ -229,6 +232,8 @@ exports[`render options 1`] = `
                
               <a
                 href="https://developer.mozilla.org/docs/Web/API/DOMParser"
+                rel="noreferrer noopener"
+                target="_blank"
               >
                 <code>
                   DOMParser
@@ -242,17 +247,32 @@ exports[`render options 1`] = `
               <code>
                 throw new Error(...)
               </code>
-              . It will be displayed at the function that produced that.
+              . It will appear at the function that produced the error.
             </li>
             <li>
               The code runs safely under the
                
               <a
                 href="https://developer.chrome.com/apps/sandboxingEval"
+                rel="noreferrer noopener"
+                target="_blank"
               >
                 sandbox
               </a>
               , not under the page.
+            </li>
+            <li>
+              Visit
+               
+              <a
+                href="https://github.com/pokutuna/chrome-cocopy/blob/master/gallery/README.md"
+                rel="noreferrer noopener"
+                target="_blank"
+              >
+                Function Gallery
+              </a>
+               
+              to find new function and see sample codes.
             </li>
           </ul>
         </div>
@@ -326,6 +346,15 @@ exports[`render options 1`] = `
                 target="_blank"
               >
                 GitHub Repository
+              </a>
+            </li>
+            <li>
+              <a
+                href="https://github.com/pokutuna/chrome-cocopy/blob/master/gallery/README.md"
+                rel="noreferrer noopener"
+                target="_blank"
+              >
+                Function Gallery
               </a>
             </li>
             <li>
