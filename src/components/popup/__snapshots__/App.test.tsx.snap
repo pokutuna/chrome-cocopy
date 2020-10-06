@@ -3,17 +3,15 @@
 exports[`render popup 1`] = `
 <body>
   <div>
-    <div
-      class="sc-bdnylx dTgWtX"
-    >
+    <div>
       <div
-        class="sc-gtssRu hHPht"
+        class="sc-bdnylx ihlZUw"
       >
         <div
-          class="sc-dlnjPT jMylZB"
+          class="sc-gtssRu gpQDhF"
         />
         <a
-          class="sc-hKFyIo jQiFNd"
+          class="sc-dlnjPT dDfwZr"
           href="/options.html"
           target="_blank"
         >
@@ -36,39 +34,39 @@ exports[`render popup 1`] = `
       </div>
       <div>
         <div
-          class="sc-eCApGN sc-iqAbSa iRCizN dOTJGn"
+          class="sc-hKFyIo sc-kEqYlL gOPVqV eYjjgk"
           tabindex="1"
         >
           <div
-            class="sc-jSFkmK JcKaJ"
+            class="sc-eCApGN gOFSAh"
           >
             <kbd
-              class="sc-gKAblj fQPaqr"
+              class="sc-jSFkmK gwJIoY"
             >
               1
             </kbd>
           </div>
           <div
-            class="sc-iCoHVE sNtAS"
+            class="sc-gKAblj cJCRnF"
           >
             Markdown: [title](url)
           </div>
         </div>
         <div
-          class="sc-eCApGN sc-iqAbSa iBOTdE eWwlYu"
+          class="sc-hKFyIo sc-kEqYlL gvNVEM iBGedN"
           tabindex="1"
         >
           <div
-            class="sc-jSFkmK JcKaJ"
+            class="sc-eCApGN gOFSAh"
           >
             <kbd
-              class="sc-gKAblj icuebD"
+              class="sc-jSFkmK kqFbWA"
             >
               2
             </kbd>
           </div>
           <div
-            class="sc-iCoHVE sNtAS"
+            class="sc-gKAblj cJCRnF"
           >
             HTML: &lt;a href={url}&gt;{title}&lt;/a&gt;
           </div>
