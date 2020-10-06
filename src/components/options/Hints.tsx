@@ -8,8 +8,8 @@ export const Hint = memo(() => {
     <Section title="Hints">
       <TextList>
         <li>
-          The code must be a single function that returns a string value to be
-          copied.
+          The code must be a single function that returns a string value to
+          copy.
         </li>
         <li>
           <code>render(template, view)</code> - You can render{' '}
@@ -30,7 +30,7 @@ export const Hint = memo(() => {
         </li>
         <li>
           To feedback an error, use <code>throw new Error(...)</code>. It will
-          be displayed at the function that produced that.
+          appear at the function that produced the error.
         </li>
         <li>
           The code runs safely under the{' '}
