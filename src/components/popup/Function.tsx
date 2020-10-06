@@ -5,7 +5,13 @@ import styled, {css, keyframes} from 'styled-components';
 import {CopyFunction} from '../../lib/function';
 import {indexToKey} from '../../lib/util';
 import {EvalError} from '../../lib/eval';
-import {Shortcut, FunctionBox, FunctionName} from '../common/FunctionParts';
+import {
+  Shortcut,
+  FunctionBox,
+  FunctionName,
+  RigthIconBox,
+} from '../common/FunctionParts';
+import {PatternIcon} from '../common/Icon';
 import {FunctionError} from './Error';
 
 function wrapKeyDown(cb: () => void) {
@@ -80,6 +86,12 @@ export function FunctionItem(props: FunctionItemProps) {
         <FunctionName>{fn.name}</FunctionName>
       ) : (
         <FunctionError error={error} />
+      )}
+
+      {props.fn.pattern && (
+        <RigthIconBox color={props.fn.theme.textColor}>
+          <PatternIcon />
+        </RigthIconBox>
       )}
     </FunctionBoxWithAnimation>
   );
