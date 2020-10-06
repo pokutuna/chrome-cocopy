@@ -105,3 +105,14 @@ export const DividerV = styled.div`
     transparent 80%
   );
 `;
+
+export const ExternalLink = (props: {
+  href: string;
+  children: ComponentChildren;
+}) => {
+  return (
+    <a href={props.href} target="_blank" rel="noreferrer noopener">
+      {props.children}
+    </a>
+  );
+};

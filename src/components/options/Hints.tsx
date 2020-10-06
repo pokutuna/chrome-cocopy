@@ -1,7 +1,7 @@
 import {h} from 'preact';
 import {memo} from 'preact/compat';
 
-import {Section, TextList} from './Parts';
+import {Section, TextList, ExternalLink} from './Parts';
 
 export const Hint = memo(() => {
   return (
@@ -13,16 +13,19 @@ export const Hint = memo(() => {
         </li>
         <li>
           <code>render(template, view)</code> - You can render{' '}
-          <a href="https://github.com/janl/mustache.js">mustache</a> templates.
+          <ExternalLink href="https://github.com/janl/mustache.js">
+            mustache
+          </ExternalLink>{' '}
+          templates.
         </li>
         <li>
           <code>
             new DOMParser().parseFromString(content, &apos;text/html&apos;)
           </code>
           - You can use{' '}
-          <a href="https://developer.mozilla.org/docs/Web/API/DOMParser">
+          <ExternalLink href="https://developer.mozilla.org/docs/Web/API/DOMParser">
             <code>DOMParser</code>
-          </a>{' '}
+          </ExternalLink>{' '}
           to query the page document.
         </li>
         <li>
@@ -31,8 +34,17 @@ export const Hint = memo(() => {
         </li>
         <li>
           The code runs safely under the{' '}
-          <a href="https://developer.chrome.com/apps/sandboxingEval">sandbox</a>
+          <ExternalLink href="https://developer.chrome.com/apps/sandboxingEval">
+            sandbox
+          </ExternalLink>
           , not under the page.
+        </li>
+        <li>
+          Visit{' '}
+          <ExternalLink href="https://github.com/pokutuna/chrome-cocopy/blob/master/gallery/README.md">
+            Function Gallery
+          </ExternalLink>{' '}
+          to find new function and see sample codes.
         </li>
       </TextList>
     </Section>
