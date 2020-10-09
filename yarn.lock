@@ -620,7 +620,7 @@
     dom-accessibility-api "^0.5.1"
     pretty-format "^26.4.2"
 
-"@testing-library/jest-dom@^5.11.4":
+"@testing-library/jest-dom@5.11.4":
   version "5.11.4"
   resolved "https://registry.yarnpkg.com/@testing-library/jest-dom/-/jest-dom-5.11.4.tgz#f325c600db352afb92995c2576022b35621ddc99"
   integrity sha512-6RRn3epuweBODDIv3dAlWjOEHQLpGJHB2i912VS3JQtsD22+ENInhdDNl4ZZQiViLlIfFinkSET/J736ytV9sw==
@@ -634,7 +634,7 @@
     lodash "^4.17.15"
     redent "^3.0.0"
 
-"@testing-library/preact@^2.0.0":
+"@testing-library/preact@2.0.0":
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/@testing-library/preact/-/preact-2.0.0.tgz#bf40faa24136a2388e74655d154fe3538541c33b"
   integrity sha512-K54AYOnUzMcjK21+6XLfMyb6q8ngBVUXZkirjHMnUoqjarmCHmREzP539U0oKSszWSq7AJxu8M1EYD2YWAIneA==
@@ -4037,7 +4037,7 @@ icss-utils@^4.0.0, icss-utils@^4.1.1:
   dependencies:
     postcss "^7.0.14"
 
-identity-obj-proxy@^3.0.0:
+identity-obj-proxy@3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/identity-obj-proxy/-/identity-obj-proxy-3.0.0.tgz#94d2bda96084453ef36fbc5aaec37e0f79f1fc14"
   integrity sha1-lNK9qWCERT7zb7xarsN+D3nx/BQ=
