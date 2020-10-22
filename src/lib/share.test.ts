@@ -7,7 +7,7 @@ test('encodeSharable & decodeSharable', () => {
   const deserialized = s.decodeSharable(serialized);
   expect(deserialized).not.toBe(null);
 
-  delete fn.id;
-  delete deserialized!.id;
+  delete (fn as Partial<f.CopyFunction>).id;
+  delete (deserialized as Partial<f.CopyFunction>)!.id;
   expect(deserialized).toEqual(fn);
 });
