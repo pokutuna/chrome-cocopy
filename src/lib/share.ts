@@ -17,7 +17,7 @@ export function encodeSharable(fn: CopyFunction): string {
     throw new Error('fn is not a CopyFunction');
   }
 
-  const data = {...fn};
+  const data: Partial<CopyFunction> = {...fn};
   delete data.id;
 
   return toBase64(
