@@ -1,37 +1,223 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`render options 1`] = `
+.c0 {
+  padding: 0;
+  width: 840px;
+  margin: 20px auto;
+}
+
+.c1 {
+  display: inline-block;
+  background: no-repeat center/contain url('img/logo.png');
+  width: 123px;
+  height: 60px;
+}
+
+.c2 {
+  margin-bottom: 2rem;
+}
+
+.c3 {
+  font-family: Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
+  font-size: 1.25rem;
+}
+
+.c4 {
+  margin-left: 0.5rem;
+}
+
+.c15 {
+  font-size: .875rem;
+  margin-bottom: 1rem;
+}
+
+.c15 li {
+  margin-bottom: 0.5rem;
+}
+
+.c15 code {
+  font-size: .75rem;
+  font-family: Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
+  background-color: #f5f2f0;
+}
+
+.c13 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  width: 380px;
+  height: 32px;
+  padding: 0.25rem 0.5rem;
+  color: #010203;
+  background-color: #FFF;
+  cursor: pointer;
+}
+
+.c13:focus,
+.c13:hover {
+  -webkit-filter: brightness(110%);
+  filter: brightness(110%);
+}
+
+.c7 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  width: 380px;
+  height: 32px;
+  padding: 0.25rem 0.5rem;
+  color: #000000;
+  background-color: #f5f5f5;
+  cursor: pointer;
+}
+
+.c7:focus,
+.c7:hover {
+  -webkit-filter: brightness(110%);
+  filter: brightness(110%);
+}
+
+.c11 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  width: 380px;
+  height: 32px;
+  padding: 0.25rem 0.5rem;
+  color: #FFFFFF;
+  background-color: #ff5722;
+  cursor: pointer;
+}
+
+.c11:focus,
+.c11:hover {
+  -webkit-filter: brightness(110%);
+  filter: brightness(110%);
+}
+
+.c8 {
+  width: 32px;
+}
+
+.c9 {
+  font-size: 1rem;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.c14 {
+  border: 1px solid #010203;
+}
+
+.c14:hover {
+  color: #007BFF;
+  border-color: #007BFF;
+}
+
+.c5 {
+  opacity: 1;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.c6 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 32px;
+  cursor: pointer;
+}
+
+.c10 {
+  width: 2.25rem;
+  opacity: 1;
+  cursor: move;
+}
+
+.c12 {
+  margin-top: 0.5rem;
+}
+
 <body>
   <div>
     <div
-      class="sc-bdnylx fEgBwR"
+      class="c0"
     >
       <header>
         <a
           href="#/"
         >
           <div
-            class="sc-gtssRu kruGRM"
+            class="c1"
           />
         </a>
       </header>
       <div
-        class="sc-dlnjPT bKMytf"
+        class="c2"
       >
         <h2
-          class="sc-hKFyIo kqHCXE"
+          class="c3"
         >
           Functions
         </h2>
         <div
-          class="sc-eCApGN fsKIHg"
+          class="c4"
         >
           <div>
             <div
-              class="sc-iwaifL fiPkhR"
+              class="c5"
             >
               <div
-                class="sc-cxNIbT exoMFU"
+                class="c6"
               >
                 <svg
                   aria-hidden="true"
@@ -50,14 +236,14 @@ exports[`render options 1`] = `
                 </svg>
               </div>
               <div
-                class="sc-kEqYlL gzwrWt"
+                class="c7"
                 tabindex="-1"
               >
                 <div
-                  class="sc-iqAbSa gGSkkq"
+                  class="c8"
                 />
                 <div
-                  class="sc-dIsAE gcDpLS"
+                  class="c9"
                 >
                   Markdown: [title](url)
                 </div>
@@ -66,7 +252,7 @@ exports[`render options 1`] = `
                 draggable="true"
               >
                 <div
-                  class="sc-cxNIbT sc-lmgQde exoMFU iwSAIt"
+                  class="c6 c10"
                   draggable="true"
                 >
                   <svg
@@ -90,10 +276,10 @@ exports[`render options 1`] = `
           </div>
           <div>
             <div
-              class="sc-iwaifL fiPkhR"
+              class="c5"
             >
               <div
-                class="sc-cxNIbT exoMFU"
+                class="c6"
               >
                 <svg
                   aria-hidden="true"
@@ -112,14 +298,14 @@ exports[`render options 1`] = `
                 </svg>
               </div>
               <div
-                class="sc-kEqYlL dgIvBg"
+                class="c11"
                 tabindex="-1"
               >
                 <div
-                  class="sc-iqAbSa gGSkkq"
+                  class="c8"
                 />
                 <div
-                  class="sc-dIsAE gcDpLS"
+                  class="c9"
                 >
                   HTML: &lt;a href={url}&gt;{title}&lt;/a&gt;
                 </div>
@@ -128,7 +314,7 @@ exports[`render options 1`] = `
                 draggable="true"
               >
                 <div
-                  class="sc-cxNIbT sc-lmgQde exoMFU iwSAIt"
+                  class="c6 c10"
                   draggable="true"
                 >
                   <svg
@@ -151,13 +337,13 @@ exports[`render options 1`] = `
             </div>
           </div>
           <div
-            class="sc-giAqnE hvOJsj"
+            class="c12"
           >
             <div
-              class="sc-iwaifL fiPkhR"
+              class="c5"
             >
               <div
-                class="sc-cxNIbT exoMFU"
+                class="c6"
               >
                 <svg
                   aria-hidden="true"
@@ -176,13 +362,13 @@ exports[`render options 1`] = `
                 </svg>
               </div>
               <div
-                class="sc-kEqYlL sc-ksluoS dGsTjY cocZqc"
+                class="c13 c14"
               >
                 <div
-                  class="sc-iqAbSa gGSkkq"
+                  class="c8"
                 />
                 <div
-                  class="sc-dIsAE gcDpLS"
+                  class="c9"
                 >
                   Create New Function
                 </div>
@@ -192,18 +378,18 @@ exports[`render options 1`] = `
         </div>
       </div>
       <div
-        class="sc-dlnjPT bKMytf"
+        class="c2"
       >
         <h2
-          class="sc-hKFyIo kqHCXE"
+          class="c3"
         >
           Hints
         </h2>
         <div
-          class="sc-eCApGN fsKIHg"
+          class="c4"
         >
           <ul
-            class="sc-jSFkmK dAHTJM"
+            class="c15"
           >
             <li>
               The code must be a single function that returns a string value to copy.
@@ -278,18 +464,18 @@ exports[`render options 1`] = `
         </div>
       </div>
       <div
-        class="sc-dlnjPT bKMytf"
+        class="c2"
       >
         <h2
-          class="sc-hKFyIo kqHCXE"
+          class="c3"
         >
           Debugging
         </h2>
         <div
-          class="sc-eCApGN fsKIHg"
+          class="c4"
         >
           <ul
-            class="sc-jSFkmK dAHTJM"
+            class="c15"
           >
             <li>
               To open the developer console by right clicking on the popup & selecting "Inspect"
@@ -317,18 +503,18 @@ exports[`render options 1`] = `
         </div>
       </div>
       <div
-        class="sc-dlnjPT bKMytf"
+        class="c2"
       >
         <h2
-          class="sc-hKFyIo kqHCXE"
+          class="c3"
         >
           Links
         </h2>
         <div
-          class="sc-eCApGN fsKIHg"
+          class="c4"
         >
           <ul
-            class="sc-jSFkmK dAHTJM"
+            class="c15"
           >
             <li>
               <a

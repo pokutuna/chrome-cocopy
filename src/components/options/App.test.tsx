@@ -2,6 +2,7 @@ import {h} from 'preact';
 
 import {render, screen, waitFor} from '@testing-library/preact';
 import '@testing-library/jest-dom';
+import 'jest-styled-components';
 import {chrome} from 'jest-chrome';
 
 import {defaultFunctions} from '../../lib/builtin';

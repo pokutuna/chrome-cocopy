@@ -1,17 +1,164 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`render popup 1`] = `
+.c0 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  position: relative;
+}
+
+.c1 {
+  width: 84px;
+  height: 40px;
+  background: no-repeat center/contain url('img/logo.png');
+  margin: 0.25rem;
+  padding: 0 0.25rem;
+}
+
+.c2 {
+  position: absolute;
+  right: 0;
+  font-size: 1.25rem;
+  margin-right: 1rem;
+  color: #666;
+}
+
+.c2:hover,
+.c2:focus {
+  color: #333;
+  -webkit-animation: cilQsd 1.5s linear infinite;
+  animation: cilQsd 1.5s linear infinite;
+}
+
+.c3 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  width: 380px;
+  height: 32px;
+  padding: 0.25rem 0.5rem;
+  color: #000000;
+  background-color: #f5f5f5;
+  cursor: pointer;
+}
+
+.c3:focus,
+.c3:hover {
+  -webkit-filter: brightness(110%);
+  filter: brightness(110%);
+}
+
+.c8 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  width: 380px;
+  height: 32px;
+  padding: 0.25rem 0.5rem;
+  color: #FFFFFF;
+  background-color: #ff5722;
+  cursor: pointer;
+}
+
+.c8:focus,
+.c8:hover {
+  -webkit-filter: brightness(110%);
+  filter: brightness(110%);
+}
+
+.c5 {
+  width: 32px;
+}
+
+.c6 {
+  text-align: center;
+  padding: 0 0.25rem;
+  margin-right: 0.5rem;
+  font-size: 1.125rem;
+  font-family: Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
+  border-radius: 0.25rem;
+  border: 2px solid #000000;
+  box-shadow: 2px 2px 0px 0px rgba(0,0,0,0.3);
+}
+
+.c10 {
+  text-align: center;
+  padding: 0 0.25rem;
+  margin-right: 0.5rem;
+  font-size: 1.125rem;
+  font-family: Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
+  border-radius: 0.25rem;
+  border: 2px solid #FFFFFF;
+  box-shadow: 2px 2px 0px 0px rgba(0,0,0,0.3);
+}
+
+.c7 {
+  font-size: 1rem;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.c4 {
+  -webkit-animation-name: none !important;
+  animation-name: none !important;
+  background-color: #f5f5f5;
+  background-image: none;
+  background-position: 0% !important;
+}
+
+.c9 {
+  -webkit-animation-name: none !important;
+  animation-name: none !important;
+  background-color: #ff5722;
+  background-image: none;
+  background-position: 0% !important;
+}
+
 <body>
   <div>
     <div>
       <div
-        class="sc-bdnylx ihlZUw"
+        class="c0"
       >
         <div
-          class="sc-gtssRu gpQDhF"
+          class="c1"
         />
         <a
-          class="sc-dlnjPT dDfwZr"
+          class="c2"
           href="/options.html"
           target="_blank"
         >
@@ -34,39 +181,39 @@ exports[`render popup 1`] = `
       </div>
       <div>
         <div
-          class="sc-hKFyIo sc-kEqYlL gOPVqV eYjjgk"
+          class="c3 c4"
           tabindex="1"
         >
           <div
-            class="sc-eCApGN gOFSAh"
+            class="c5"
           >
             <kbd
-              class="sc-jSFkmK gwJIoY"
+              class="c6"
             >
               1
             </kbd>
           </div>
           <div
-            class="sc-gKAblj cJCRnF"
+            class="c7"
           >
             Markdown: [title](url)
           </div>
         </div>
         <div
-          class="sc-hKFyIo sc-kEqYlL gvNVEM iBGedN"
+          class="c8 c9"
           tabindex="1"
         >
           <div
-            class="sc-eCApGN gOFSAh"
+            class="c5"
           >
             <kbd
-              class="sc-jSFkmK kqFbWA"
+              class="c10"
             >
               2
             </kbd>
           </div>
           <div
-            class="sc-gKAblj cJCRnF"
+            class="c7"
           >
             HTML: &lt;a href={url}&gt;{title}&lt;/a&gt;
           </div>
