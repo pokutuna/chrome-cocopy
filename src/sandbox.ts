@@ -10,7 +10,7 @@ import * as library from './lib/library';
 
 Object.assign(window, library);
 
-const doneDOMContentLoaded = new Promise(resolve => {
+const doneDOMContentLoaded = new Promise<void>(resolve => {
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => resolve());
   } else {
