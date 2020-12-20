@@ -1,4 +1,4 @@
-import {h} from 'preact';
+import {h, Fragment} from 'preact';
 import {useState, useEffect, useCallback} from 'preact/hooks';
 
 import {getCopyFunctions} from '../../lib/config';
@@ -75,7 +75,7 @@ export const FunctionList = () => {
   }, [functions]);
 
   return (
-    <div>
+    <>
       {functions.map((r, idx) => (
         <FunctionItem
           key={r.id}
@@ -86,6 +86,6 @@ export const FunctionList = () => {
           onClick={onClick}
         />
       ))}
-    </div>
+    </>
   );
 };
