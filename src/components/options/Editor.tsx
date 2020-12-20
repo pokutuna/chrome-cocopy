@@ -132,7 +132,7 @@ export function Editor(props: EditorProps) {
               <ButtonIcon>
                 <FontAwesomeIcon icon={faShareSquare} />
               </ButtonIcon>
-              Share
+              {!props.install ? 'Share' : 'Update URL'}
             </Button>
           </Item>
           {!props.install && (
