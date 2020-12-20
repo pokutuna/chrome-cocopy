@@ -43,12 +43,19 @@ function reduce(state: State, action: Action): State {
   }
 }
 
+const NoticeFrame = styled.div`
+  border: 1px solid ${p => p.theme.color.warning};
+  color: ${p => p.theme.color.warning};
+  margin-bottom: ${p => p.theme.space[4]};
+`;
 const Notice = memo(() => {
   return (
-    <TextList>
-      <li>Sharing this URL makes others can use this function.</li>
-      <li>You can edit the code and every fields before installing.</li>
-    </TextList>
+    <NoticeFrame>
+      <TextList>
+        <li>Sharing this URL makes others can use this function.</li>
+        <li>You can edit the code and every fields before installation.</li>
+      </TextList>
+    </NoticeFrame>
   );
 });
 
@@ -84,13 +91,11 @@ export function InstallFunction() {
   return (
     <Section title="Install Function">
       {state.fn ? (
-        <div>
+        <EditorBox>
           <Notice />
-          <EditorBox>
-            <FunctionItem fn={state.fn} />
-            <Editor function={state.fn} dispatch={dispatch} install />
-          </EditorBox>
-        </div>
+          <FunctionItem fn={state.fn} />
+          <Editor function={state.fn} dispatch={dispatch} install />
+        </EditorBox>
       ) : (
         <FailedMessage />
       )}

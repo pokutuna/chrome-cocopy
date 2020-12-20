@@ -40,6 +40,7 @@ export const theme = {
     codeBg: '#f5f2f0',
     error: '#F44336',
     danger: '#F44336',
+    warning: '#4338CA',
     primary: '#007BFF',
   },
   fontFamily: {
