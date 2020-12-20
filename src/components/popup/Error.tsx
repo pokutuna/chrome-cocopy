@@ -8,14 +8,11 @@ const FunctionErrorBox = styled.div`
   justify-content: space-between;
   align-items: center;
 `;
-const MessageBox = styled.div``;
 
 export function FunctionError(props: {error: EvalError}) {
   return (
     <FunctionErrorBox>
-      <MessageBox>
-        {props.error.name}: {props.error.message}
-      </MessageBox>
+      {props.error.name}: {props.error.message}
     </FunctionErrorBox>
   );
 }

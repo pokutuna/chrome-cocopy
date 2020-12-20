@@ -8,10 +8,8 @@ import {FunctionList} from './FunctionList';
 export const App = () => {
   return (
     <ThemeProvider theme={theme}>
-      <div>
-        <PopupHeader />
-        <FunctionList />
-      </div>
+      <PopupHeader />
+      <FunctionList />
     </ThemeProvider>
   );
 };

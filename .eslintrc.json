@@ -12,6 +12,7 @@
   "settings": {
     "react": {
       "pragma": "h",
+      "fragment": "Fragment",
       "version": "latest"
     }
   },
