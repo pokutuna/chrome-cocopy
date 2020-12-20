@@ -1,5 +1,883 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`render install page 1`] = `
+<body>
+  .c0 {
+  padding: 0;
+  width: 840px;
+  margin: 20px auto;
+}
+
+.c1 {
+  display: inline-block;
+  background: no-repeat center/contain url('img/logo.png');
+  width: 123px;
+  height: 60px;
+}
+
+.c2 {
+  margin-bottom: 2rem;
+}
+
+.c3 {
+  font-family: Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
+  font-size: 1.25rem;
+}
+
+.c4 {
+  margin-left: 0.5rem;
+}
+
+.c7 {
+  font-size: .875rem;
+  margin-bottom: 1rem;
+}
+
+.c7 li {
+  margin-bottom: 0.5rem;
+}
+
+.c7 code {
+  font-size: .75rem;
+  font-family: Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
+  background-color: #f5f2f0;
+}
+
+.c11 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-flow: column wrap;
+  -ms-flex-flow: column wrap;
+  flex-flow: column wrap;
+}
+
+.c14 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-flex: 1;
+  -webkit-flex-grow: 1;
+  -ms-flex-positive: 1;
+  flex-grow: 1;
+}
+
+.c18 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-flex: 0;
+  -webkit-flex-grow: 0;
+  -ms-flex-positive: 0;
+  flex-grow: 0;
+}
+
+.c12 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-flow: row wrap;
+  -ms-flex-flow: row wrap;
+  flex-flow: row wrap;
+}
+
+.c12 .c13 + .c13 {
+  margin-left: 1rem;
+}
+
+.c24 {
+  margin: 0 0.5rem;
+  width: 0.25rem;
+  height: 100%;
+  background: linear-gradient( 180deg, transparent 20%, #DDD 20%, #DDD 80%, transparent 80% );
+}
+
+.c26 {
+  text-align: center;
+}
+
+.c8 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  width: 380px;
+  height: 32px;
+  padding: 0.25rem 0.5rem;
+  color: #000000;
+  background-color: #f5f5f5;
+  cursor: pointer;
+}
+
+.c8:focus,
+.c8:hover {
+  -webkit-filter: brightness(110%);
+  filter: brightness(110%);
+}
+
+.c9 {
+  width: 32px;
+}
+
+.c10 {
+  font-size: 1rem;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.c23 {
+  padding: 0.5rem;
+  background-color: transparent;
+  border: solid 1px;
+  border-radius: 0.25rem;
+  cursor: pointer;
+}
+
+.c23:hover:not(:disabled),
+.c23:focus:not(:disabled) {
+  color: #007BFF;
+  border-color: #007BFF;
+  outline-color: #007BFF;
+}
+
+.c25 {
+  margin-right: 0.25rem;
+}
+
+.c15 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  width: 100%;
+  margin-bottom: 0.5rem;
+  border-radius: 0.25rem;
+}
+
+.c16 {
+  font-size: 1.125rem;
+  margin: 0.5rem 0;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+}
+
+.c21 {
+  margin-left: 0.5rem;
+  font-size: .875rem;
+  -webkit-align-self: flex-end;
+  -ms-flex-item-align: end;
+  align-self: flex-end;
+  color: #666;
+}
+
+.c17 {
+  padding: 0.25rem;
+  font-size: 1.125rem;
+  width: 100%;
+  border: 1px solid;
+  border-color: inherit;
+}
+
+.c22 {
+  color: #F44336;
+  margin-left: 0.25rem;
+}
+
+.c19 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.c20 {
+  position: relative;
+  margin-left: -1.5rem;
+  font-size: 1.125rem;
+  cursor: pointer;
+}
+
+.c5 {
+  margin-left: 2.25rem;
+  margin-bottom: 2.25rem;
+}
+
+.c6 {
+  border: 1px solid #4338CA;
+  color: #4338CA;
+  margin-bottom: 1rem;
+}
+
+<div>
+    <div
+      class="c0"
+    >
+      <header>
+        <a
+          href="/"
+        >
+          <div
+            class="c1"
+          />
+        </a>
+      </header>
+      <div
+        class="c2"
+      >
+        <h2
+          class="c3"
+        >
+          Install Function
+        </h2>
+        <div
+          class="c4"
+        >
+          <div
+            class="c5"
+          >
+            <div
+              class="c6"
+            >
+              <ul
+                class="c7"
+              >
+                <li>
+                  Sharing this URL makes others can use this function.
+                </li>
+                <li>
+                  You can edit the code and every fields before installation.
+                </li>
+              </ul>
+            </div>
+            <div
+              class="c8"
+              tabindex="-1"
+            >
+              <div
+                class="c9"
+              />
+              <div
+                class="c10"
+              >
+                Markdown: [title](url)
+              </div>
+            </div>
+            <form>
+              <div
+                class="c11"
+              >
+                <div
+                  class="c12"
+                >
+                  <div
+                    class="c13 c14"
+                  >
+                    <div
+                      class="c15"
+                    >
+                      <label
+                        class="c16"
+                        for="name"
+                      >
+                        Name
+                      </label>
+                      <input
+                        class="c17"
+                        id="name"
+                        name="name"
+                        placeholder=""
+                        type="text"
+                      />
+                    </div>
+                  </div>
+                  <div
+                    class="c13 c18"
+                    style="width: 9rem;"
+                  >
+                    <div
+                      class="c15"
+                    >
+                      <label
+                        class="c16"
+                        for="color"
+                      >
+                        Color
+                      </label>
+                      <div
+                        class="c19"
+                      >
+                        <input
+                          class="c17"
+                          id="color"
+                          maxlength="7"
+                          name="color"
+                          pattern="#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})"
+                          placeholder="#F0F0F0"
+                          type="text"
+                        />
+                        <div
+                          class="c20"
+                        >
+                          <svg
+                            aria-hidden="true"
+                            class="svg-inline--fa fa-palette fa-w-16 "
+                            data-icon="palette"
+                            data-prefix="fas"
+                            focusable="false"
+                            role="img"
+                            viewBox="0 0 512 512"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="M204.3 5C104.9 24.4 24.8 104.3 5.2 203.4c-37 187 131.7 326.4 258.8 306.7 41.2-6.4 61.4-54.6 42.5-91.7-23.1-45.4 9.9-98.4 60.9-98.4h79.7c35.8 0 64.8-29.6 64.9-65.3C511.5 97.1 368.1-26.9 204.3 5zM96 320c-17.7 0-32-14.3-32-32s14.3-32 32-32 32 14.3 32 32-14.3 32-32 32zm32-128c-17.7 0-32-14.3-32-32s14.3-32 32-32 32 14.3 32 32-14.3 32-32 32zm128-64c-17.7 0-32-14.3-32-32s14.3-32 32-32 32 14.3 32 32-14.3 32-32 32zm128 64c-17.7 0-32-14.3-32-32s14.3-32 32-32 32 14.3 32 32-14.3 32-32 32z"
+                              fill="currentColor"
+                            />
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="c12"
+                >
+                  <div
+                    class="c15"
+                  >
+                    <label
+                      class="c16"
+                      for="pattern"
+                    >
+                      URL Pattern
+                      <span
+                        class="c21"
+                      >
+                        <span>
+                          (optional) This function will be displayed if the URL matches.
+                        </span>
+                      </span>
+                    </label>
+                    <input
+                      class="c17"
+                      id="pattern"
+                      name="pattern"
+                      placeholder=".*"
+                      type="text"
+                    />
+                  </div>
+                </div>
+                <div
+                  class="c12"
+                >
+                  <div
+                    class="c15"
+                  >
+                    <label
+                      class="c16"
+                      for="code"
+                    >
+                      Code
+                      <span
+                        class="c21"
+                      >
+                        Must be a single function.
+                      </span>
+                    </label>
+                    <div
+                      style="position: relative; text-align: left; box-sizing: border-box; padding: 0px; overflow: hidden; font-size: 1rem; font-family: Menlo, Monaco, Consolas, \\"Liberation Mono\\", \\"Courier New\\", monospace; background-color: rgb(245, 242, 240);"
+                    >
+                      <textarea
+                        autocapitalize="off"
+                        autocomplete="off"
+                        autocorrect="off"
+                        class="npm__react-simple-code-editor__textarea editor-additional-styles"
+                        id="code"
+                        style="margin: 0px; border: 0px; background: none; box-sizing: inherit; display: inherit; font-family: inherit; font-style: inherit; font-variant-ligatures: inherit; font-weight: inherit; letter-spacing: inherit; line-height: inherit; tab-size: inherit; text-indent: inherit; text-rendering: inherit; text-transform: inherit; white-space: pre-wrap; word-break: keep-all; overflow-wrap: break-word; position: absolute; top: 0px; left: 0px; height: 100%; width: 100%; resize: none; overflow: hidden; padding: 0.5rem 0.5rem 0.5rem 0.5rem;"
+                      />
+                      <pre
+                        aria-hidden="true"
+                        class="editor-additional-styles"
+                        style="margin: 0px; border: 0px; background: none; box-sizing: inherit; display: inherit; font-family: inherit; font-style: inherit; font-variant-ligatures: inherit; font-weight: inherit; letter-spacing: inherit; line-height: inherit; tab-size: inherit; text-indent: inherit; text-rendering: inherit; text-transform: inherit; white-space: pre-wrap; word-break: keep-all; overflow-wrap: break-word; position: relative; pointer-events: none; padding: 0.5rem 0.5rem 0.5rem 0.5rem;"
+                      >
+                        <span
+                          class="token comment"
+                        >
+                          /**
+ * Copy link as Markdown.
+ */
+                        </span>
+                        
+
+                        <span
+                          class="token punctuation"
+                        >
+                          (
+                        </span>
+                        <span
+                          class="token parameter"
+                        >
+                          <span
+                            class="token punctuation"
+                          >
+                            {
+                          </span>
+                          title
+                          <span
+                            class="token punctuation"
+                          >
+                            ,
+                          </span>
+                           url
+                          <span
+                            class="token punctuation"
+                          >
+                            }
+                          </span>
+                        </span>
+                        <span
+                          class="token punctuation"
+                        >
+                          )
+                        </span>
+                         
+                        <span
+                          class="token operator"
+                        >
+                          =&gt;
+                        </span>
+                         
+                        <span
+                          class="token punctuation"
+                        >
+                          {
+                        </span>
+                        
+  
+                        <span
+                          class="token keyword"
+                        >
+                          const
+                        </span>
+                         escaped 
+                        <span
+                          class="token operator"
+                        >
+                          =
+                        </span>
+                         title
+                        <span
+                          class="token punctuation"
+                        >
+                          .
+                        </span>
+                        <span
+                          class="token function"
+                        >
+                          replace
+                        </span>
+                        <span
+                          class="token punctuation"
+                        >
+                          (
+                        </span>
+                        <span
+                          class="token regex"
+                        >
+                          <span
+                            class="token regex-delimiter"
+                          >
+                            /
+                          </span>
+                          <span
+                            class="token regex-source language-regex"
+                          >
+                            [\\[\\]]
+                          </span>
+                          <span
+                            class="token regex-delimiter"
+                          >
+                            /
+                          </span>
+                          <span
+                            class="token regex-flags"
+                          >
+                            g
+                          </span>
+                        </span>
+                        <span
+                          class="token punctuation"
+                        >
+                          ,
+                        </span>
+                         
+                        <span
+                          class="token string"
+                        >
+                          '\\\\$&'
+                        </span>
+                        <span
+                          class="token punctuation"
+                        >
+                          )
+                        </span>
+                        <span
+                          class="token punctuation"
+                        >
+                          ;
+                        </span>
+                        
+  
+                        <span
+                          class="token keyword"
+                        >
+                          return
+                        </span>
+                         
+                        <span
+                          class="token template-string"
+                        >
+                          <span
+                            class="token template-punctuation string"
+                          >
+                            \`
+                          </span>
+                          <span
+                            class="token string"
+                          >
+                            [
+                          </span>
+                          <span
+                            class="token interpolation"
+                          >
+                            <span
+                              class="token interpolation-punctuation punctuation"
+                            >
+                              \${
+                            </span>
+                            escaped
+                            <span
+                              class="token interpolation-punctuation punctuation"
+                            >
+                              }
+                            </span>
+                          </span>
+                          <span
+                            class="token string"
+                          >
+                            ](
+                          </span>
+                          <span
+                            class="token interpolation"
+                          >
+                            <span
+                              class="token interpolation-punctuation punctuation"
+                            >
+                              \${
+                            </span>
+                            url
+                            <span
+                              class="token interpolation-punctuation punctuation"
+                            >
+                              }
+                            </span>
+                          </span>
+                          <span
+                            class="token string"
+                          >
+                            )
+                          </span>
+                          <span
+                            class="token template-punctuation string"
+                          >
+                            \`
+                          </span>
+                        </span>
+                        <span
+                          class="token punctuation"
+                        >
+                          ;
+                        </span>
+                        
+
+                        <span
+                          class="token punctuation"
+                        >
+                          }
+                        </span>
+                        <span
+                          class="token punctuation"
+                        >
+                          ;
+                        </span>
+                        <br />
+                      </pre>
+                      <style
+                        type="text/css"
+                      >
+                        
+/**
+ * Reset the text fill color so that placeholder is visible
+ */
+.npm__react-simple-code-editor__textarea:empty {
+  -webkit-text-fill-color: inherit !important;
+}
+
+/**
+ * Hack to apply on some CSS on IE10 and IE11
+ */
+@media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
+  /**
+    * IE doesn't support '-webkit-text-fill-color'
+    * So we use 'color: transparent' to make the text transparent on IE
+    * Unlike other browsers, it doesn't affect caret color in IE
+    */
+  .npm__react-simple-code-editor__textarea {
+    color: transparent !important;
+  }
+
+  .npm__react-simple-code-editor__textarea::selection {
+    background-color: #accef7 !important;
+    color: transparent !important;
+  }
+}
+
+                      </style>
+                    </div>
+                    <span
+                      class="c22"
+                    />
+                  </div>
+                </div>
+                <div
+                  class="c12"
+                >
+                  <div
+                    class="c13 c18"
+                  >
+                    <button
+                      class="c23"
+                      type="button"
+                    >
+                      Install
+                    </button>
+                  </div>
+                  <div
+                    class="c13 c18"
+                  >
+                    <div
+                      class="c24"
+                    />
+                  </div>
+                  <div
+                    class="c13 c18"
+                  >
+                    <button
+                      class="c23"
+                      type="button"
+                    >
+                      <i
+                        class="c25"
+                      >
+                        <svg
+                          aria-hidden="true"
+                          class="svg-inline--fa fa-share-square fa-w-18 "
+                          data-icon="share-square"
+                          data-prefix="fas"
+                          focusable="false"
+                          role="img"
+                          viewBox="0 0 576 512"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M568.482 177.448L424.479 313.433C409.3 327.768 384 317.14 384 295.985v-71.963c-144.575.97-205.566 35.113-164.775 171.353 4.483 14.973-12.846 26.567-25.006 17.33C155.252 383.105 120 326.488 120 269.339c0-143.937 117.599-172.5 264-173.312V24.012c0-21.174 25.317-31.768 40.479-17.448l144.003 135.988c10.02 9.463 10.028 25.425 0 34.896zM384 379.128V448H64V128h50.916a11.99 11.99 0 0 0 8.648-3.693c14.953-15.568 32.237-27.89 51.014-37.676C185.708 80.83 181.584 64 169.033 64H48C21.49 64 0 85.49 0 112v352c0 26.51 21.49 48 48 48h352c26.51 0 48-21.49 48-48v-88.806c0-8.288-8.197-14.066-16.011-11.302a71.83 71.83 0 0 1-34.189 3.377c-7.27-1.046-13.8 4.514-13.8 11.859z"
+                            fill="currentColor"
+                          />
+                        </svg>
+                      </i>
+                      Update URL
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+      <div
+        class="c2"
+      >
+        <h2
+          class="c3"
+        >
+          Hints
+        </h2>
+        <div
+          class="c4"
+        >
+          <ul
+            class="c7"
+          >
+            <li>
+              The code must be a single function that returns a string value to copy.
+            </li>
+            <li>
+              <code>
+                render(template, view)
+              </code>
+               - You can render
+               
+              <a
+                href="https://github.com/janl/mustache.js"
+                rel="noreferrer noopener"
+                target="_blank"
+              >
+                mustache
+              </a>
+               
+              templates.
+            </li>
+            <li>
+              <code>
+                new DOMParser().parseFromString(content, 'text/html')
+              </code>
+              - You can use
+               
+              <a
+                href="https://developer.mozilla.org/docs/Web/API/DOMParser"
+                rel="noreferrer noopener"
+                target="_blank"
+              >
+                <code>
+                  DOMParser
+                </code>
+              </a>
+               
+              to query the page document.
+            </li>
+            <li>
+              To feedback an error, use 
+              <code>
+                throw new Error(...)
+              </code>
+              . It will appear at the function that produced the error.
+            </li>
+            <li>
+              The code runs safely under the
+               
+              <a
+                href="https://developer.chrome.com/apps/sandboxingEval"
+                rel="noreferrer noopener"
+                target="_blank"
+              >
+                sandbox
+              </a>
+              , not under the page.
+            </li>
+            <li>
+              Visit
+               
+              <a
+                href="https://github.com/pokutuna/chrome-cocopy/blob/master/gallery/README.md"
+                rel="noreferrer noopener"
+                target="_blank"
+              >
+                Function Gallery
+              </a>
+               
+              to find new function and see sample codes.
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div
+        class="c2"
+      >
+        <h2
+          class="c3"
+        >
+          Links
+        </h2>
+        <div
+          class="c4"
+        >
+          <ul
+            class="c7"
+          >
+            <li>
+              <a
+                href="https://chrome.google.com/webstore/detail/cocopy/ihnfodlbkhgjnbheemjhkjfkfglgbdgc"
+                rel="noreferrer noopener"
+                target="_blank"
+              >
+                Chrome Web Store
+              </a>
+            </li>
+            <li>
+              <a
+                href="https://github.com/pokutuna/chrome-cocopy"
+                rel="noreferrer noopener"
+                target="_blank"
+              >
+                GitHub Repository
+              </a>
+            </li>
+            <li>
+              <a
+                href="https://github.com/pokutuna/chrome-cocopy/blob/master/gallery/README.md"
+                rel="noreferrer noopener"
+                target="_blank"
+              >
+                Function Gallery
+              </a>
+            </li>
+            <li>
+              <a
+                href="./licenses.txt"
+                rel="noreferrer noopener"
+                target="_blank"
+              >
+                Copyright Notice
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div
+        class="c26"
+      />
+    </div>
+  </div>
+</body>
+`;
+
 exports[`render options 1`] = `
 .c0 {
   padding: 0;
@@ -198,7 +1076,7 @@ exports[`render options 1`] = `
     >
       <header>
         <a
-          href="#/"
+          href="/"
         >
           <div
             class="c1"
