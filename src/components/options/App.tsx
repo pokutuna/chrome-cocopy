@@ -1,7 +1,7 @@
 import {h} from 'preact';
 import {ThemeProvider} from 'styled-components';
 
-import {HashRouter as Router, Switch, Route} from 'react-router-dom';
+import {Switch, Route} from 'react-router-dom';
 
 import {theme} from '../common/Theme';
 import {MainColumn, Title, VersionLabel} from './Parts';
@@ -12,26 +12,24 @@ import {InstallFunction} from './InstallFunction';
 
 export const App = () => {
   return (
-    <Router basename="/">
-      <ThemeProvider theme={theme}>
-        <MainColumn>
-          <Title />
-          <Switch>
-            <Route exact path="/">
-              <FunctionList />
-              <Hint />
-              <DebuggingHint />
-              <Links />
-            </Route>
-            <Route path="/install">
-              <InstallFunction />
-              <Hint />
-              <Links />
-            </Route>
-          </Switch>
-          <VersionLabel />
-        </MainColumn>
-      </ThemeProvider>
-    </Router>
+    <ThemeProvider theme={theme}>
+      <MainColumn>
+        <Title />
+        <Switch>
+          <Route exact path="/">
+            <FunctionList />
+            <Hint />
+            <DebuggingHint />
+            <Links />
+          </Route>
+          <Route path="/install">
+            <InstallFunction />
+            <Hint />
+            <Links />
+          </Route>
+        </Switch>
+        <VersionLabel />
+      </MainColumn>
+    </ThemeProvider>
   );
 };
