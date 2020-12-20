@@ -42,6 +42,10 @@ exports[`render options 1`] = `
   background-color: #f5f2f0;
 }
 
+.c16 {
+  text-align: center;
+}
+
 .c13 {
   display: -webkit-box;
   display: -webkit-flex;
@@ -555,6 +559,9 @@ exports[`render options 1`] = `
           </ul>
         </div>
       </div>
+      <div
+        class="c16"
+      />
     </div>
   </div>
 </body>

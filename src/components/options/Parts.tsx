@@ -1,4 +1,5 @@
 import {h, ComponentChildren} from 'preact';
+import {useMemo} from 'preact/hooks';
 import {memo} from 'preact/compat';
 
 import {Link} from 'react-router-dom';
@@ -115,4 +116,13 @@ export const ExternalLink = (props: {
       {props.children}
     </a>
   );
+};
+
+const Center = styled.div`
+  text-align: center;
+`;
+
+export const VersionLabel = () => {
+  const label = useMemo(() => chrome.runtime.getManifest()?.version_name, []);
+  return <Center>{label}</Center>;
 };

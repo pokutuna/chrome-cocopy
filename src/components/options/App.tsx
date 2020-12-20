@@ -4,7 +4,7 @@ import {ThemeProvider} from 'styled-components';
 import {HashRouter as Router, Switch, Route} from 'react-router-dom';
 
 import {theme} from '../common/Theme';
-import {MainColumn, Title} from './Parts';
+import {MainColumn, Title, VersionLabel} from './Parts';
 import {FunctionList} from './FunctionList';
 import {Links} from './Links';
 import {Hint, DebuggingHint} from './Hints';
@@ -29,6 +29,7 @@ export const App = () => {
               <Links />
             </Route>
           </Switch>
+          <VersionLabel />
         </MainColumn>
       </ThemeProvider>
     </Router>
