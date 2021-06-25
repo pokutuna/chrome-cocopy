@@ -10,7 +10,7 @@ interface GalleryCategory {
   categories?: GalleryCategory[];
 }
 
-const gallery = yaml.safeLoad(
+const gallery = yaml.load(
   fs.readFileSync(path.join(__dirname, './gallery.yaml'), 'utf8')
 ) as GalleryCategory[];
 

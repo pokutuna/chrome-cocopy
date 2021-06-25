@@ -9,7 +9,7 @@ const template = fs.readFileSync(
   path.join(__dirname, './README.template.md'),
   'utf8'
 );
-const gallery = yaml.safeLoad(
+const gallery = yaml.load(
   fs.readFileSync(path.join(__dirname, './gallery.yaml'), 'utf8')
 );
 
