@@ -31,7 +31,7 @@
     "@fortawesome/fontawesome-svg-core": "1.2.34",
     "@fortawesome/free-solid-svg-icons": "5.15.2",
     "@fortawesome/react-fontawesome": "0.1.14",
-    "ajv": "7.1.1",
+    "ajv": "8.6.0",
     "chroma-js": "2.1.0",
     "lodash.debounce": "4.0.8",
     "mustache": "4.1.0",
