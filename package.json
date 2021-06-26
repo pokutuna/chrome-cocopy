@@ -12,6 +12,7 @@
     "fix": "gts fix",
     "test": "jest",
     "posttest": "yarn run check",
+    "test-watch": "jest --watch",
     "update-gallery": "ts-node ./gallery/generate.ts",
     "validator": "ajv compile -s ./src/lib/function.schema.json -o ./src/lib/function.ajv.js",
     "watch": "webpack --watch",
