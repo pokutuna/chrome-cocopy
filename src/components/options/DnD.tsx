@@ -47,11 +47,15 @@ export function useDnDItem(props: DnDItemArgs) {
     drop: onDropped,
   });
 
-  const [{isDragging}, drag, dragPreview] = useDrag({
-    item: {type, id, index},
-    collect,
-    canDrag,
-  });
+  const [{isDragging}, drag, dragPreview] = useDrag(
+    {
+      type,
+      item: {id, index},
+      collect,
+      canDrag,
+    },
+    [id, index, canDrag]
+  );
 
   dragPreview(drop(ref));
 
