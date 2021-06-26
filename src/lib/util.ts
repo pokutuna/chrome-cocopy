@@ -26,3 +26,8 @@ export function textColorFromBgColor(hex: string): string {
 export function isColorCode(input: string): boolean {
   return /^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i.test(input);
 }
+
+export function isDev(): boolean {
+  const version = chrome.runtime.getManifest()?.version_name;
+  return !/^Build v\d+\.\d+.\d+(?:-\d+)?$/.test(version || '');
+}

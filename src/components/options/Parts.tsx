@@ -4,6 +4,7 @@ import {memo} from 'preact/compat';
 
 import {Link} from 'react-router-dom';
 import styled from 'styled-components';
+import {isDev} from '../../lib/util';
 
 export const MainColumn = styled.div`
   padding: 0;
@@ -11,18 +12,25 @@ export const MainColumn = styled.div`
   margin: 20px auto;
 `;
 
-const TitleIcon = styled.div`
+const TitleIcon = styled.div<{dev: boolean}>`
   display: inline-block;
   background: no-repeat center/contain url('img/logo.png');
   width: 123px;
   height: 60px;
+
+  filter: ${props =>
+    props.dev
+      ? 'invert(24%) sepia(85%) saturate(3947%) hue-rotate(167deg) brightness(93%) contrast(101%)'
+      : 'none'};
 `;
 
 export const Title = memo(() => {
+  const dev = useMemo(() => isDev(), []);
+
   return (
     <header>
       <Link to="/">
-        <TitleIcon />
+        <TitleIcon dev={dev} />
       </Link>
     </header>
   );
