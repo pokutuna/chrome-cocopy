@@ -9,8 +9,8 @@ import {defaultFunctions} from '../../lib/builtin';
 import {App} from './App';
 
 test('render popup', async () => {
-  chrome.tabs.query.mockImplementation((_, cb) =>
-    cb([{url: 'https://example.test/page'}] as chrome.tabs.Tab[])
+  chrome.tabs.query.mockImplementation(
+    async () => [{url: 'https://example.test/page'}] as chrome.tabs.Tab[]
   );
   chrome.storage.sync.get.mockImplementation((_, cb) =>
     cb({functions: defaultFunctions})
