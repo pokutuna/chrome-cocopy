@@ -52,3 +52,17 @@ There are functions to ...
 
 - Simplify Amazon.co.jp URL.
 - Copy current playing position on YouTube video.
+
+
+## Import/Export
+
+In options page & open console
+
+```js
+// export to clipboard
+chrome.storage.sync.get('functions', copy)
+
+// import
+const obj = /* paste here */;
+chrome.storage.sync.set(obj)
+```
