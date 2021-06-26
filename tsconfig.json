@@ -8,9 +8,8 @@
     "allowJs": true,
     "esModuleInterop": true,
     "declaration": false,
-    "jsx": "react",
-    "jsxFactory": "h",
-    "jsxFragmentFactory": "Fragment",
+    "jsx": "react-jsx",
+    "jsxImportSource": "preact",
     "skipLibCheck": true,
     "rootDir": "./",
     "outDir": "./build"
