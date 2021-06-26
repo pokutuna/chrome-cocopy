@@ -5,6 +5,8 @@ module.exports = {
   moduleNameMapper: {
     '^react$': 'preact/compat',
     '^react-dom$': 'preact/compat',
+    '^react-dom/test-utils$': 'preact/test-utils',
     '^.+\\.(css|sass|scss|less)$': 'identity-obj-proxy',
+    '^react/jsx-runtime$': 'preact-jsx-runtime',
   },
 };
