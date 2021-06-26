@@ -29,7 +29,7 @@
   ],
 
   "commands": {
-    "_execute_browser_action": {
+    "_execute_action": {
       "description": "open cocopy",
       "suggested_key": {
         "default": "Ctrl+Shift+L",
