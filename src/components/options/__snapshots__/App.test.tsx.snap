@@ -13,6 +13,8 @@ exports[`render install page 1`] = `
   background: no-repeat center/contain url('img/logo.png');
   width: 123px;
   height: 60px;
+  -webkit-filter: none;
+  filter: none;
 }
 
 .c2 {
@@ -872,7 +874,9 @@ exports[`render install page 1`] = `
       </div>
       <div
         class="c26"
-      />
+      >
+        Build v0.0.0
+      </div>
     </div>
   </div>
 </body>
@@ -890,6 +894,8 @@ exports[`render options 1`] = `
   background: no-repeat center/contain url('img/logo.png');
   width: 123px;
   height: 60px;
+  -webkit-filter: none;
+  filter: none;
 }
 
 .c2 {
@@ -1439,7 +1445,9 @@ exports[`render options 1`] = `
       </div>
       <div
         class="c16"
-      />
+      >
+        Build v0.0.0
+      </div>
     </div>
   </div>
 </body>

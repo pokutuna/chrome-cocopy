@@ -26,6 +26,8 @@ exports[`render popup 1`] = `
   background: no-repeat center/contain url('img/logo.png');
   margin: 0.25rem;
   padding: 0 0.25rem;
+  -webkit-filter: none;
+  filter: none;
 }
 
 .c2 {
