@@ -5,6 +5,6 @@ GCLOUD := gcloud beta --project $(PROJECT)
 deploy:
 	$(GCLOUD) functions deploy redirect \
 		--entry-point=app \
-		--runtime=nodejs12 \
+		--runtime=nodejs14 \
 		--trigger-http \
 		--allow-unauthenticated
