@@ -68,7 +68,10 @@ export async function evaluate(request: EvalPayload): Promise<EvalResult> {
   } catch (e) {
     return {
       result: null,
-      error: error('ParseError', e),
+      error: error(
+        'ParseError',
+        e instanceof Error ? e : new Error(`Unknown error: ${e}`)
+      ),
     };
   }
 
@@ -87,7 +90,10 @@ export async function evaluate(request: EvalPayload): Promise<EvalResult> {
   } catch (e) {
     return {
       result,
-      error: error('ExecutionError', e),
+      error: error(
+        'ExecutionError',
+        e instanceof Error ? e : new Error(`Unknown error: ${e}`)
+      ),
     };
   }
 

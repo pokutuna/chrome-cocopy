@@ -80,7 +80,11 @@ function validateEdit(
         new RegExp(action.value);
         errors.pattern = undefined;
       } catch (e) {
-        errors.pattern = e.message;
+        if (e instanceof Error) {
+          errors.pattern = e.message;
+        } else {
+          errors.pattern = `Unknown error: ${e}`;
+        }
       }
       break;
   }
