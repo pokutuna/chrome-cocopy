@@ -6,7 +6,12 @@ import validate from './function.ajv';
 
 export const currentVersion = 1;
 
-export type CopyResult = string | null | undefined;
+export interface RichContent {
+  html: string;
+  text: string;
+}
+
+export type CopyResult = string | RichContent | null | undefined;
 export type CopyFn = (
   this: Library,
   t: Page

@@ -6,7 +6,7 @@ import {CopyFunction, filterFunctions} from '../../lib/function';
 import {getActiveTab} from '../../lib/tab';
 import {createPageTargetFromTab} from '../../lib/page';
 import {keyToIndex} from '../../lib/util';
-import {EvalResult, EvalError} from '../../lib/eval';
+import {EvalResult, EvalError, isRichContent} from '../../lib/eval';
 
 import {FunctionItem} from './Function';
 import {useEvaluate} from '../common/Sandbox';
@@ -24,7 +24,16 @@ async function availableFunctions(): Promise<CopyFunction[]> {
 
 function writeResultToClipboard(res: EvalResult) {
   if (res.result) {
-    navigator.clipboard.writeText(res.result.toString());
+    if (isRichContent(res.result)) {
+      navigator.clipboard.write([
+        new ClipboardItem({
+          'text/plain': new Blob([res.result.text], {type: 'text/plain'}),
+          'text/html': new Blob([res.result.html], {type: 'text/html'}),
+        }),
+      ]);
+    } else {
+      navigator.clipboard.writeText(res.result.toString());
+    }
   }
 }
 

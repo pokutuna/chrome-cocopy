@@ -1,5 +1,5 @@
 import {Page, isPage} from './page';
-import {CopyResult} from './function';
+import {CopyResult, RichContent} from './function';
 
 export type EvalPayload =
   | {
@@ -33,8 +33,13 @@ function isAcceptableResult(input: any): input is CopyResult {
     typeof input === 'string' ||
     typeof input === 'number' ||
     typeof input === 'undefined' ||
-    input === null
+    input === null ||
+    isRichContent(input)
   );
+}
+
+export function isRichContent(input: any): input is RichContent {
+  return typeof input === 'object' && 'html' in input && 'text' in input;
 }
 
 function isEmpty(input: any): boolean {
@@ -76,7 +81,7 @@ export async function evaluate(request: EvalPayload): Promise<EvalResult> {
     result = await Promise.resolve(fn.call(undefined, request.page));
     if (!isAcceptableResult(result)) {
       throw new Error(
-        'returning value is not one of (string | number | null | undefined)'
+        'returning value is not one of (string | number | { html: string, text: string } | null | undefined)'
       );
     }
   } catch (e) {
