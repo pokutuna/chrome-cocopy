@@ -12,6 +12,15 @@ export const Hint = memo(() => {
           copy.
         </li>
         <li>
+          <b>*BETA*</b> Returning{' '}
+          <code>
+            {'{'}&quot;html&quot;:&quot;...&quot;,&quot;text&quot;:
+            &quot;...&quot;{'}'}
+          </code>{' '}
+          to copy as rich text &amp; plain text. This interface may change in
+          future.
+        </li>
+        <li>
           <code>render(template, view)</code> - You can render{' '}
           <ExternalLink href="https://github.com/janl/mustache.js">
             mustache
