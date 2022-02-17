@@ -19,7 +19,7 @@ async function executeInTab(
 ): Promise<string | undefined> {
   const p = new Promise<string>(resolve => {
     return chrome.scripting.executeScript(
-      {target: {tabId: tab.id!}, function: fn},
+      {target: {tabId: tab.id!}, func: fn},
       results => {
         resolve(results?.[0].result);
       }

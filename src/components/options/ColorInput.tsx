@@ -85,7 +85,7 @@ export function ColorPicker(props: ColorPickerProps) {
 
   useEffect(() => {
     const onClickBody = (event: MouseEvent) => {
-      if (props.show && !ref.current.contains(event.target as Node)) {
+      if (props.show && !ref.current?.contains(event.target as Node)) {
         props.togglePalette();
       }
     };
