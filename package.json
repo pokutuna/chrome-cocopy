@@ -60,7 +60,7 @@
     "@types/styled-components": "5.1.22",
     "ajv-cli": "5.0.0",
     "clean-webpack-plugin": "3.0.0",
-    "copy-webpack-plugin": "9.1.0",
+    "copy-webpack-plugin": "10.2.4",
     "css-loader": "6.6.0",
     "eslint-plugin-jest": "26.1.1",
     "eslint-plugin-react": "7.28.0",
