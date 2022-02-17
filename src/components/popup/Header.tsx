@@ -2,6 +2,7 @@ import {h} from 'preact';
 import styled, {keyframes} from 'styled-components';
 import {useMemo} from 'preact/hooks';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
+
 import {faCog} from '@fortawesome/free-solid-svg-icons/faCog';
 import {isDev} from '../../lib/util';
 
