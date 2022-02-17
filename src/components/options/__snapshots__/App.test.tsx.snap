@@ -751,6 +751,20 @@ exports[`render install page 1`] = `
               The code must be a single function that returns a string value to copy.
             </li>
             <li>
+              <b>
+                *BETA*
+              </b>
+               Returning
+               
+              <code>
+                {
+                "html":"...","text": "..."
+                }
+              </code>
+               
+              to copy as rich text & plain text. This interface may change in future.
+            </li>
+            <li>
               <code>
                 render(template, view)
               </code>
@@ -1281,6 +1295,20 @@ exports[`render options 1`] = `
           >
             <li>
               The code must be a single function that returns a string value to copy.
+            </li>
+            <li>
+              <b>
+                *BETA*
+              </b>
+               Returning
+               
+              <code>
+                {
+                "html":"...","text": "..."
+                }
+              </code>
+               
+              to copy as rich text & plain text. This interface may change in future.
             </li>
             <li>
               <code>
