@@ -1,13 +1,36 @@
 import {Page, isPage} from './page';
 import {CopyResult, RichContent} from './function';
 
-export type EvalPayload =
-  | {
-      command: 'eval';
-      code: string;
-      page: Page;
-    }
-  | {command: 'parse'; code: string};
+export type Modifier = {
+  alt: boolean;
+  ctrl: boolean;
+  meta: boolean;
+  shift: boolean;
+};
+
+export const EMPTY_MODIFIER: Modifier = {
+  alt: false,
+  ctrl: false,
+  meta: false,
+  shift: false,
+};
+
+export type FunctionArgument = Page & {
+  modifier: Modifier;
+};
+
+type FunctionEvalPayload = {
+  command: 'eval';
+  code: string;
+  arg: FunctionArgument;
+};
+
+type ParseEvalPayload = {
+  command: 'parse';
+  code: string;
+};
+
+export type EvalPayload = FunctionEvalPayload | ParseEvalPayload;
 
 export type EvalError = {
   type: 'ParseError' | 'ExecutionError' | 'ReturnsEmpty';
@@ -59,6 +82,7 @@ export async function evaluate(request: EvalPayload): Promise<EvalResult> {
     throw Error('unexpected command');
   }
 
+  // parse
   let fn: Function;
   try {
     fn = eval.call(undefined, request.code);
@@ -79,9 +103,10 @@ export async function evaluate(request: EvalPayload): Promise<EvalResult> {
     return {result: 'ok'};
   }
 
+  // excute
   let result: any;
   try {
-    result = await Promise.resolve(fn.call(undefined, request.page));
+    result = await Promise.resolve(fn.call(undefined, request.arg));
     if (!isAcceptableResult(result)) {
       throw new Error(
         'returning value is not one of (string | number | { html: string, text: string } | null | undefined)'

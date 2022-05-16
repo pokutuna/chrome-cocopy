@@ -1,18 +1,19 @@
 import * as ev from './eval';
-import {Page} from './page';
+import {FunctionArgument, EMPTY_MODIFIER} from './eval';
 
 describe('evaluate', () => {
-  const page: Page = {
+  const arg: FunctionArgument = {
     title: 'Test Title',
     url: 'https://example.test/some/page',
     content: '',
+    modifier: EMPTY_MODIFIER,
   };
 
   test('success', async () => {
     const result = await ev.evaluate({
       command: 'eval',
       code: '(t) => `[${t.title}](${t.url})`',
-      page,
+      arg,
     });
     expect(result).toEqual({
       result: '[Test Title](https://example.test/some/page)',
@@ -23,7 +24,7 @@ describe('evaluate', () => {
     const result = await ev.evaluate({
       command: 'eval',
       code: '(t) => t.title.length',
-      page,
+      arg,
     });
     expect(result).toEqual({
       result: 10,
@@ -34,7 +35,7 @@ describe('evaluate', () => {
     const result = await ev.evaluate({
       command: 'eval',
       code: '() => null',
-      page,
+      arg,
     });
     expect(result).toEqual({
       result: null,
@@ -46,11 +47,52 @@ describe('evaluate', () => {
     });
   });
 
+  test('success with modifier', async () => {
+    const code =
+      '({title, modifier}) => modifier.shift ? title + " (with Shift)" : title';
+
+    expect(
+      await ev.evaluate({
+        command: 'eval',
+        code,
+        arg,
+      })
+    ).toEqual({
+      result: 'Test Title',
+    });
+
+    expect(
+      await ev.evaluate({
+        command: 'eval',
+        code,
+        arg: {
+          ...arg,
+          modifier: {...EMPTY_MODIFIER, shift: true},
+        },
+      })
+    ).toEqual({
+      result: 'Test Title (with Shift)',
+    });
+
+    expect(
+      await ev.evaluate({
+        command: 'eval',
+        code,
+        arg: {
+          ...arg,
+          modifier: {...EMPTY_MODIFIER, shift: true, alt: true},
+        },
+      })
+    ).toEqual({
+      result: 'Test Title (with Shift)',
+    });
+  });
+
   test('parse error with syntax error', async () => {
     const result = await ev.evaluate({
       command: 'eval',
       code: '}',
-      page,
+      arg,
     });
     expect(result).toEqual({
       result: null,
@@ -66,7 +108,7 @@ describe('evaluate', () => {
     const result = await ev.evaluate({
       command: 'eval',
       code: '123',
-      page,
+      arg,
     });
     expect(result).toEqual({
       result: null,
@@ -82,7 +124,7 @@ describe('evaluate', () => {
     const result = await ev.evaluate({
       command: 'eval',
       code: '() => { throw new Error("simulated error") }',
-      page,
+      arg,
     });
     expect(result).toEqual({
       result: undefined,
@@ -98,7 +140,7 @@ describe('evaluate', () => {
     const result = await ev.evaluate({
       command: 'eval',
       code: '() => ({ foo: "bar" })',
-      page,
+      arg,
     });
     expect(result).toEqual({
       result: {foo: 'bar'},
