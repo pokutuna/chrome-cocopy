@@ -21,3 +21,12 @@ export function isModifier(input: any): input is Modifier {
     typeof input.shift === 'boolean'
   );
 }
+
+export function getModifier(e: KeyboardEvent): Modifier {
+  return {
+    alt: e.altKey,
+    ctrl: e.ctrlKey,
+    meta: e.metaKey,
+    shift: e.shiftKey,
+  };
+}

@@ -5,8 +5,9 @@ import {getCopyFunctions} from '../../lib/config';
 import {CopyFunction, filterFunctions} from '../../lib/function';
 import {getActiveTab} from '../../lib/tab';
 import {createPageTargetFromTab} from '../../lib/page';
-import {keyToIndex} from '../../lib/util';
+import {codeToIndex} from '../../lib/util';
 import {EvalResult, EvalError, isRichContent} from '../../lib/eval';
+import {Modifier, getModifier, EMPTY_MODIFIER} from '../../lib/modifier';
 
 import {FunctionItem} from './Function';
 import {useEvaluate} from '../common/Sandbox';
@@ -40,6 +41,7 @@ function writeResultToClipboard(res: EvalResult) {
 export const FunctionList = () => {
   const evaluate = useEvaluate();
   const [functions, setFunctions] = useState<CopyFunction[]>([]);
+  const [modifier, setModifier] = useState<Modifier>(EMPTY_MODIFIER);
   const [running, setRunning] = useState<string | null>(null);
   const [fnError, setFnError] = useState<FunctionError>(null);
 
@@ -57,21 +59,26 @@ export const FunctionList = () => {
         evaluate({
           command: 'eval',
           code: c.code + `\n//# sourceURL=${encodeURI(c.name)}.js`,
-          page: await createPageTargetFromTab(tab),
+          arg: {
+            ...(await createPageTargetFromTab(tab)),
+            modifier,
+          },
         })
           .then(writeResultToClipboard)
           .catch(r => setFnError({id: c.id, error: r.error}));
       };
       run().catch(e => console.error(e));
     },
-    [evaluate, setRunning, setFnError]
+    [evaluate, modifier, setRunning, setFnError]
   );
 
   // Kyeboard Shortcut
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if (/^\d$/.test(e.key)) {
-        const index = keyToIndex(e.key);
+      setModifier(getModifier(e));
+
+      const index = codeToIndex(e.code);
+      if (index !== undefined) {
         const rule = functions[index];
         if (rule) onClick(rule);
       }
@@ -81,7 +88,7 @@ export const FunctionList = () => {
     };
     document.addEventListener('keydown', handler);
     return () => document.removeEventListener('keydown', handler);
-  }, [functions]);
+  }, [functions, setModifier]);
 
   return (
     <>
