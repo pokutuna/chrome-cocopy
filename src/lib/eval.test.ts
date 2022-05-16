@@ -1,5 +1,6 @@
 import * as ev from './eval';
-import {FunctionArgument, EMPTY_MODIFIER} from './eval';
+import {FunctionArgument} from './eval';
+import {EMPTY_MODIFIER} from './modifier';
 
 describe('evaluate', () => {
   const arg: FunctionArgument = {

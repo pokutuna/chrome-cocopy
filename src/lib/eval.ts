@@ -1,23 +1,14 @@
 import {Page, isPage} from './page';
 import {CopyResult, RichContent} from './function';
-
-export type Modifier = {
-  alt: boolean;
-  ctrl: boolean;
-  meta: boolean;
-  shift: boolean;
-};
-
-export const EMPTY_MODIFIER: Modifier = {
-  alt: false,
-  ctrl: false,
-  meta: false,
-  shift: false,
-};
+import {Modifier, isModifier} from './modifier';
 
 export type FunctionArgument = Page & {
   modifier: Modifier;
 };
+
+export function isFunctionArgument(input: any): input is FunctionArgument {
+  return isPage(input) && isModifier((input as any).modifier);
+}
 
 type FunctionEvalPayload = {
   command: 'eval';
@@ -47,7 +38,7 @@ export function isEvalPayload(input: any): input is EvalPayload {
   return (
     typeof input.code === 'string' &&
     (input.command === 'parse' ||
-      (input.command === 'eval' && isPage(input.page)))
+      (input.command === 'eval' && isFunctionArgument(input.arg)))
   );
 }
 
