@@ -1,19 +1,17 @@
 import * as util from './util';
 
-test('keyToIndex', () => {
+test('codeToIndex', () => {
   const cases = [
-    {in: '1', out: 0},
-    {in: '2', out: 1},
-    {in: '3', out: 2},
-    {in: '4', out: 3},
-    {in: '5', out: 4},
-    {in: '6', out: 5},
-    {in: '7', out: 6},
-    {in: '8', out: 7},
-    {in: '9', out: 8},
-    {in: '0', out: 9},
+    {in: 'Digit1', out: 0},
+    {in: 'Digit2', out: 1},
+    {in: 'Digit9', out: 8},
+    {in: 'Digit0', out: 9},
+    {in: 'Numpad1', out: 0},
+    {in: 'Numpad2', out: 1},
+    {in: 'Numpad9', out: 8},
+    {in: 'Numpad0', out: 9},
   ];
-  cases.forEach(c => expect(util.keyToIndex(c.in)).toBe(c.out));
+  cases.forEach(c => expect(util.codeToIndex(c.in)).toBe(c.out));
 });
 
 test('textColorFromBgColor', () => {
