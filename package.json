@@ -70,6 +70,7 @@
     "identity-obj-proxy": "3.0.0",
     "jest": "28.1.0",
     "jest-chrome": "0.7.2",
+    "jest-environment-jsdom": "28.1.0",
     "jest-styled-components": "7.0.8",
     "js-yaml": "4.1.0",
     "license-webpack-plugin": "4.0.2",

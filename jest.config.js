@@ -1,6 +1,6 @@
 module.exports = {
   preset: 'ts-jest',
-  testEnvironment: 'jsdom',
+  testEnvironment: 'jest-environment-jsdom',
   setupFilesAfterEnv: ['./src/jest.setup.js'],
   moduleNameMapper: {
     '^react$': 'preact/compat',
