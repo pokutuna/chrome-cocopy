@@ -38,7 +38,7 @@
     "lodash.debounce": "4.0.8",
     "mustache": "4.2.0",
     "preact": "10.7.2",
-    "preact-jsx-runtime": "1.2.0",
+    "preact-jsx-runtime": "^1.2.0",
     "prismjs": "1.28.0",
     "react-dnd": "15.1.2",
     "react-dnd-html5-backend": "15.1.3",
