@@ -1,13 +1,27 @@
 import {Page, isPage} from './page';
 import {CopyResult, RichContent} from './function';
+import {Modifier, isModifier} from './modifier';
 
-export type EvalPayload =
-  | {
-      command: 'eval';
-      code: string;
-      page: Page;
-    }
-  | {command: 'parse'; code: string};
+export type FunctionArgument = Page & {
+  modifier: Modifier;
+};
+
+export function isFunctionArgument(input: any): input is FunctionArgument {
+  return isPage(input) && isModifier((input as any).modifier);
+}
+
+type FunctionEvalPayload = {
+  command: 'eval';
+  code: string;
+  arg: FunctionArgument;
+};
+
+type ParseEvalPayload = {
+  command: 'parse';
+  code: string;
+};
+
+export type EvalPayload = FunctionEvalPayload | ParseEvalPayload;
 
 export type EvalError = {
   type: 'ParseError' | 'ExecutionError' | 'ReturnsEmpty';
@@ -24,7 +38,7 @@ export function isEvalPayload(input: any): input is EvalPayload {
   return (
     typeof input.code === 'string' &&
     (input.command === 'parse' ||
-      (input.command === 'eval' && isPage(input.page)))
+      (input.command === 'eval' && isFunctionArgument(input.arg)))
   );
 }
 
@@ -59,6 +73,7 @@ export async function evaluate(request: EvalPayload): Promise<EvalResult> {
     throw Error('unexpected command');
   }
 
+  // parse
   let fn: Function;
   try {
     fn = eval.call(undefined, request.code);
@@ -79,9 +94,10 @@ export async function evaluate(request: EvalPayload): Promise<EvalResult> {
     return {result: 'ok'};
   }
 
+  // excute
   let result: any;
   try {
-    result = await Promise.resolve(fn.call(undefined, request.page));
+    result = await Promise.resolve(fn.call(undefined, request.arg));
     if (!isAcceptableResult(result)) {
       throw new Error(
         'returning value is not one of (string | number | { html: string, text: string } | null | undefined)'
