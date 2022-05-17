@@ -1,5 +1,4 @@
-import {h} from 'preact';
-import {memo} from 'preact/compat';
+import {memo} from 'react';
 import {Section, TextList, ExternalLink} from '../options/Parts';
 
 export const Links = memo(() => {

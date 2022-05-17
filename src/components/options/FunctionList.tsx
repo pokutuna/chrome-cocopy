@@ -1,5 +1,4 @@
-import {h} from 'preact';
-import {useEffect, useCallback, useRef, useReducer} from 'preact/hooks';
+import {useEffect, useCallback, useRef, useReducer} from 'react';
 import styled from 'styled-components';
 
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';

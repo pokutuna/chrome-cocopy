@@ -1,5 +1,4 @@
-import {h} from 'preact';
-import {useReducer, useMemo, useCallback} from 'preact/hooks';
+import {useReducer, useMemo, useCallback} from 'react';
 
 import debounce from 'lodash.debounce';
 

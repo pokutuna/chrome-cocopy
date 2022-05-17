@@ -1,5 +1,4 @@
-import {h} from 'preact';
-import {useCallback} from 'preact/hooks';
+import React, {useCallback} from 'react';
 import styled from 'styled-components';
 
 import {CopyFunction} from '../../lib/function';

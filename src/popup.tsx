@@ -1,5 +1,5 @@
-import {h, render} from 'preact';
+import * as ReactDOM from 'react-dom/client';
 
 import {App} from './components/popup/App';
 
-render(<App />, document.getElementById('root')!);
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);

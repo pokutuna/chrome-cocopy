@@ -1,5 +1,4 @@
-import {h} from 'preact';
-import {useCallback, useMemo} from 'preact/hooks';
+import {useCallback, useMemo} from 'react';
 import styled, {css, keyframes} from 'styled-components';
 
 import {CopyFunction} from '../../lib/function';

@@ -1,4 +1,4 @@
-import {h} from 'preact';
+import React from 'react';
 import {ThemeProvider} from 'styled-components';
 
 import {theme} from '../common/Theme';

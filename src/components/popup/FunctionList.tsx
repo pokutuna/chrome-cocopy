@@ -1,5 +1,4 @@
-import {h, Fragment} from 'preact';
-import {useState, useEffect, useCallback} from 'preact/hooks';
+import {useState, useEffect, useCallback} from 'react';
 
 import {getCopyFunctions} from '../../lib/config';
 import {CopyFunction, filterFunctions} from '../../lib/function';

@@ -1,10 +1,9 @@
-import {h, ComponentChildren} from 'preact';
-import {useCallback, Ref} from 'preact/hooks';
+import React, {useCallback} from 'react';
 
 import {DndProvider, useDrag, useDrop, DropTargetMonitor} from 'react-dnd';
 import {HTML5Backend} from 'react-dnd-html5-backend';
 
-export function DnDWrapper(props: {children: ComponentChildren}) {
+export function DnDWrapper(props: {children: React.ReactNode}) {
   return <DndProvider backend={HTML5Backend}>{props.children}</DndProvider>;
 }
 
@@ -19,7 +18,7 @@ interface DragItem {
 type DnDItemArgs = {
   id: string;
   index: number;
-  ref: Ref<HTMLElement>;
+  ref: React.RefObject<HTMLElement>;
   move: (dragIndex: number, hoverIndex: number) => void;
   canDrag?: boolean;
   onDropped?: (item: DragItem, monitor: DropTargetMonitor) => void;

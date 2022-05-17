@@ -1,6 +1,5 @@
-import {h} from 'preact';
 import styled, {keyframes} from 'styled-components';
-import {useMemo} from 'preact/hooks';
+import {useMemo} from 'react';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 
 import {faCog} from '@fortawesome/free-solid-svg-icons/faCog';

@@ -1,4 +1,3 @@
-import {h} from 'preact';
 import {ThemeProvider} from 'styled-components';
 import {Routes, Route} from 'react-router-dom';
 

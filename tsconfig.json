@@ -9,7 +9,6 @@
     "esModuleInterop": true,
     "declaration": false,
     "jsx": "react-jsx",
-    "jsxImportSource": "preact",
     "skipLibCheck": true,
     "rootDir": "./",
     "outDir": "./build"

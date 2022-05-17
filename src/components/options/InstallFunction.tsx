@@ -1,6 +1,4 @@
-import {h} from 'preact';
-import {memo} from 'preact/compat';
-import {useReducer, useMemo} from 'preact/hooks';
+import {memo, useReducer, useMemo} from 'react';
 import {useLocation} from 'react-router-dom';
 
 import styled from 'styled-components';
