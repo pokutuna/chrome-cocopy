@@ -1,5 +1,4 @@
-import {h, ComponentChildren} from 'preact';
-import {useCallback} from 'preact/hooks';
+import React, {useCallback} from 'react';
 import styled, {css} from 'styled-components';
 
 type ButtonMode = 'default' | 'danger';
@@ -34,7 +33,7 @@ export const Button = (props: {
   mode?: ButtonMode;
   disabled?: boolean;
   onClick?: (event: MouseEvent) => void;
-  children?: ComponentChildren;
+  children?: React.ReactNode;
 }) => {
   const onClick = useCallback(
     (event: MouseEvent) => {

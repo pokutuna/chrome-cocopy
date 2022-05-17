@@ -1,5 +1,4 @@
-import {h} from 'preact';
-import {useCallback, useEffect} from 'preact/hooks';
+import {useCallback, useEffect} from 'react';
 
 import {default as SimpleCodeEditor} from 'react-simple-code-editor';
 import {highlight as hl, languages} from 'prismjs/components/prism-core';
@@ -23,7 +22,6 @@ export const CodeEditor = (props: {
     return result;
   }, []);
 
-  // preact ignores spellCheck props?
   useEffect(() => {
     setTimeout(() => {
       const textarea = document.getElementById(textareaId);

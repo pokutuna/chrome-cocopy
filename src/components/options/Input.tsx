@@ -1,5 +1,4 @@
-import {h, VNode} from 'preact';
-import {useCallback} from 'preact/hooks';
+import React, {useCallback} from 'react';
 
 import styled from 'styled-components';
 
@@ -48,7 +47,7 @@ export const TextInput = (props: {
   pattern?: string;
   value: string;
   onInput?: (name: string, value: string) => void;
-  subLabel?: VNode;
+  subLabel?: React.ReactNode;
   error?: string;
 }) => {
   const handleInput = useCallback(

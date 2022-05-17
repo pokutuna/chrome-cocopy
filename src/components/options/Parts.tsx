@@ -1,6 +1,4 @@
-import {h, ComponentChildren} from 'preact';
-import {useMemo} from 'preact/hooks';
-import {memo} from 'preact/compat';
+import React, {memo, useMemo} from 'react';
 
 import {Link} from 'react-router-dom';
 import styled from 'styled-components';
@@ -49,10 +47,7 @@ const SectionInner = styled.div`
   margin-left: ${props => props.theme.space[2]};
 `;
 
-export const Section = (props: {
-  title: string;
-  children?: ComponentChildren;
-}) => (
+export const Section = (props: {title: string; children?: React.ReactNode}) => (
   <SectionBox>
     <SectionTitleHeader>{props.title}</SectionTitleHeader>
     <SectionInner>{props.children}</SectionInner>
@@ -117,7 +112,7 @@ export const DividerV = styled.div`
 
 export const ExternalLink = (props: {
   href: string;
-  children: ComponentChildren;
+  children: React.ReactNode;
 }) => {
   return (
     <a href={props.href} target="_blank" rel="noreferrer noopener">

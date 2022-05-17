@@ -1,4 +1,4 @@
-import {useMemo, useCallback, useEffect, useRef} from 'preact/hooks';
+import {useMemo, useCallback, useEffect, useRef} from 'react';
 import {EvalPayload, EvalResult} from '../../lib/eval';
 
 type Chan = {channel: number};

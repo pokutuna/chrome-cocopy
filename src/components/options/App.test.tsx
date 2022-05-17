@@ -1,6 +1,4 @@
-import {h} from 'preact';
-
-import {render, screen, waitFor} from '@testing-library/preact';
+import {render, screen, waitFor} from '@testing-library/react';
 import '@testing-library/jest-dom';
 import 'jest-styled-components';
 import {chrome} from 'jest-chrome';

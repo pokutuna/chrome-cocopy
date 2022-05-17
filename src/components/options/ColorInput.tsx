@@ -1,5 +1,4 @@
-import {h} from 'preact';
-import {useCallback, useEffect, useRef} from 'preact/hooks';
+import {useCallback, useEffect, useRef} from 'react';
 
 import {random} from 'chroma-js';
 
