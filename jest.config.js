@@ -6,4 +6,7 @@ module.exports = {
   moduleNameMapper: {
     '^.+\\.(css|sass|scss|less)$': 'identity-obj-proxy',
   },
+
+  // https://github.com/react-dnd/react-dnd/issues/3443
+  transformIgnorePatterns: ['/node_modules/(?!react-dnd|dnd-core|@react-dnd)'],
 };
