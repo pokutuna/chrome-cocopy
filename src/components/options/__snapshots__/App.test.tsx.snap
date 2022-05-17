@@ -317,6 +317,7 @@ exports[`render install page 1`] = `
                         name="name"
                         placeholder=""
                         type="text"
+                        value="Markdown: [title](url)"
                       />
                     </div>
                   </div>
@@ -344,6 +345,7 @@ exports[`render install page 1`] = `
                           pattern="#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})"
                           placeholder="#F0F0F0"
                           type="text"
+                          value="#f5f5f5"
                         />
                         <div
                           class="c20"
@@ -393,6 +395,7 @@ exports[`render install page 1`] = `
                       name="pattern"
                       placeholder=".*"
                       type="text"
+                      value=""
                     />
                   </div>
                 </div>
@@ -421,9 +424,19 @@ exports[`render install page 1`] = `
                         autocomplete="off"
                         autocorrect="off"
                         class="npm__react-simple-code-editor__textarea editor-additional-styles"
+                        data-gramm="false"
                         id="code"
+                        spellcheck="false"
                         style="margin: 0px; border: 0px; background: none; box-sizing: inherit; display: inherit; font-family: inherit; font-style: inherit; font-variant-ligatures: inherit; font-weight: inherit; letter-spacing: inherit; line-height: inherit; tab-size: inherit; text-indent: inherit; text-rendering: inherit; text-transform: inherit; white-space: pre-wrap; word-break: keep-all; overflow-wrap: break-word; position: absolute; top: 0px; left: 0px; height: 100%; width: 100%; resize: none; overflow: hidden; padding: 0.5rem 0.5rem 0.5rem 0.5rem;"
-                      />
+                      >
+                        /**
+ * Copy link as Markdown.
+ */
+({title, url}) =&gt; {
+  const escaped = title.replace(/[\\[\\]]/g, '\\\\$&');
+  return \`[\${escaped}](\${url})\`;
+};
+                      </textarea>
                       <pre
                         aria-hidden="true"
                         class="editor-additional-styles"
