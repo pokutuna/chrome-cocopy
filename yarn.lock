@@ -715,7 +715,7 @@
     lodash "^4.17.15"
     redent "^3.0.0"
 
-"@testing-library/react@^13.2.0":
+"@testing-library/react@13.2.0":
   version "13.2.0"
   resolved "https://registry.yarnpkg.com/@testing-library/react/-/react-13.2.0.tgz#2db00bc94d71c4e90e5c25582e90a650ae2925bf"
   integrity sha512-Bprbz/SZVONCJy5f7hcihNCv313IJXdYiv0nSJklIs1SQCIHHNlnGNkosSXnGZTmesyGIcBGNppYhXcc11pb7g==
@@ -4081,7 +4081,7 @@ json5@2.x, json5@^2.1.3, json5@^2.2.1:
     array-includes "^3.1.2"
     object.assign "^4.1.2"
 
-jsx-runtime@^1.2.0:
+jsx-runtime@1.2.0:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/jsx-runtime/-/jsx-runtime-1.2.0.tgz#3bae0dad50ec30541bb5b0420b104856694350cb"
   integrity sha1-O64NrVDsMFQbtbBCCxBIVmlDUMs=
