@@ -35,7 +35,7 @@
     "@fortawesome/react-fontawesome": "0.1.18",
     "ajv": "8.11.0",
     "chroma-js": "2.4.2",
-    "jsx-runtime": "^1.2.0",
+    "jsx-runtime": "1.2.0",
     "lodash.debounce": "4.0.8",
     "mustache": "4.2.0",
     "prismjs": "1.28.0",
@@ -49,7 +49,7 @@
   },
   "devDependencies": {
     "@testing-library/jest-dom": "5.16.4",
-    "@testing-library/react": "^13.2.0",
+    "@testing-library/react": "13.2.0",
     "@types/chroma-js": "2.1.3",
     "@types/chrome": "0.0.186",
     "@types/jest": "27.5.1",
