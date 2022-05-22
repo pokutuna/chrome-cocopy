@@ -355,6 +355,7 @@ exports[`render install page 1`] = `
                             class="svg-inline--fa fa-palette "
                             data-icon="palette"
                             data-prefix="fas"
+                            data-testid="toggle-palette"
                             focusable="false"
                             role="img"
                             viewBox="0 0 512 512"
