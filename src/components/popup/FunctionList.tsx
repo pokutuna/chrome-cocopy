@@ -6,7 +6,7 @@ import {getActiveTab} from '../../lib/tab';
 import {createPageTargetFromTab} from '../../lib/page';
 import {codeToIndex} from '../../lib/util';
 import {EvalResult, EvalError, isRichContent} from '../../lib/eval';
-import {Modifier, getModifier, EMPTY_MODIFIER} from '../../lib/modifier';
+import {useModifier} from './hooks';
 
 import {FunctionItem} from './Function';
 import {useEvaluate} from '../common/Sandbox';
@@ -40,9 +40,9 @@ function writeResultToClipboard(res: EvalResult) {
 export const FunctionList = () => {
   const evaluate = useEvaluate();
   const [functions, setFunctions] = useState<CopyFunction[]>([]);
-  const [modifier, setModifier] = useState<Modifier>(EMPTY_MODIFIER);
   const [running, setRunning] = useState<string | null>(null);
   const [fnError, setFnError] = useState<FunctionError>(null);
+  const modifier = useModifier();
 
   useEffect(() => {
     availableFunctions().then(setFunctions);
@@ -68,14 +68,12 @@ export const FunctionList = () => {
       };
       run().catch(e => console.error(e));
     },
-    [evaluate, modifier, setRunning, setFnError]
+    [evaluate, modifier]
   );
 
   // Kyeboard Shortcut
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      setModifier(getModifier(e));
-
       const index = codeToIndex(e.code);
       if (index !== undefined) {
         const rule = functions[index];
@@ -87,7 +85,7 @@ export const FunctionList = () => {
     };
     document.addEventListener('keydown', handler);
     return () => document.removeEventListener('keydown', handler);
-  }, [functions, setModifier]);
+  }, [functions, onClick]);
 
   return (
     <>
