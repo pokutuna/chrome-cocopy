@@ -1,6 +1,7 @@
 import {DispatchType as FnDispatchType} from './FunctionsReducer';
 import {CopyFunction, currentVersion} from '../../lib/function';
 import {textColorFromBgColor, isColorCode} from '../../lib/util';
+
 interface State {
   fn: CopyFunction;
   fnDispatch: FnDispatchType;
@@ -18,6 +19,7 @@ interface State {
     pattern?: string;
     code?: string;
   };
+
   canSave: boolean;
   hasSaved: boolean;
 }
@@ -100,6 +102,7 @@ function removeTrailingSpace(code: string): string {
 
 function handleEdit(state: State, action: EditAction): State {
   const next = {...state, [action.name]: action.value, hasSaved: false};
+
   if (action.name === 'backgroundColor') {
     if (/^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i.test(action.value)) {
       next.textColor = textColorFromBgColor(next.backgroundColor);
