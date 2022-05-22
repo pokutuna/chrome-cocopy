@@ -25,9 +25,17 @@ type EditorProps = {
 };
 
 export function Editor(props: EditorProps) {
+  // TODO refactor messaging between reducers
+  // stop warning "Cannot update a component while rendering a differencet component"
+  // see https://github.com/facebook/react/issues/18178
+  const laterDispatch = useCallback<FnDispatchType>(
+    action => setTimeout(() => props.dispatch(action), 1),
+    [props.dispatch]
+  );
+
   const [state, dispatch] = useReducer(
     reducer,
-    init(props.function, props.dispatch)
+    init(props.function, laterDispatch)
   );
 
   const onEdit = useCallback(
