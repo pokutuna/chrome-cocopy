@@ -6,7 +6,7 @@ export const initialCode = `
  * @param {Object} page
  * @returns {(string|undefined|Promise)}
  */
-({title, url, content, selectingText}) => {
+({title, url, content, selectingText, modifier}) => {
   return [title, url].join(' ');
 }
 `.trim();

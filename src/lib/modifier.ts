@@ -30,3 +30,12 @@ export function getModifier(e: KeyboardEvent): Modifier {
     shift: e.shiftKey,
   };
 }
+
+export function hasModifierChanged(prev: Modifier, next: Modifier): boolean {
+  return (
+    prev.alt !== next.alt ||
+    prev.ctrl !== next.ctrl ||
+    prev.meta !== next.meta ||
+    prev.shift !== next.shift
+  );
+}
