@@ -84,7 +84,11 @@ export function ColorPicker(props: ColorPickerProps) {
 
   useEffect(() => {
     const onClickBody = (event: MouseEvent) => {
-      if (props.show && !ref.current?.contains(event.target as Node)) {
+      if (
+        event.target instanceof Node &&
+        props.show &&
+        !ref.current?.contains(event.target)
+      ) {
         props.togglePalette();
       }
     };
@@ -93,16 +97,17 @@ export function ColorPicker(props: ColorPickerProps) {
   }, [props.show, props.togglePalette]);
 
   return (
-    <ColorPickerBox>
+    <ColorPickerBox ref={ref}>
       <FontAwesomeIcon
         icon={faPalette}
         onClick={props.togglePalette}
         color={props.show ? theme.color.primary : undefined}
+        data-testid="toggle-palette"
       />
       {props.show && (
-        <PaletteBox ref={ref}>
-          {colorPalette.map(c => (
-            <PaletteColor key={c} color={c} onClick={props.onSelect} />
+        <PaletteBox data-testid="palette">
+          {colorPalette.map((c, i) => (
+            <PaletteColor key={i} color={c} onClick={props.onSelect} />
           ))}
           <PaletteColorRandom onClick={props.onSelect} />
         </PaletteBox>
