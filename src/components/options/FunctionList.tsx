@@ -22,6 +22,8 @@ const FunctionItemBox = styled.div<{isDragging?: boolean}>`
   display: flex;
   flex-direction: row;
   align-items: center;
+  margin-top: ${props => (props.isDragging ? props.theme.space[1] : 0)};
+  margin-bottom: ${props => (props.isDragging ? props.theme.space[1] : 0)};
 `;
 
 const ItemButton = styled.div`
@@ -92,7 +94,7 @@ function FunctionListItem(props: FunctionListItemProps) {
   const move = useCallback(
     (dragIndex: number, hoverIndex: number) =>
       dispatch({t: 'dragging', dragIndex, hoverIndex}),
-    []
+    [dispatch]
   );
 
   const onDropped = useCallback(() => dispatch({t: 'dropped'}), []);
