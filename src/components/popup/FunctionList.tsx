@@ -77,9 +77,11 @@ export const FunctionList = () => {
       const index = codeToIndex(e.code);
       if (index !== undefined) {
         const rule = functions[index];
+        e.preventDefault();
         if (rule) onClick(rule);
       }
       if (e.key === 'Esc' || e.key === 'Escape') {
+        e.preventDefault();
         window.close();
       }
     };
