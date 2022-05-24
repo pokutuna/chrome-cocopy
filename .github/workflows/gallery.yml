@@ -3,6 +3,7 @@ on:
   push:
     paths:
       - 'gallery/gallery.yaml'
+  workflow_dispatch:
 
 jobs:
   generate:
