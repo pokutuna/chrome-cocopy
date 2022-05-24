@@ -26,10 +26,15 @@ Install from [Chrome Web Store](https://chrome.google.com/webstore/detail/cocopy
 
 - You can open the options page from the cog icon ⚙️ on the popup and define & edit a function
 - The function receives an object having these properties.
-  - `title`: same as `document.title`.
-  - `url`: same as `location.href`.
-  - `content`: same as `document.documentElement.outerHTML`. You can query it using [`DOMParser`](https://developer.mozilla.org/docs/Web/API/DOMParser).
-  - `selectingText`: same as `window.getSelection().toString()`.
+
+| property | type| description |
+| --- | --- | --- |
+| `title` | `string` | The page title. Same as `document.title`. |
+| `url` | `string` | The page url. Same as `location.href`. |
+| `content` | `string` | HTML content of current page. <br>Same as `document.documentElement.outerHTML` <br>You can query this using [`DOMParser`](https://developer.mozilla.org/docs/Web/API/DOMParser). |
+| `selectingText` | `string` | Text currently selected on the page. <br>Same as `window.getSelection().toString()`. |
+| `modifier` | `object` | Flags of modifier key being pressed when a function executed. <br>The keys are `alt`, `ctrl`, `meta` and `shift` |
+
 - The code runs safely under the [sandbox](https://developer.chrome.com/apps/sandboxingEval), not under the page.
 
 ![edit a function](./sozai/img/edit.gif)
