@@ -16,11 +16,6 @@ Function Gallery
 
 
 
-<details>
-<summary>detail</summary>
-
-- color: <span style="color:#000000; background-color:#f5f5f5">#f5f5f5</span>
-
 ```js
 /**
  * Copy link as Markdown.
@@ -30,18 +25,13 @@ Function Gallery
   return `[${escaped}](${url})`;
 };
 ```
-</details>
+
 
 
 
 ### [HTML: &lt;a href&#x3D;{url}&gt;{title}&lt;&#x2F;a&gt;](https://us-central1-cocopy.cloudfunctions.net/redirect?f=eyJuYW1lIjoiSFRNTDogPGEgaHJlZj17dXJsfT57dGl0bGV9PC9hPiIsImNvZGUiOiIvKipcbiAqIENvcHkgYXMgYW5jaG9yIGVsZW1lbnQuXG4gKlxuICogWW91IGNhbiB1c2UgbXVzdGFjaGUgdGVtcGxhdGUgd2l0aCBgcmVuZGVyYCBmdW5jdGlvbi5cbiAqIEBzZWUgaHR0cHM6Ly9naXRodWIuY29tL2phbmwvbXVzdGFjaGUuanNcbiAqL1xucGFnZSA9PiByZW5kZXIoJzxhIGhyZWY9XCJ7eyZ1cmx9fVwiPnt7dGl0bGV9fTwvYT4nLCBwYWdlKTsiLCJ0aGVtZSI6eyJ0ZXh0Q29sb3IiOiIjRkZGRkZGIiwiYmFja2dyb3VuZENvbG9yIjoiI2ZmNTcyMiJ9LCJ2ZXJzaW9uIjoxfQ%3D%3D)
 
 
-
-<details>
-<summary>detail</summary>
-
-- color: <span style="color:#FFFFFF; background-color:#ff5722">#ff5722</span>
 
 ```js
 /**
@@ -52,7 +42,7 @@ Function Gallery
  */
 page => render('<a href="{{&url}}">{{title}}</a>', page);
 ```
-</details>
+
 
 
 
@@ -65,26 +55,16 @@ Link notations for various formats and services.
 
 
 
-<details>
-<summary>detail</summary>
-
-- color: <span style="color:#FFFFFF; background-color:#06B632">#06B632</span>
-
 ```js
 ({title, url}) => `[${title.replace(/\s*[\[\]]\s*/g, ' ')} ${url}]`;
 ```
-</details>
+
 
 
 
 ### [Hatena: \[{url}:title&#x3D;{title}\]](https://us-central1-cocopy.cloudfunctions.net/redirect?f=eyJuYW1lIjoiSGF0ZW5hOiBbe3VybH06dGl0bGU9e3RpdGxlfV0iLCJjb2RlIjoiLyoqXG4gKiBDb3B5IGFzIFx1MzA2Zlx1MzA2Nlx1MzA2YVx1OGExOFx1NmNkNVxuICogQHNlZSBodHRwczovL2hlbHAuaGF0ZW5hYmxvZy5jb20vZW50cnkvdGV4dC1oYXRlbmEtbGlzdFxuICovXG4oe3RpdGxlLCB1cmx9KSA9PiBgWyR7dXJsfTp0aXRsZT0ke3RpdGxlfV1gOyIsInBhdHRlcm4iOiIiLCJ0aGVtZSI6eyJ0ZXh0Q29sb3IiOiIjRkZGRkZGIiwiYmFja2dyb3VuZENvbG9yIjoiIzAwOGJmZiJ9LCJ2ZXJzaW9uIjoxfQ%3D%3D)
 
 
-
-<details>
-<summary>detail</summary>
-
-- color: <span style="color:#FFFFFF; background-color:#008bff">#008bff</span>
 
 ```js
 /**
@@ -93,7 +73,7 @@ Link notations for various formats and services.
  */
 ({title, url}) => `[${url}:title=${title}]`;
 ```
-</details>
+
 
 
 
@@ -109,11 +89,6 @@ Linking to a resource considers whether should have &#x60;?project&#x3D;&#x60; p
 
 
 
-<details>
-<summary>detail</summary>
-
-- color: <span style="color:#FFFFFF; background-color:#1a73e8">#1a73e8</span>
-- pattern: `https://cloud.google.com/.*/docs/.*`
 ```js
 /**
  * Create link to GCP document for Scrapbox
@@ -140,7 +115,7 @@ Linking to a resource considers whether should have &#x60;?project&#x3D;&#x60; p
   return quote ? [link, quote].join('\n') : link;
 }
 ```
-</details>
+
 
 
 
@@ -148,11 +123,6 @@ Linking to a resource considers whether should have &#x60;?project&#x3D;&#x60; p
 
 
 
-<details>
-<summary>detail</summary>
-
-- color: <span style="color:#FFFFFF; background-color:#1a73e8">#1a73e8</span>
-- pattern: `https://cloud.google.com/.*/docs/.*`
 ```js
 /**
  * Create link to GCP document for Scrapbox
@@ -179,7 +149,7 @@ Linking to a resource considers whether should have &#x60;?project&#x3D;&#x60; p
   return quote ? [link, quote].join('\n') : link;
 }
 ```
-</details>
+
 
 
 
@@ -191,11 +161,6 @@ Linking to a resource considers whether should have &#x60;?project&#x3D;&#x60; p
 
 
 
-<details>
-<summary>detail</summary>
-
-- color: <span style="color:#FFFFFF; background-color:#1a73e8">#1a73e8</span>
-- pattern: `^https://console.cloud.google.com/storage/browser/`
 ```js
 /**
  * Create link to the GCS browser with gs://... title
@@ -209,7 +174,7 @@ Linking to a resource considers whether should have &#x60;?project&#x3D;&#x60; p
   return `[gs://${path} ${u.origin}${u.pathname}]`;
 }
 ```
-</details>
+
 
 
 
@@ -221,11 +186,6 @@ Linking to a resource considers whether should have &#x60;?project&#x3D;&#x60; p
 
 
 
-<details>
-<summary>detail</summary>
-
-- color: <span style="color:#FFFFFF; background-color:#1a73e8">#1a73e8</span>
-- pattern: `https://console.cloud.google.com/bigquery`
 ```js
 /**
  * Copy project.dataset.table as Markdown
@@ -244,7 +204,7 @@ Linking to a resource considers whether should have &#x60;?project&#x3D;&#x60; p
   return `[${parts.join('.')} - BigQuery](${url.toString()})`;
 }
 ```
-</details>
+
 
 
 
@@ -260,11 +220,6 @@ Linking to a resource considers whether should have &#x60;?project&#x3D;&#x60; p
 
 
 
-<details>
-<summary>detail</summary>
-
-- color: <span style="color:#000000; background-color:#ffa724">#ffa724</span>
-- pattern: `^https://www\.amazon\.co\.jp/(.+/dp/.+|gp/.+)$`
 ```js
 /**
  * Copy simplified amazon.co.jp item URL.
@@ -278,7 +233,7 @@ Linking to a resource considers whether should have &#x60;?project&#x3D;&#x60; p
   return modifier.shift ? u + '?tag=pokutuna-22' : u;
 }
 ```
-</details>
+
 
 
 
@@ -290,11 +245,6 @@ Linking to a resource considers whether should have &#x60;?project&#x3D;&#x60; p
 
 
 
-<details>
-<summary>detail</summary>
-
-- color: <span style="color:#FFFFFF; background-color:#FF0000">#FF0000</span>
-- pattern: `youtube.com/watch`
 ```js
 /**
  * Copy a YouTube video URL with current playging position.
@@ -318,7 +268,7 @@ Linking to a resource considers whether should have &#x60;?project&#x3D;&#x60; p
   return u.toString();
 }
 ```
-</details>
+
 
 
 
