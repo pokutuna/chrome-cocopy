@@ -36,15 +36,10 @@ const func = `
 
 {{&description}}
 
-<details>
-<summary>detail</summary>
-
-- color: <span style="color:{{fn.theme.textColor}}; background-color:{{fn.theme.backgroundColor}}">{{fn.theme.backgroundColor}}</span>
-{{#fn.pattern}}- pattern: \`{{&fn.pattern}}\`{{/fn.pattern}}
 \`\`\`js
 {{&fn.code}}
 \`\`\`
-</details>
+
 {{end}}
 `.trim();
 
