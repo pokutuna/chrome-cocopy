@@ -10,14 +10,14 @@
     "check": "gts check",
     "clean": "gts clean",
     "fix": "gts fix",
+    "prepare": "husky install",
     "test": "jest",
     "posttest": "yarn run check",
     "test-watch": "jest --watch",
     "update-gallery": "ts-node ./gallery/generate.ts",
     "validator": "ajv compile -s ./src/lib/function.schema.json -o ./src/lib/function.ajv.js",
     "watch": "webpack --watch",
-    "zip": "yarn build && zip -r build-$(cat build/manifest.json | jq -r '.version').zip ./build",
-    "prepare": "husky install"
+    "zip": "yarn build && zip -r build-$(cat build/manifest.json | jq -r '.version').zip ./build"
   },
   "husky": {
     "hooks": {
@@ -28,6 +28,9 @@
     "src/**/*.{ts,tsx}": [
       "gts fix"
     ]
+  },
+  "resolutions": {
+    "@types/react": "18.0.9"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "6.1.1",
@@ -88,8 +91,5 @@
   },
   "engines": {
     "node": ">=16"
-  },
-  "resolutions": {
-    "@types/react": "18.0.9"
   }
 }
