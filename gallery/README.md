@@ -256,7 +256,7 @@ Linking to a resource considers whether should have &#x60;?project&#x3D;&#x60; p
 
 
 
-#### [Amazon.co.jp: Simplify URL](https://us-central1-cocopy.cloudfunctions.net/redirect?f=eyJuYW1lIjoiQW1hem9uLmNvLmpwOiBTaW1wbGlmeSBVUkwiLCJjb2RlIjoiLyoqXG4gKiBDb3B5IHNpbXBsaWZpZWQgYW1hem9uLmNvLmpwIGl0ZW0gVVJMLlxuICpcbiAqIFJldHVybmluZyBmYWxzeSB2YWx1ZSBkb2Vzbid0IG92ZXJ3cml0ZSB5b3VyIGNsaXBib2FyZC5cbiAqL1xuKHt1cmx9KSA9PiB7XG4gIGNvbnN0IG1hdGNoID0gdXJsLm1hdGNoKC8oXFwvZHBcXC9cXHcrKVsvP10%2FLyk7XG4gIHJldHVybiBtYXRjaCA%2FIG5ldyBVUkwodXJsKS5vcmlnaW4gKyBtYXRjaFsxXSA6IHVuZGVmaW5lZDtcbn0iLCJwYXR0ZXJuIjoiXmh0dHBzOi8vd3d3XFwuYW1hem9uXFwuY29cXC5qcC8uKy9kcC8uKyQiLCJ0aGVtZSI6eyJ0ZXh0Q29sb3IiOiIjMDAwMDAwIiwiYmFja2dyb3VuZENvbG9yIjoiI2ZmYTcyNCJ9LCJ2ZXJzaW9uIjoxfQ%3D%3D)
+#### [Amazon.co.jp: Simplify URL](https://us-central1-cocopy.cloudfunctions.net/redirect?f=eyJuYW1lIjoiQW1hem9uLmNvLmpwOiBTaW1wbGlmeSBVUkwiLCJjb2RlIjoiLyoqXG4gKiBDb3B5IHNpbXBsaWZpZWQgYW1hem9uLmNvLmpwIGl0ZW0gVVJMLlxuICpcbiAqIFJldHVybmluZyBmYWxzeSB2YWx1ZSBkb2Vzbid0IG92ZXJ3cml0ZSB5b3VyIGNsaXBib2FyZC5cbiAqL1xuKHt1cmwsIG1vZGlmaWVyfSkgPT4ge1xuICBjb25zdCBtYXRjaCA9IHVybC5tYXRjaCgvKFxcL2RwXFwvXFx3K3xcXC9ncFxcL3Byb2R1Y3RcXC9cXHcrKVsvP10%2FLyk7XG4gIGlmICghbWF0Y2gpIHJldHVybiB1bmRlZmluZWQ7XG4gIGNvbnN0IHUgPSBuZXcgVVJMKHVybCkub3JpZ2luICsgbWF0Y2hbMV07XG4gIHJldHVybiBtb2RpZmllci5zaGlmdCA%2FIHUgKyAnP3RhZz1wb2t1dHVuYS0yMicgOiB1O1xufSIsInBhdHRlcm4iOiJeaHR0cHM6Ly93d3dcXC5hbWF6b25cXC5jb1xcLmpwLyguKy9kcC8uK3xncC8uKykkIiwidGhlbWUiOnsidGV4dENvbG9yIjoiIzAwMDAwMCIsImJhY2tncm91bmRDb2xvciI6IiNmZmE3MjQifSwidmVyc2lvbiI6MX0%3D)
 
 
 
@@ -264,16 +264,18 @@ Linking to a resource considers whether should have &#x60;?project&#x3D;&#x60; p
 <summary>detail</summary>
 
 - color: <span style="color:#000000; background-color:#ffa724">#ffa724</span>
-- pattern: `^https://www\.amazon\.co\.jp/.+/dp/.+$`
+- pattern: `^https://www\.amazon\.co\.jp/(.+/dp/.+|gp/.+)$`
 ```js
 /**
  * Copy simplified amazon.co.jp item URL.
  *
  * Returning falsy value doesn't overwrite your clipboard.
  */
-({url}) => {
-  const match = url.match(/(\/dp\/\w+)[/?]?/);
-  return match ? new URL(url).origin + match[1] : undefined;
+({url, modifier}) => {
+  const match = url.match(/(\/dp\/\w+|\/gp\/product\/\w+)[/?]?/);
+  if (!match) return undefined;
+  const u = new URL(url).origin + match[1];
+  return modifier.shift ? u + '?tag=pokutuna-22' : u;
 }
 ```
 </details>
