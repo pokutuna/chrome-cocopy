@@ -41,7 +41,7 @@
     "jsx-runtime": "1.2.0",
     "lodash.debounce": "4.0.8",
     "mustache": "4.2.0",
-    "prismjs": "1.28.0",
+    "prismjs": "1.30.0",
     "react": "18.2.0",
     "react-dnd": "16.0.1",
     "react-dnd-html5-backend": "16.0.1",
