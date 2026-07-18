@@ -11,7 +11,7 @@
     "ignoreDeprecations": "6.0",
     "types": [
       "chrome",
-      "jest",
+      "vitest/globals",
       "node"
     ],
     "declaration": false,
@@ -27,6 +27,8 @@
     "e2e/**/*",
     "scripts/**/*",
     "playwright.config.ts",
-    "vite.config.ts"
+    "vite.config.ts",
+    "vitest.config.ts",
+    "vitest.setup.ts"
   ]
 }
