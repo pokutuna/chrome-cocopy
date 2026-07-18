@@ -1,7 +1,7 @@
 const {defineConfig} = require('eslint/config');
 const globals = require('globals');
 const gts = require('gts');
-const jest = require('eslint-plugin-jest');
+const vitest = require('@vitest/eslint-plugin');
 const react = require('eslint-plugin-react');
 
 module.exports = defineConfig([
@@ -13,7 +13,7 @@ module.exports = defineConfig([
   react.configs.flat['jsx-runtime'],
   {
     files: ['**/*.{js,jsx,ts,tsx}'],
-    plugins: {jest, react},
+    plugins: {react},
     settings: {
       react: {
         version: 'detect',
@@ -22,7 +22,6 @@ module.exports = defineConfig([
     languageOptions: {
       globals: {
         ...globals.browser,
-        ...globals.jest,
         ...globals.node,
         chrome: 'readonly',
       },
@@ -38,18 +37,26 @@ module.exports = defineConfig([
       '@typescript-eslint/no-explicit-any': 'off',
       'react/display-name': 'off',
       'react/react-in-jsx-scope': 'off',
-      'jest/valid-title': 'off',
     },
   },
   {
     files: ['**/*.test.{js,jsx,ts,tsx}'],
-    ...jest.configs['flat/recommended'],
+    plugins: {vitest},
+    languageOptions: {
+      globals: {
+        ...globals.node,
+        ...vitest.environments.env.globals,
+      },
+    },
     rules: {
-      'jest/valid-title': 'off',
+      ...vitest.configs.recommended.rules,
+      // gallery/gallery.test.ts builds test titles from yaml category
+      // names read at runtime, which this rule can't statically verify.
+      'vitest/valid-title': 'off',
     },
   },
   {
-    files: ['jest.config.js', 'eslint.config.js'],
+    files: ['eslint.config.js'],
     languageOptions: {
       sourceType: 'commonjs',
     },

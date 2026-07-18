@@ -1,13 +1,13 @@
 import {fireEvent, render, screen} from '@testing-library/react';
 import '@testing-library/jest-dom';
-import 'jest-styled-components';
+import {vi} from 'vitest';
 import {ColorInput} from './ColorInput';
 
 import {Wrapper} from '../common/ForTest';
 
 test('toggle open', async () => {
-  const onInput = jest.fn();
-  const togglePalette = jest.fn();
+  const onInput = vi.fn();
+  const togglePalette = vi.fn();
 
   render(
     <Wrapper>
@@ -26,8 +26,8 @@ test('toggle open', async () => {
 });
 
 test('toggle close', async () => {
-  const onInput = jest.fn();
-  const togglePalette = jest.fn();
+  const onInput = vi.fn();
+  const togglePalette = vi.fn();
 
   render(
     <Wrapper>
