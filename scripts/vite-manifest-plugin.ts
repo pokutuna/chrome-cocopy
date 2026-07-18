@@ -10,9 +10,10 @@ import type {Plugin, ResolvedConfig} from 'vite';
  * unit-tested / reused if the manifest generation moves elsewhere later.
  */
 export function versionName(): Promise<string> {
-  return new Promise((resolve, reject) => {
+  return new Promise(resolve => {
     exec('git describe --tags --always --dirty', (err, stdout) =>
-      err ? reject(err) : resolve(`Build ${stdout.replace('\n', '')}`),
+      // Fall back when git is unavailable (e.g. building from a source ZIP).
+      err ? resolve('Build') : resolve(`Build ${stdout.trim()}`),
     );
   });
 }
@@ -40,19 +41,6 @@ export async function buildManifest(
   );
 }
 
-function copyDirRecursive(src: string, dest: string) {
-  fs.mkdirSync(dest, {recursive: true});
-  for (const entry of fs.readdirSync(src, {withFileTypes: true})) {
-    const srcPath = path.join(src, entry.name);
-    const destPath = path.join(dest, entry.name);
-    if (entry.isDirectory()) {
-      copyDirRecursive(srcPath, destPath);
-    } else {
-      fs.copyFileSync(srcPath, destPath);
-    }
-  }
-}
-
 export type ManifestPluginOptions = {
   /** Path to the source manifest.json (e.g. src/manifest.json). */
   srcManifest: string;
@@ -76,9 +64,10 @@ export function manifestPlugin(options: ManifestPluginOptions): Plugin {
       resolvedConfig = config;
     },
     async closeBundle() {
-      const outDir = path.isAbsolute(resolvedConfig.build.outDir)
-        ? resolvedConfig.build.outDir
-        : path.join(resolvedConfig.root, resolvedConfig.build.outDir);
+      const outDir = path.resolve(
+        resolvedConfig.root,
+        resolvedConfig.build.outDir,
+      );
 
       const manifestContent = await buildManifest(
         options.srcManifest,
@@ -87,7 +76,9 @@ export function manifestPlugin(options: ManifestPluginOptions): Plugin {
       fs.writeFileSync(path.join(outDir, 'manifest.json'), manifestContent);
 
       if (fs.existsSync(options.srcImgDir)) {
-        copyDirRecursive(options.srcImgDir, path.join(outDir, 'img'));
+        fs.cpSync(options.srcImgDir, path.join(outDir, 'img'), {
+          recursive: true,
+        });
       }
     },
   };
