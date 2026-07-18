@@ -49,7 +49,7 @@ module.exports = defineConfig([
     },
   },
   {
-    files: ['webpack.config.js', 'jest.config.js', 'eslint.config.js'],
+    files: ['jest.config.js', 'eslint.config.js'],
     languageOptions: {
       sourceType: 'commonjs',
     },
