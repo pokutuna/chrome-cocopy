@@ -2,14 +2,15 @@ import {useEffect} from 'react';
 import {CopyFunction} from '../../lib/function';
 
 export function useSubscribeFunctions(
-  update: (functions: CopyFunction[]) => void
+  update: (functions: CopyFunction[]) => void,
 ) {
   useEffect(() => {
     const onChange = (changes: {
       [key: string]: chrome.storage.StorageChange;
     }) => {
       if ('functions' in changes) {
-        update(changes['functions'].newValue);
+        const functions = changes['functions'].newValue;
+        if (Array.isArray(functions)) update(functions as CopyFunction[]);
       }
     };
     chrome.storage.onChanged.addListener(onChange);

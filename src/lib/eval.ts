@@ -85,7 +85,7 @@ export async function evaluate(request: EvalPayload): Promise<EvalResult> {
       result: null,
       error: error(
         'ParseError',
-        e instanceof Error ? e : new Error(`Unknown error: ${e}`)
+        e instanceof Error ? e : new Error(`Unknown error: ${e}`),
       ),
     };
   }
@@ -100,7 +100,7 @@ export async function evaluate(request: EvalPayload): Promise<EvalResult> {
     result = await Promise.resolve(fn.call(undefined, request.arg));
     if (!isAcceptableResult(result)) {
       throw new Error(
-        'returning value is not one of (string | number | { html: string, text: string } | null | undefined)'
+        'returning value is not one of (string | number | { html: string, text: string } | null | undefined)',
       );
     }
   } catch (e) {
@@ -108,7 +108,7 @@ export async function evaluate(request: EvalPayload): Promise<EvalResult> {
       result,
       error: error(
         'ExecutionError',
-        e instanceof Error ? e : new Error(`Unknown error: ${e}`)
+        e instanceof Error ? e : new Error(`Unknown error: ${e}`),
       ),
     };
   }
@@ -118,7 +118,7 @@ export async function evaluate(request: EvalPayload): Promise<EvalResult> {
       result,
       error: error(
         'ReturnsEmpty',
-        new Error('returning value is empty (undefined or null)')
+        new Error('returning value is empty (undefined or null)'),
       ),
     };
   }

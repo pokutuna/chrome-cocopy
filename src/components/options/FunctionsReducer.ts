@@ -36,7 +36,7 @@ const newId = 'new';
 const dragging = (
   functions: CopyFunction[],
   dragIndex: number,
-  hoverIndex: number
+  hoverIndex: number,
 ) => {
   const [dragging] = functions.splice(dragIndex, 1);
   functions.splice(hoverIndex, 0, dragging);
@@ -118,7 +118,7 @@ function reduce(state: State, action: Action): State {
         functions: dragging(
           state.functions,
           action.dragIndex,
-          action.hoverIndex
+          action.hoverIndex,
         ),
       };
     case 'dropped':

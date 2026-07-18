@@ -17,13 +17,13 @@ import {Editor} from './Editor';
 import {reducer, initialState, DispatchType} from './FunctionsReducer';
 import {useSubscribeFunctions} from './Subscribe';
 
-const FunctionItemBox = styled.div<{isDragging?: boolean}>`
-  opacity: ${props => (props.isDragging ? 0.5 : 1)};
+const FunctionItemBox = styled.div<{$isDragging?: boolean}>`
+  opacity: ${props => (props.$isDragging ? 0.5 : 1)};
   display: flex;
   flex-direction: row;
   align-items: center;
-  margin-top: ${props => (props.isDragging ? props.theme.space[1] : 0)};
-  margin-bottom: ${props => (props.isDragging ? props.theme.space[1] : 0)};
+  margin-top: ${props => (props.$isDragging ? props.theme.space[1] : 0)};
+  margin-bottom: ${props => (props.$isDragging ? props.theme.space[1] : 0)};
 `;
 
 const ItemButton = styled.div`
@@ -94,14 +94,14 @@ function FunctionListItem(props: FunctionListItemProps) {
   const move = useCallback(
     (dragIndex: number, hoverIndex: number) =>
       dispatch({t: 'dragging', dragIndex, hoverIndex}),
-    [dispatch]
+    [dispatch],
   );
 
   const onDropped = useCallback(() => dispatch({t: 'dropped'}), []);
 
   const onClick = useCallback(
     () => dispatch({t: 'select', functionId: fn.id}),
-    [fn.id]
+    [fn.id],
   );
 
   const {isDragging, drag} = useDnDItem({
@@ -115,10 +115,14 @@ function FunctionListItem(props: FunctionListItemProps) {
 
   return (
     <div ref={ref}>
-      <FunctionItemBox isDragging={isDragging}>
+      <FunctionItemBox $isDragging={isDragging}>
         <Caret active={active} onClick={onClick} />
         <FunctionItem fn={fn} onClick={onClick} />
-        <div ref={drag}>
+        <div
+          ref={node => {
+            drag(node);
+          }}
+        >
           <DragKnob draggable={draggable} />
         </div>
       </FunctionItemBox>
@@ -144,7 +148,7 @@ export function FunctionList() {
   // refresh when functions are updated with opening multiple options pages.
   const onUpdateFunctionsBackground = useCallback(
     (functions: CopyFunction[]) => dispatch({t: 'refresh', functions}),
-    [dispatch]
+    [dispatch],
   );
   useSubscribeFunctions(onUpdateFunctionsBackground);
 

@@ -30,24 +30,25 @@ export function Editor(props: EditorProps) {
   // see https://github.com/facebook/react/issues/18178
   const fnDispatchLater = useCallback<FnDispatchType>(
     action => setTimeout(() => props.dispatch(action), 1),
-    [props.dispatch]
+    [props.dispatch],
   );
 
   const [state, dispatch] = useReducer(
     reducer,
-    init(props.function, fnDispatchLater)
+    init(props.function, fnDispatchLater),
   );
 
   const onEdit = useCallback(
     (name: string, value: string) => dispatch({t: 'edit', name, value}),
-    [dispatch]
+    [dispatch],
   );
   const togglePalette = useCallback(() => dispatch({t: 'palette'}), [dispatch]);
 
   const _evaluate = useSandbox<EvalPayload, EvalResult>(
-    useCallback(res => dispatch({t: 'parse', error: res.error?.message}), [
-      dispatch,
-    ])
+    useCallback(
+      res => dispatch({t: 'parse', error: res.error?.message}),
+      [dispatch],
+    ),
   );
   const parse = useMemo(() => debounce(_evaluate, 200), [dispatch, _evaluate]);
 
@@ -56,7 +57,7 @@ export function Editor(props: EditorProps) {
       parse({command: 'parse', code: value});
       dispatch({t: 'edit', name: 'code', value});
     },
-    [dispatch, parse]
+    [dispatch, parse],
   );
 
   const onClickSave = useCallback(() => dispatch({t: 'save'}), [dispatch]);
@@ -72,7 +73,7 @@ export function Editor(props: EditorProps) {
     <form>
       <Box>
         <Row>
-          <Item grow={1}>
+          <Item $grow={1}>
             <TextInput
               label="Name"
               name="name"

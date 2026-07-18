@@ -57,7 +57,7 @@ describe('evaluate', () => {
         command: 'eval',
         code,
         arg,
-      })
+      }),
     ).toEqual({
       result: 'Test Title',
     });
@@ -70,7 +70,7 @@ describe('evaluate', () => {
           ...arg,
           modifier: {...EMPTY_MODIFIER, shift: true},
         },
-      })
+      }),
     ).toEqual({
       result: 'Test Title (with Shift)',
     });
@@ -83,7 +83,7 @@ describe('evaluate', () => {
           ...arg,
           modifier: {...EMPTY_MODIFIER, shift: true, alt: true},
         },
-      })
+      }),
     ).toEqual({
       result: 'Test Title (with Shift)',
     });

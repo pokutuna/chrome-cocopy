@@ -17,12 +17,12 @@ test('toggle open', async () => {
         togglePalette={togglePalette}
         showPalette={false}
       />
-    </Wrapper>
+    </Wrapper>,
   );
 
-  expect(togglePalette).not.toBeCalled();
+  expect(togglePalette).not.toHaveBeenCalled();
   fireEvent.click(await screen.findByTestId('toggle-palette'));
-  expect(togglePalette).toBeCalled();
+  expect(togglePalette).toHaveBeenCalled();
 });
 
 test('toggle close', async () => {
@@ -38,16 +38,16 @@ test('toggle close', async () => {
         togglePalette={togglePalette}
         showPalette={true}
       />
-    </Wrapper>
+    </Wrapper>,
   );
 
   screen.findByTestId('palette');
 
-  expect(togglePalette).not.toBeCalled();
+  expect(togglePalette).not.toHaveBeenCalled();
 
   fireEvent.click(await screen.findByTestId('toggle-palette'));
-  expect(togglePalette).toBeCalledTimes(1);
+  expect(togglePalette).toHaveBeenCalledTimes(1);
 
   fireEvent.click(screen.getByTestId('out'));
-  expect(togglePalette).toBeCalledTimes(2);
+  expect(togglePalette).toHaveBeenCalledTimes(2);
 });

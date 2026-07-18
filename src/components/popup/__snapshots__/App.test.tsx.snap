@@ -1,21 +1,10 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`render popup 1`] = `
 .c0 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
   flex-direction: column;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
   justify-content: center;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
   align-items: center;
   position: relative;
 }
@@ -26,7 +15,6 @@ exports[`render popup 1`] = `
   background: no-repeat center/contain url('img/logo.png');
   margin: 0.25rem;
   padding: 0 0.25rem;
-  -webkit-filter: none;
   filter: none;
 }
 
@@ -41,21 +29,12 @@ exports[`render popup 1`] = `
 .c2:hover,
 .c2:focus {
   color: #333;
-  -webkit-animation: cilQsd 1.5s linear infinite;
-  animation: cilQsd 1.5s linear infinite;
+  animation: k0 1.5s linear infinite;
 }
 
 .c3 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
   flex-direction: row;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
   align-items: center;
   width: 380px;
   height: 32px;
@@ -67,21 +46,12 @@ exports[`render popup 1`] = `
 
 .c3:focus,
 .c3:hover {
-  -webkit-filter: brightness(110%);
   filter: brightness(110%);
 }
 
 .c8 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
   flex-direction: row;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
   align-items: center;
   width: 380px;
   height: 32px;
@@ -93,7 +63,6 @@ exports[`render popup 1`] = `
 
 .c8:focus,
 .c8:hover {
-  -webkit-filter: brightness(110%);
   filter: brightness(110%);
 }
 
@@ -109,7 +78,7 @@ exports[`render popup 1`] = `
   font-family: Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
   border-radius: 0.25rem;
   border: 2px solid #000000;
-  box-shadow: 2px 2px 0px 0px rgba(0,0,0,0.3);
+  box-shadow: 2px 2px 0px 0px rgba(0, 0, 0, 0.3);
 }
 
 .c10 {
@@ -120,7 +89,7 @@ exports[`render popup 1`] = `
   font-family: Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
   border-radius: 0.25rem;
   border: 2px solid #FFFFFF;
-  box-shadow: 2px 2px 0px 0px rgba(0,0,0,0.3);
+  box-shadow: 2px 2px 0px 0px rgba(0, 0, 0, 0.3);
 }
 
 .c7 {
@@ -128,26 +97,31 @@ exports[`render popup 1`] = `
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
   user-select: none;
 }
 
 .c4 {
-  -webkit-animation-name: none !important;
-  animation-name: none !important;
+  animation-name: none!important;
   background-color: #f5f5f5;
   background-image: none;
-  background-position: 0% !important;
+  background-position: 0%!important;
 }
 
 .c9 {
-  -webkit-animation-name: none !important;
-  animation-name: none !important;
+  animation-name: none!important;
   background-color: #ff5722;
   background-image: none;
-  background-position: 0% !important;
+  background-position: 0%!important;
+}
+
+@keyframes k0 {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 <body>
@@ -165,16 +139,14 @@ exports[`render popup 1`] = `
       >
         <svg
           aria-hidden="true"
-          class="svg-inline--fa fa-gear "
+          class="svg-inline--fa fa-gear"
           data-icon="gear"
           data-prefix="fas"
-          focusable="false"
           role="img"
           viewBox="0 0 512 512"
-          xmlns="http://www.w3.org/2000/svg"
         >
           <path
-            d="M495.9 166.6C499.2 175.2 496.4 184.9 489.6 191.2L446.3 230.6C447.4 238.9 448 247.4 448 256C448 264.6 447.4 273.1 446.3 281.4L489.6 320.8C496.4 327.1 499.2 336.8 495.9 345.4C491.5 357.3 486.2 368.8 480.2 379.7L475.5 387.8C468.9 398.8 461.5 409.2 453.4 419.1C447.4 426.2 437.7 428.7 428.9 425.9L373.2 408.1C359.8 418.4 344.1 427 329.2 433.6L316.7 490.7C314.7 499.7 307.7 506.1 298.5 508.5C284.7 510.8 270.5 512 255.1 512C241.5 512 227.3 510.8 213.5 508.5C204.3 506.1 197.3 499.7 195.3 490.7L182.8 433.6C167 427 152.2 418.4 138.8 408.1L83.14 425.9C74.3 428.7 64.55 426.2 58.63 419.1C50.52 409.2 43.12 398.8 36.52 387.8L31.84 379.7C25.77 368.8 20.49 357.3 16.06 345.4C12.82 336.8 15.55 327.1 22.41 320.8L65.67 281.4C64.57 273.1 64 264.6 64 256C64 247.4 64.57 238.9 65.67 230.6L22.41 191.2C15.55 184.9 12.82 175.3 16.06 166.6C20.49 154.7 25.78 143.2 31.84 132.3L36.51 124.2C43.12 113.2 50.52 102.8 58.63 92.95C64.55 85.8 74.3 83.32 83.14 86.14L138.8 103.9C152.2 93.56 167 84.96 182.8 78.43L195.3 21.33C197.3 12.25 204.3 5.04 213.5 3.51C227.3 1.201 241.5 0 256 0C270.5 0 284.7 1.201 298.5 3.51C307.7 5.04 314.7 12.25 316.7 21.33L329.2 78.43C344.1 84.96 359.8 93.56 373.2 103.9L428.9 86.14C437.7 83.32 447.4 85.8 453.4 92.95C461.5 102.8 468.9 113.2 475.5 124.2L480.2 132.3C486.2 143.2 491.5 154.7 495.9 166.6V166.6zM256 336C300.2 336 336 300.2 336 255.1C336 211.8 300.2 175.1 256 175.1C211.8 175.1 176 211.8 176 255.1C176 300.2 211.8 336 256 336z"
+            d="M195.1 9.5C198.1-5.3 211.2-16 226.4-16l59.8 0c15.2 0 28.3 10.7 31.3 25.5L332 79.5c14.1 6 27.3 13.7 39.3 22.8l67.8-22.5c14.4-4.8 30.2 1.2 37.8 14.4l29.9 51.8c7.6 13.2 4.9 29.8-6.5 39.9L447 233.3c.9 7.4 1.3 15 1.3 22.7s-.5 15.3-1.3 22.7l53.4 47.5c11.4 10.1 14 26.8 6.5 39.9l-29.9 51.8c-7.6 13.1-23.4 19.2-37.8 14.4l-67.8-22.5c-12.1 9.1-25.3 16.7-39.3 22.8l-14.4 69.9c-3.1 14.9-16.2 25.5-31.3 25.5l-59.8 0c-15.2 0-28.3-10.7-31.3-25.5l-14.4-69.9c-14.1-6-27.2-13.7-39.3-22.8L73.5 432.3c-14.4 4.8-30.2-1.2-37.8-14.4L5.8 366.1c-7.6-13.2-4.9-29.8 6.5-39.9l53.4-47.5c-.9-7.4-1.3-15-1.3-22.7s.5-15.3 1.3-22.7L12.3 185.8c-11.4-10.1-14-26.8-6.5-39.9L35.7 94.1c7.6-13.2 23.4-19.2 37.8-14.4l67.8 22.5c12.1-9.1 25.3-16.7 39.3-22.8L195.1 9.5zM256.3 336a80 80 0 1 0 -.6-160 80 80 0 1 0 .6 160z"
             fill="currentColor"
           />
         </svg>

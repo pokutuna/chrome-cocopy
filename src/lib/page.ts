@@ -26,7 +26,7 @@ export function isPage(input: any): input is Page {
 }
 
 export async function createPageTargetFromTab(
-  tab: chrome.tabs.Tab
+  tab: chrome.tabs.Tab,
 ): Promise<Page> {
   // tab.url and tab.title are present when including `activeTab` permission.
   const url = (tab.url || tab.pendingUrl) as string;

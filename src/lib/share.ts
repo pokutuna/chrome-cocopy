@@ -23,8 +23,8 @@ export function encodeSharable(fn: CopyFunction): string {
   return toBase64(
     JSON.stringify(data).replace(
       /[^\x00-\x7F]/g, // eslint-disable-line no-control-regex
-      c => `\\u${c.charCodeAt(0).toString(16)}`
-    )
+      c => `\\u${c.charCodeAt(0).toString(16)}`,
+    ),
   );
 }
 

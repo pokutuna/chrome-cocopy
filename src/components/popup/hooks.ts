@@ -14,7 +14,7 @@ export function useModifier(): Modifier {
       const next = getModifier(e);
       if (hasModifierChanged(modifier, next)) setModifier(next);
     },
-    [modifier]
+    [modifier],
   );
 
   useEffect(() => {

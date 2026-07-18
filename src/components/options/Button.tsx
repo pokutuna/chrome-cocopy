@@ -20,13 +20,13 @@ const danger = css`
   }
 `;
 
-const ButtonStyle = styled.button<{mode?: ButtonMode}>`
+const ButtonStyle = styled.button<{$mode?: ButtonMode}>`
   padding: ${props => props.theme.space[2]};
   background-color: transparent;
   border: solid 1px;
   border-radius: ${props => props.theme.space[1]};
   cursor: pointer;
-  ${p => (p.mode === 'danger' ? danger : primary)};
+  ${p => (p.$mode === 'danger' ? danger : primary)};
 `;
 
 export const Button = (props: {
@@ -40,13 +40,13 @@ export const Button = (props: {
       event.preventDefault();
       props.onClick?.(event);
     },
-    [props.onClick]
+    [props.onClick],
   );
 
   return (
     <ButtonStyle
       type="button"
-      mode={props.mode}
+      $mode={props.mode}
       onClick={onClick as any}
       disabled={props.disabled}
     >

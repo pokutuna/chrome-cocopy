@@ -8,19 +8,19 @@ import {App} from './App';
 
 test('render popup', async () => {
   chrome.tabs.query.mockImplementation(
-    async () => [{url: 'https://example.test/page'}] as chrome.tabs.Tab[]
+    async () => [{url: 'https://example.test/page'}] as chrome.tabs.Tab[],
   );
   chrome.storage.sync.get.mockImplementation((_, cb) =>
-    cb({functions: defaultFunctions})
+    cb({functions: defaultFunctions}),
   );
   chrome.runtime.getManifest.mockImplementation(
-    () => ({version_name: 'Build v0.0.0'} as chrome.runtime.Manifest)
+    () => ({version_name: 'Build v0.0.0'}) as chrome.runtime.Manifest,
   );
 
   render(<App />);
 
   await waitFor(() =>
-    expect(screen.getByText(defaultFunctions[0].name)).toBeInTheDocument()
+    expect(screen.getByText(defaultFunctions[0].name)).toBeInTheDocument(),
   );
 
   expect(document.body).toMatchSnapshot();

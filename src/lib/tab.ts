@@ -15,14 +15,14 @@ function timeout(ms: number): Promise<void> {
  */
 async function executeInTab(
   tab: chrome.tabs.Tab,
-  fn: () => void
+  fn: () => string,
 ): Promise<string | undefined> {
-  const p = new Promise<string>(resolve => {
+  const p = new Promise<string | undefined>(resolve => {
     return chrome.scripting.executeScript(
       {target: {tabId: tab.id!}, func: fn},
       results => {
         resolve(results?.[0].result);
-      }
+      },
     );
   });
 
@@ -31,7 +31,7 @@ async function executeInTab(
 }
 
 export async function getTabContent(
-  tab: chrome.tabs.Tab
+  tab: chrome.tabs.Tab,
 ): Promise<string | undefined> {
   return executeInTab(tab, _getTabContent);
 }
@@ -41,7 +41,7 @@ function _getTabContent(): string {
 }
 
 export async function getSelectionText(
-  tab: chrome.tabs.Tab
+  tab: chrome.tabs.Tab,
 ): Promise<string | undefined> {
   return executeInTab(tab, _getSelectionText);
 }

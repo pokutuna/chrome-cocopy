@@ -68,7 +68,7 @@ export const FunctionList = () => {
       };
       run().catch(e => console.error(e));
     },
-    [evaluate, modifier]
+    [evaluate, modifier],
   );
 
   // Kyeboard Shortcut

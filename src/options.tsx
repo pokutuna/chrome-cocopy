@@ -8,5 +8,5 @@ import './components/options/prism.css';
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <Router basename="/">
     <App />
-  </Router>
+  </Router>,
 );

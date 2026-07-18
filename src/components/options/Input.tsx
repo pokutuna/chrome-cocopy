@@ -23,15 +23,15 @@ export const LabelSub = styled.span`
   color: ${props => props.theme.color.gray};
 `;
 
-export const Input = styled.input<{error?: boolean}>`
+export const Input = styled.input<{$error?: boolean}>`
   padding: ${props => props.theme.space[1]};
   font-size: ${props => props.theme.size.lg};
   width: 100%;
   border: 1px solid;
 
-  border-color: ${p => (p.error ? p.theme.color.error : 'inherit')};
+  border-color: ${p => (p.$error ? p.theme.color.error : 'inherit')};
   &:focus {
-    ${p => p.error && `outline-color: ${p.theme.color.error}`};
+    ${p => p.$error && `outline-color: ${p.theme.color.error}`};
   }
 `;
 
@@ -54,9 +54,9 @@ export const TextInput = (props: {
     (event: InputEvent) =>
       props.onInput?.(
         props.name,
-        (event.currentTarget as HTMLInputElement).value
+        (event.currentTarget as HTMLInputElement).value,
       ),
-    [props.name, props.onInput]
+    [props.name, props.onInput],
   );
 
   return (
@@ -73,7 +73,7 @@ export const TextInput = (props: {
         name={props.name}
         placeholder={props.placeholder}
         pattern={props.pattern}
-        error={!!props.error}
+        $error={!!props.error}
       />
       {props.error && <ErrorMessage>{props.error}</ErrorMessage>}
     </InputBox>

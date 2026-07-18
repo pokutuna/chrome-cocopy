@@ -10,14 +10,14 @@ export const MainColumn = styled.div`
   margin: 20px auto;
 `;
 
-const TitleIcon = styled.div<{dev: boolean}>`
+const TitleIcon = styled.div<{$dev: boolean}>`
   display: inline-block;
   background: no-repeat center/contain url('img/logo.png');
   width: 123px;
   height: 60px;
 
   filter: ${props =>
-    props.dev
+    props.$dev
       ? 'invert(24%) sepia(85%) saturate(3947%) hue-rotate(167deg) brightness(93%) contrast(101%)'
       : 'none'};
 `;
@@ -28,7 +28,7 @@ export const Title = memo(() => {
   return (
     <header>
       <Link to="/">
-        <TitleIcon dev={dev} />
+        <TitleIcon $dev={dev} />
       </Link>
     </header>
   );
@@ -72,9 +72,9 @@ export const Box = styled.div`
   flex-flow: column wrap;
 `;
 
-export const Item = styled.div<{grow?: number}>`
+export const Item = styled.div<{$grow?: number}>`
   display: flex;
-  flex-grow: ${props => props.grow || 0};
+  flex-grow: ${props => props.$grow || 0};
 `;
 
 export const Row = styled.div`

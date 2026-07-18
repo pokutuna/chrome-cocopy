@@ -1,6 +1,6 @@
 import {useCallback, useEffect, useRef} from 'react';
 
-import {random} from 'chroma-js';
+import chroma from 'chroma-js';
 
 import styled from 'styled-components';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
@@ -39,8 +39,8 @@ const PaletteBox = styled.div`
   border: 1px solid ${props => props.theme.color.gray};
 `;
 
-const PaletteColorBox = styled.div<{color: string}>`
-  background-color: ${props => props.color};
+const PaletteColorBox = styled.div<{$color: string}>`
+  background-color: ${props => props.$color};
   width: ${props => props.theme.size['2xl']};
   height: ${props => props.theme.size['2xl']};
   margin: ${props => props.theme.space[1]};
@@ -55,19 +55,20 @@ const PaletteColor = (props: {
   color: string;
   onClick: (color: string) => void;
 }) => {
-  const onClick = useCallback(() => props.onClick(props.color), [
-    props.onClick,
-    props.color,
-  ]);
-  return <PaletteColorBox color={props.color} onClick={onClick} />;
+  const onClick = useCallback(
+    () => props.onClick(props.color),
+    [props.onClick, props.color],
+  );
+  return <PaletteColorBox $color={props.color} onClick={onClick} />;
 };
 
 const PaletteColorRandom = (props: {onClick: (color: string) => void}) => {
-  const onClick = useCallback(() => props.onClick(random().hex()), [
-    props.onClick,
-  ]);
+  const onClick = useCallback(
+    () => props.onClick(chroma.random().hex()),
+    [props.onClick],
+  );
   return (
-    <PaletteColorBox color="transparent" onClick={onClick}>
+    <PaletteColorBox $color="transparent" onClick={onClick}>
       <FontAwesomeIcon icon={faRandom} />
     </PaletteColorBox>
   );
@@ -129,14 +130,14 @@ export function ColorInput(props: ColorInputProps) {
     (event: InputEvent) =>
       props.onInput?.(
         'backgroundColor',
-        (event.currentTarget as HTMLInputElement).value
+        (event.currentTarget as HTMLInputElement).value,
       ),
-    [props.onInput]
+    [props.onInput],
   );
 
   const onSelect = useCallback(
     (value: string) => props.onInput?.('backgroundColor', value),
-    [props.onInput]
+    [props.onInput],
   );
 
   return (
@@ -152,7 +153,7 @@ export function ColorInput(props: ColorInputProps) {
           placeholder="#F0F0F0"
           pattern="#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})"
           maxLength={7}
-          error={props.error}
+          $error={props.error}
         />
         <ColorPicker
           show={props.showPalette}

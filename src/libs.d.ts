@@ -1,3 +1,5 @@
+declare module '*.css';
+
 declare module 'prismjs/components/prism-core' {
   export function highlight(code: any, language: any): any;
 

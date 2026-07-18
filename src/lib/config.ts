@@ -20,7 +20,7 @@ export async function getCopyFunctions(): Promise<CopyFunction[]> {
  * @param functions
  */
 export async function saveCopyFunctions(
-  functions: CopyFunction[]
+  functions: CopyFunction[],
 ): Promise<void> {
   if (!functions.every(isCopyFunction)) {
     throw new Error('function validation failed when saving');

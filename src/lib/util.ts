@@ -32,10 +32,10 @@ export function indexToKey(index: number): number | undefined {
   return index + 1;
 }
 
-import {contrast} from 'chroma-js';
+import chroma from 'chroma-js';
 export function textColorFromBgColor(hex: string): string {
   const minContrast = 7;
-  if (contrast(hex, '#000000') >= minContrast) {
+  if (chroma.contrast(hex, '#000000') >= minContrast) {
     return '#000000';
   } else {
     return '#FFFFFF';

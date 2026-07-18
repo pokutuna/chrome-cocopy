@@ -32,7 +32,7 @@ export function useSandbox<Q, S>(onMessage: (s: S) => void) {
       }
       onMessage(message.data);
     },
-    [channel, onMessage]
+    [channel, onMessage],
   );
 
   useEffect(() => {
@@ -53,7 +53,7 @@ export function useEvaluate(): (q: EvalPayload) => Promise<EvalResult> {
       const [resolve, reject] = promise.current;
       s.error ? reject(s) : resolve(s);
     },
-    [promise]
+    [promise],
   );
   const evaluate = useSandbox<EvalPayload, EvalResult>(onMessage);
   return useCallback(
@@ -63,6 +63,6 @@ export function useEvaluate(): (q: EvalPayload) => Promise<EvalResult> {
         evaluate(q);
       });
     },
-    [promise, evaluate]
+    [promise, evaluate],
   );
 }

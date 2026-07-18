@@ -7,6 +7,7 @@ import {EvalError} from '../../lib/eval';
 import {
   Shortcut,
   FunctionBox,
+  FunctionBoxProps,
   FunctionName,
   RigthIconBox,
 } from '../common/FunctionParts';
@@ -25,7 +26,7 @@ const scanning = keyframes`
   100% { background-position: 0% }
 `;
 
-const execAnimation = css<CopyFunction['theme']>`
+const execAnimation = css<FunctionBoxProps>`
   animation-name: ${scanning};
   animation-duration: 0.3s;
   animation-timing-function: linear;
@@ -34,27 +35,27 @@ const execAnimation = css<CopyFunction['theme']>`
   background-position: 0%;
   background-image: linear-gradient(
     90deg,
-    ${p => p.backgroundColor} 0%,
-    ${p => p.backgroundColor} 35%,
-    ${p => p.textColor} 60%,
-    ${p => p.backgroundColor} 60%,
-    ${p => p.backgroundColor} 100%
+    ${p => p.$backgroundColor} 0%,
+    ${p => p.$backgroundColor} 35%,
+    ${p => p.$textColor} 60%,
+    ${p => p.$backgroundColor} 60%,
+    ${p => p.$backgroundColor} 100%
   );
 `;
 
 // XXX sometime scanning animation stops accidentally.
 // GPU & CSS animation problem? I met this when using this ext on sub display.
-const cancelAnimation = css<CopyFunction['theme']>`
+const cancelAnimation = css<FunctionBoxProps>`
   animation-name: none !important;
-  background-color: ${p => p.backgroundColor};
+  background-color: ${p => p.$backgroundColor};
   background-image: none;
   background-position: 0% !important;
 `;
 
 const FunctionBoxWithAnimation = styled(FunctionBox)<
-  CopyFunction['theme'] & {running: boolean}
+  FunctionBoxProps & {$running: boolean}
 >`
-  ${p => (p.running ? execAnimation : cancelAnimation)};
+  ${p => (p.$running ? execAnimation : cancelAnimation)};
 `;
 
 type FunctionItemProps = {
@@ -73,9 +74,10 @@ export function FunctionItem(props: FunctionItemProps) {
 
   return (
     <FunctionBoxWithAnimation
-      {...fn.theme}
+      $textColor={fn.theme.textColor}
+      $backgroundColor={fn.theme.backgroundColor}
       onClick={onClick}
-      running={running}
+      $running={running}
       onKeyDown={onKeyDown as any}
       tabIndex={1}
     >
@@ -88,7 +90,7 @@ export function FunctionItem(props: FunctionItemProps) {
       )}
 
       {props.fn.pattern && (
-        <RigthIconBox color={props.fn.theme.textColor}>
+        <RigthIconBox $color={props.fn.theme.textColor}>
           <PatternIcon />
         </RigthIconBox>
       )}

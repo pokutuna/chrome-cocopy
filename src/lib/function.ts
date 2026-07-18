@@ -14,7 +14,7 @@ export interface RichContent {
 export type CopyResult = string | RichContent | null | undefined;
 export type CopyFn = (
   this: Library,
-  t: Page
+  t: Page,
 ) => CopyResult | Promise<CopyResult>;
 
 export interface CopyFunction {
@@ -54,10 +54,10 @@ export function newFunction(): CopyFunction {
 
 export function filterFunctions<T extends CopyFunction>(
   url: string,
-  functions: T[]
+  functions: T[],
 ): T[] {
   return functions.filter(f =>
-    f.pattern ? new RegExp(f.pattern).test(url) : true
+    f.pattern ? new RegExp(f.pattern).test(url) : true,
   );
 }
 

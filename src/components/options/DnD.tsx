@@ -18,7 +18,7 @@ interface DragItem {
 type DnDItemArgs = {
   id: string;
   index: number;
-  ref: React.RefObject<HTMLElement>;
+  ref: React.RefObject<HTMLElement | null>;
   move: (dragIndex: number, hoverIndex: number) => void;
   canDrag?: boolean;
   onDropped?: (item: DragItem, monitor: DropTargetMonitor) => void;
@@ -38,7 +38,7 @@ export function useDnDItem(props: DnDItemArgs) {
       props.move(dragIndex, hoverIndex);
       item.index = hoverIndex;
     },
-    [ref, index, move]
+    [ref, index, move],
   );
   const [, drop] = useDrop({
     accept: type,
@@ -53,7 +53,7 @@ export function useDnDItem(props: DnDItemArgs) {
       collect,
       canDrag,
     },
-    [id, index, canDrag]
+    [id, index, canDrag],
   );
 
   dragPreview(drop(ref));

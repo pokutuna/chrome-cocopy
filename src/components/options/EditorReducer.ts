@@ -66,7 +66,7 @@ export function stateToFn(state: State): Omit<CopyFunction, 'id'> {
 
 function validateEdit(
   errors: State['errors'],
-  action: EditAction
+  action: EditAction,
 ): State['errors'] {
   switch (action.name) {
     case 'name':

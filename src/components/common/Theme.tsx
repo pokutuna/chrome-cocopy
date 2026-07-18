@@ -53,3 +53,5 @@ export const theme = {
     functionHeight: '32px',
   },
 } as const;
+
+export type Theme = typeof theme;

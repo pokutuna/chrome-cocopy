@@ -1,16 +1,16 @@
-import yaml from 'js-yaml';
+import * as yaml from 'js-yaml';
 import fs from 'fs';
 import path from 'path';
 
-import {render} from 'mustache';
+import Mustache from 'mustache';
 import {decodeSharable} from '../src/lib/share';
 
 const template = fs.readFileSync(
   path.join(__dirname, './README.template.md'),
-  'utf8'
+  'utf8',
 );
 const gallery = yaml.load(
-  fs.readFileSync(path.join(__dirname, './gallery.yaml'), 'utf8')
+  fs.readFileSync(path.join(__dirname, './gallery.yaml'), 'utf8'),
 );
 
 const category = `
@@ -63,7 +63,7 @@ const decode = function (this: any) {
 
 (global.window as any) = {};
 
-const rendered = render(
+const rendered = Mustache.render(
   template,
   {
     gallery,
@@ -76,7 +76,7 @@ const rendered = render(
   {
     category,
     func,
-  }
+  },
 );
 
 fs.writeFileSync(path.join(__dirname, './README.md'), rendered);

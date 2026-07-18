@@ -7,16 +7,22 @@
     ],
     "allowJs": true,
     "esModuleInterop": true,
+    "isolatedModules": true,
+    "ignoreDeprecations": "6.0",
+    "types": [
+      "chrome",
+      "jest",
+      "node"
+    ],
     "declaration": false,
+    "composite": false,
     "jsx": "react-jsx",
     "skipLibCheck": true,
     "rootDir": "./",
     "outDir": "./build"
   },
   "include": [
-    "src/libs.d.ts"
-  ],
-  "exclude": [
-    "src/**/*.test.ts"
+    "src/**/*",
+    "gallery/**/*"
   ]
 }

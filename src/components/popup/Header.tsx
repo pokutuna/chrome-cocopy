@@ -13,14 +13,14 @@ const HeaderBox = styled.div`
   position: relative;
 `;
 
-const Title = styled.div<{dev: boolean}>`
+const Title = styled.div<{$dev: boolean}>`
   width: 84px;
   height: 40px;
   background: no-repeat center/contain url('img/logo.png');
   margin: ${props => props.theme.space[1]};
   padding: 0 ${props => props.theme.space[1]};
   filter: ${props =>
-    props.dev
+    props.$dev
       ? 'invert(24%) sepia(85%) saturate(3947%) hue-rotate(167deg) brightness(93%) contrast(101%)'
       : 'none'};
 `;
@@ -51,7 +51,7 @@ export function PopupHeader() {
   const dev = useMemo(() => isDev(), []);
   return (
     <HeaderBox>
-      <Title dev={dev} />
+      <Title $dev={dev} />
       <OptionLink href="/options.html" target="_blank">
         <FontAwesomeIcon icon={faCog} />
       </OptionLink>

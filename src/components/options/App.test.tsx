@@ -10,23 +10,23 @@ import {encodeSharable} from '../../lib/share';
 
 test('render options', async () => {
   chrome.tabs.query.mockImplementation(
-    async () => [{url: 'https://example.test/page'}] as chrome.tabs.Tab[]
+    async () => [{url: 'https://example.test/page'}] as chrome.tabs.Tab[],
   );
   chrome.storage.sync.get.mockImplementation((_, cb) =>
-    cb({functions: defaultFunctions})
+    cb({functions: defaultFunctions}),
   );
   chrome.runtime.getManifest.mockImplementation(
-    () => ({version_name: 'Build v0.0.0'} as chrome.runtime.Manifest)
+    () => ({version_name: 'Build v0.0.0'}) as chrome.runtime.Manifest,
   );
 
   render(
     <MemoryRouter initialEntries={['/']}>
       <App />
-    </MemoryRouter>
+    </MemoryRouter>,
   );
 
   await waitFor(() =>
-    expect(screen.getByText(defaultFunctions[0].name)).toBeInTheDocument()
+    expect(screen.getByText(defaultFunctions[0].name)).toBeInTheDocument(),
   );
 
   expect(document.body).toMatchSnapshot();
@@ -39,7 +39,7 @@ test('render install page', async () => {
   render(
     <MemoryRouter initialEntries={[path]}>
       <App />
-    </MemoryRouter>
+    </MemoryRouter>,
   );
 
   await waitFor(() => {
@@ -48,7 +48,7 @@ test('render install page', async () => {
 
   expect(screen.getByDisplayValue(fn.name)).toBeInTheDocument();
   expect(
-    screen.getByDisplayValue(fn.theme.backgroundColor)
+    screen.getByDisplayValue(fn.theme.backgroundColor),
   ).toBeInTheDocument();
   expect(screen.getByText('Install')).toBeInTheDocument();
   expect(screen.getByText('Update URL')).toBeInTheDocument();

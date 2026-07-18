@@ -7,7 +7,7 @@ const {LicenseWebpackPlugin} = require('license-webpack-plugin');
 function versionName() {
   return new Promise((resolve, reject) => {
     exec('git describe --tags --always --dirty', (err, stdout, _stderr) =>
-      err ? reject(err) : resolve(`Build ${stdout.replace('\n', '')}`)
+      err ? reject(err) : resolve(`Build ${stdout.replace('\n', '')}`),
     );
   });
 }
@@ -84,6 +84,10 @@ module.exports = {
         'styled-components':
           'https://github.com/styled-components/styled-components/blob/master/LICENSE',
         isarray: 'https://github.com/juliangruber/isarray/blob/master/LICENSE',
+        '@react-dnd/invariant':
+          'https://github.com/react-dnd/react-dnd/blob/main/LICENSE',
+        '@react-dnd/shallowequal':
+          'https://github.com/react-dnd/react-dnd/blob/main/LICENSE',
       },
     }),
   ],

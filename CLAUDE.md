@@ -4,7 +4,10 @@ Chrome extension (Manifest V3) that copies text from a web page through user-def
 
 ## Tech Stack
 
-TypeScript / React 18 / styled-components / Webpack 5 / Jest / gts (lint).
+TypeScript 6 / React 19 / styled-components 6 / Webpack 5 / Jest 30 / gts 7 (lint).
+
+TypeScript 6 and ESLint 9 are intentional: the current ts-jest/gts TypeScript
+ESLint peer ranges do not support TypeScript 7 or ESLint 10 yet.
 
 See `package.json` for scripts and `README.md` for end-user usage.
 

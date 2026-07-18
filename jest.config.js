@@ -3,6 +3,9 @@ module.exports = {
   preset: 'ts-jest/presets/js-with-ts',
   testEnvironment: 'jest-environment-jsdom',
   setupFilesAfterEnv: ['./src/jest.setup.js'],
+  transform: {
+    '^.+\\.[tj]sx?$': ['ts-jest'],
+  },
   moduleNameMapper: {
     '^.+\\.(css|sass|scss|less)$': 'identity-obj-proxy',
   },

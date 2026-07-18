@@ -3,10 +3,10 @@
  * @packageDescription
  */
 
-import {render} from 'mustache';
+import Mustache from 'mustache';
 
 export interface Library {
-  render: typeof render;
+  render: typeof Mustache.render;
 }
 
-export {render};
+export const {render} = Mustache;
