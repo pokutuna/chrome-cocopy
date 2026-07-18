@@ -1,6 +1,7 @@
-import * as yaml from 'js-yaml';
 import fs from 'fs';
 import path from 'path';
+
+import * as yaml from 'js-yaml';
 
 import {decodeSharable} from '../src/lib/share';
 

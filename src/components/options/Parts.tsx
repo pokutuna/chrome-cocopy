@@ -1,7 +1,7 @@
 import React, {memo, useMemo} from 'react';
-
 import {Link} from 'react-router-dom';
 import styled from 'styled-components';
+
 import {isDev} from '../../lib/util';
 
 export const MainColumn = styled.div`

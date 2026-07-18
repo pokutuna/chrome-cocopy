@@ -8,23 +8,24 @@
   "packageManager": "pnpm@10.12.2",
   "scripts": {
     "build": "vite build",
-    "check": "gts check",
-    "clean": "gts clean",
+    "check": "oxlint && oxfmt --check . && pnpm run typecheck",
     "e2e": "playwright test",
     "pree2e": "pnpm run build",
-    "fix": "gts fix",
+    "fix": "oxlint --fix && oxfmt .",
     "prepare": "husky",
     "test": "vitest run",
     "posttest": "pnpm run check",
     "test-watch": "vitest",
+    "typecheck": "tsc --noEmit",
     "update-gallery": "ts-node ./gallery/generate.ts",
     "validator": "ajv compile -s ./src/lib/function.schema.json -o ./src/lib/function.ajv.js",
     "watch": "vite build --watch",
     "zip": "pnpm run build && zip -r build-$(cat build/manifest.json | jq -r '.version').zip ./build"
   },
   "lint-staged": {
-    "src/**/*.{ts,tsx}": [
-      "gts fix"
+    "**/*.{ts,tsx}": [
+      "oxlint --fix",
+      "oxfmt"
     ]
   },
   "pnpm": {
@@ -63,16 +64,13 @@
     "@types/node": "26.1.1",
     "@types/react": "19.2.17",
     "@types/react-dom": "19.2.3",
-    "@vitest/eslint-plugin": "^1.6.23",
     "ajv-cli": "5.0.0",
-    "eslint": "9.39.5",
-    "eslint-plugin-react": "7.37.5",
-    "globals": "17.7.0",
-    "gts": "7.0.0",
     "husky": "9.1.7",
     "js-yaml": "5.2.1",
     "jsdom": "^29.1.1",
     "lint-staged": "17.0.8",
+    "oxfmt": "^0.59.0",
+    "oxlint": "^1.74.0",
     "rollup-plugin-license": "^3.7.1",
     "ts-node": "10.9.2",
     "typescript": "6.0.3",

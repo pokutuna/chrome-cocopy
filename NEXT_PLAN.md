@@ -100,14 +100,28 @@ test title へ使う都合上 off のまま維持(旧 `jest/valid-title` off を
 
 `pnpm test` (Vitest 22 ケース + gts check) / `pnpm run build` / `pnpm e2e` (2/2) すべて green。
 
-### 1-3. gts → oxlint + フォーマッタ
+### 1-3. gts → oxlint + oxfmt — **完了 (2026-07-19, branch: oxc-migration)**
+
+実施済み: oxlint@1.74 (`.oxlintrc.json`) + oxfmt@0.59 (`.oxfmtrc.json`、prettier 設定から
+移行 + `useTabs: false` / `tabWidth: 2` を明示 + `sortImports: true`)。
+eslint.config.js / .prettierrc.js を削除し、`check` = `oxlint && oxfmt --check . && tsc --noEmit`、
+`fix` = `oxlint --fix && oxfmt .` に。lint-staged も更新。tsconfig は gts の
+tsconfig-google.json を inline 化して自己完結に。
+
+**重要な発見: gts check は ESLint のみで型チェックしていなかった**。Vite (esbuild) も
+Vitest も型を見ないため、`tsc --noEmit` を `typecheck` script として check チェーンに追加。
+これにより vite.config.ts の潜在型エラー (`dependency.name: string | null` での
+Record インデックス) が実際に見つかり修正された。
+
+rule の判断メモ (.oxlintrc.json にコメントで記載):
+`eslint/no-unused-expressions` off (副作用 ternary が既存パターン)、
+`react-hooks/exhaustive-deps` off (旧設定に hooks ルールは無く、既存の依存配列は意図的。
+有効化は別タスク)、`vitest/require-mock-type-parameters` off、
+テストファイルで `vitest/valid-title` off (gallery.test.ts の動的 title、旧設定踏襲)。
+oxfmt の対象は ts/tsx/js のみ (md/html/css/json は ignore し無関係な差分を回避)。
 
 - gts (が bundle する typescript-eslint) が消えると「TS 7 / ESLint 10 に上げられない」制約が解消される
-  → **TypeScript 7 (tsgo) へのアップグレードがこの Phase の隠れた成果**
-- フォーマッタは着手前に一度だけ決める:
-  - oxfmt(若い、oxc に一本化できる)
-  - Biome(lint + format 一体で成熟)
-  - oxlint + Prettier 継続(保守的)
+  → **TypeScript 7 (tsgo) へのアップグレードは別タスクとして意図的に先送り**
 - husky / lint-staged の hook も新ツールに合わせて更新
 
 ## Phase 2: ライブラリ置換・堅牢化
@@ -157,6 +171,6 @@ Firefox / Safari は非対応のため、ユーザーコード実行の仕組み
 | 項目 | いつ決めるか |
 |---|---|
 | パッケージマネージャ | **決定済み (2026-07-18): pnpm**。npm (最薄・脱出容易だが速度と厳密さで劣る) と bun (最速だがランタイムごと寄せる意図がないなら PM だけ使う旨味が薄い) も検討した上で、速度・ディスク効率・幽霊依存検出・corepack でのバージョン固定を評価して pnpm を選択 |
-| フォーマッタ(oxfmt / Biome / Prettier 継続) | Phase 1-3 着手前 |
+| フォーマッタ(oxfmt / Biome / Prettier 継続) | **決定済み (2026-07-18): oxfmt + oxlint**。oxc に一本化。Vite+ (oxlint/oxfmt/tsgo を束ねる統合ツール) は 2026-07-02 に beta が出たばかりのため今回は見送り、stable 到達時に再検討 |
 | styled-components の移行先 | Phase 2 冒頭に 1 コンポーネントで試してから |
 | Safari をスコープに入れるか | Phase 3 の設計には影響しない(QuickJS 案ならどちらでも同じ)ので後回しで OK |

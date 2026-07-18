@@ -1,22 +1,20 @@
+import {faShareSquare} from '@fortawesome/free-solid-svg-icons/faShareSquare';
+import {faTrash} from '@fortawesome/free-solid-svg-icons/faTrash';
+import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
+import debounce from 'lodash.debounce';
 import {useReducer, useMemo, useCallback} from 'react';
 
-import debounce from 'lodash.debounce';
-
-import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
-import {faTrash} from '@fortawesome/free-solid-svg-icons/faTrash';
-import {faShareSquare} from '@fortawesome/free-solid-svg-icons/faShareSquare';
-
+import {EvalPayload, EvalResult} from '../../lib/eval';
 import {CopyFunction} from '../../lib/function';
 import {encodeSharable} from '../../lib/share';
-import {EvalPayload, EvalResult} from '../../lib/eval';
-import {Box, Row, Item, DividerV} from './Parts';
-import {Button, ButtonIcon} from './Button';
-import {TextInput} from './Input';
-import {ColorInput} from './ColorInput';
-import {CodeEditor} from './CodeEditor';
-import {DispatchType as FnDispatchType} from './FunctionsReducer';
 import {useSandbox} from '../common/Sandbox';
+import {Button, ButtonIcon} from './Button';
+import {CodeEditor} from './CodeEditor';
+import {ColorInput} from './ColorInput';
 import {reducer, init, stateToFn} from './EditorReducer';
+import {DispatchType as FnDispatchType} from './FunctionsReducer';
+import {TextInput} from './Input';
+import {Box, Row, Item, DividerV} from './Parts';
 
 type EditorProps = {
   function: CopyFunction;

@@ -1,7 +1,6 @@
-import {useCallback, useEffect} from 'react';
-
-import {default as SimpleCodeEditor} from 'react-simple-code-editor';
 import {highlight as hl, languages} from 'prismjs/components/prism-core';
+import {useCallback, useEffect} from 'react';
+import {default as SimpleCodeEditor} from 'react-simple-code-editor';
 import 'prismjs/components/prism-clike';
 import 'prismjs/components/prism-javascript';
 

@@ -1,9 +1,9 @@
 import {useCallback, useMemo} from 'react';
 import styled, {css, keyframes} from 'styled-components';
 
+import {EvalError} from '../../lib/eval';
 import {CopyFunction} from '../../lib/function';
 import {indexToKey} from '../../lib/util';
-import {EvalError} from '../../lib/eval';
 import {
   Shortcut,
   FunctionBox,

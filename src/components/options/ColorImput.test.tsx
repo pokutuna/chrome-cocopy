@@ -1,9 +1,9 @@
 import {fireEvent, render, screen} from '@testing-library/react';
 import '@testing-library/jest-dom';
 import {vi} from 'vitest';
-import {ColorInput} from './ColorInput';
 
 import {Wrapper} from '../common/ForTest';
+import {ColorInput} from './ColorInput';
 
 test('toggle open', async () => {
   const onInput = vi.fn();

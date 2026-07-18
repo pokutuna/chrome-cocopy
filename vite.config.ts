@@ -1,10 +1,10 @@
 import * as path from 'path';
 
-import {defineConfig} from 'vite';
 import license from 'rollup-plugin-license';
+import {defineConfig} from 'vite';
 
-import {manifestPlugin} from './scripts/vite-manifest-plugin';
 import packageJson from './package.json';
+import {manifestPlugin} from './scripts/vite-manifest-plugin';
 
 const rootDir = __dirname;
 const srcDir = path.join(rootDir, 'src');
@@ -61,7 +61,9 @@ export default defineConfig({
                 const header = `${dependency.name}@${dependency.version} (${dependency.license ?? 'UNKNOWN'})`;
                 const text =
                   dependency.licenseText ??
-                  licenseTextOverrides[dependency.name] ??
+                  (dependency.name
+                    ? licenseTextOverrides[dependency.name]
+                    : undefined) ??
                   '(license text not found)';
                 return `${header}\n${'-'.repeat(header.length)}\n${text}`;
               })

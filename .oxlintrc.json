@@ -1,0 +1,38 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["typescript", "unicorn", "oxc", "react", "vitest"],
+  "categories": {
+    "correctness": "error"
+  },
+  "env": {
+    "builtin": true,
+    "browser": true,
+    "node": true
+  },
+  "globals": {
+    "chrome": "readonly"
+  },
+  "ignorePatterns": ["build/**", "node_modules/**", "src/**/*.ajv.js"],
+  "rules": {
+    // gts left these off; ternaries used for their side effect (`cond ? a() : b()`)
+    // are an established pattern in this codebase (src/lib/config.ts, Sandbox.ts).
+    "eslint/no-unused-expressions": "off",
+    // Not part of the previous eslint-plugin-react config (only `recommended` +
+    // `jsx-runtime` were enabled, neither of which include hooks rules). The
+    // existing useCallback/useEffect dependency arrays are intentional in several
+    // places (e.g. capturing `props` once); enabling this would require reworking
+    // hooks across most components, which is out of scope for this migration.
+    "react-hooks/exhaustive-deps": "off",
+    // Newer/stricter than the previous @vitest/eslint-plugin recommended config;
+    // would require annotating every vi.fn() call across the test suite.
+    "vitest/require-mock-type-parameters": "off"
+  },
+  "overrides": [
+    {
+      "files": ["**/*.test.{js,jsx,ts,tsx}"],
+      "rules": {
+        "vitest/valid-title": "off"
+      }
+    }
+  ]
+}

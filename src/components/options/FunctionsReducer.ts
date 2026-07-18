@@ -1,5 +1,5 @@
-import {CopyFunction, newFunction} from '../../lib/function';
 import {saveCopyFunctions} from '../../lib/config';
+import {CopyFunction, newFunction} from '../../lib/function';
 
 export interface State {
   activeId: string | undefined;

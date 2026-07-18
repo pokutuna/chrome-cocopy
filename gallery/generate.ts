@@ -1,8 +1,9 @@
-import * as yaml from 'js-yaml';
 import fs from 'fs';
 import path from 'path';
 
+import * as yaml from 'js-yaml';
 import Mustache from 'mustache';
+
 import {decodeSharable} from '../src/lib/share';
 
 const template = fs.readFileSync(
