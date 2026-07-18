@@ -1,6 +1,10 @@
 build/
 build*.zip
 
+# Playwright
+test-results/
+playwright-report/
+
 # --- from https://github.com/github/gitignore/blob/master/Node.gitignore ---
 # Logs
 logs

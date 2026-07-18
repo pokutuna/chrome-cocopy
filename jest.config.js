@@ -3,6 +3,8 @@ module.exports = {
   preset: 'ts-jest/presets/js-with-ts',
   testEnvironment: 'jest-environment-jsdom',
   setupFilesAfterEnv: ['./src/jest.setup.js'],
+  // e2e/ holds Playwright specs, run via `yarn e2e`, not Jest.
+  testPathIgnorePatterns: ['/node_modules/', '<rootDir>/e2e/'],
   transform: {
     '^.+\\.[tj]sx?$': ['ts-jest'],
   },

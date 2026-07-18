@@ -23,6 +23,8 @@
   },
   "include": [
     "src/**/*",
-    "gallery/**/*"
+    "gallery/**/*",
+    "e2e/**/*",
+    "playwright.config.ts"
   ]
 }
