@@ -1,15 +1,14 @@
 import {useState, useEffect, useCallback} from 'react';
 
 import {getCopyFunctions} from '../../lib/config';
-import {CopyFunction, filterFunctions} from '../../lib/function';
-import {getActiveTab} from '../../lib/tab';
-import {createPageTargetFromTab} from '../../lib/page';
-import {codeToIndex} from '../../lib/util';
 import {EvalResult, EvalError, isRichContent} from '../../lib/eval';
-import {useModifier} from './hooks';
-
-import {FunctionItem} from './Function';
+import {CopyFunction, filterFunctions} from '../../lib/function';
+import {createPageTargetFromTab} from '../../lib/page';
+import {getActiveTab} from '../../lib/tab';
+import {codeToIndex} from '../../lib/util';
 import {useEvaluate} from '../common/Sandbox';
+import {FunctionItem} from './Function';
+import {useModifier} from './hooks';
 
 type FunctionError = {
   id: string;

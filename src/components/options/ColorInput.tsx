@@ -1,11 +1,9 @@
-import {useCallback, useEffect, useRef} from 'react';
-
-import chroma from 'chroma-js';
-
-import styled from 'styled-components';
-import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {faPalette} from '@fortawesome/free-solid-svg-icons/faPalette';
 import {faRandom} from '@fortawesome/free-solid-svg-icons/faRandom';
+import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
+import chroma from 'chroma-js';
+import {useCallback, useEffect, useRef} from 'react';
+import styled from 'styled-components';
 
 import {colorPalette} from '../../lib/function';
 import {theme} from '../common/Theme';

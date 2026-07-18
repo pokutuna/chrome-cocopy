@@ -1,11 +1,11 @@
 import {render, screen, waitFor} from '@testing-library/react';
 import '@testing-library/jest-dom';
-import {vi} from 'vitest';
 import {MemoryRouter} from 'react-router-dom';
+import {vi} from 'vitest';
 
 import {defaultFunctions} from '../../lib/builtin';
-import {App} from './App';
 import {encodeSharable} from '../../lib/share';
+import {App} from './App';
 
 test('render options', async () => {
   vi.mocked(chrome.tabs.query).mockImplementation(

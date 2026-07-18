@@ -1,4 +1,5 @@
 import {vi} from 'vitest';
+
 import * as tab from './tab';
 
 test('getActiveTab', async () => {

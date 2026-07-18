@@ -1,8 +1,8 @@
-import {Page} from './page';
-import {Library} from './library';
 import {initialCode} from './builtin';
-import {textColorFromBgColor} from './util';
 import validate from './function.ajv';
+import {Library} from './library';
+import {Page} from './page';
+import {textColorFromBgColor} from './util';
 
 export const currentVersion = 1;
 

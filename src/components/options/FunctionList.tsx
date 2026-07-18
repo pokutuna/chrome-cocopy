@@ -1,20 +1,18 @@
+import {faBars} from '@fortawesome/free-solid-svg-icons/faBars';
+import {faCaretDown} from '@fortawesome/free-solid-svg-icons/faCaretDown';
+import {faCaretRight} from '@fortawesome/free-solid-svg-icons/faCaretRight';
+import {faPlus} from '@fortawesome/free-solid-svg-icons/faPlus';
+import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {useEffect, useCallback, useRef, useReducer} from 'react';
 import styled from 'styled-components';
 
-import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
-import {faBars} from '@fortawesome/free-solid-svg-icons/faBars';
-import {faCaretRight} from '@fortawesome/free-solid-svg-icons/faCaretRight';
-import {faCaretDown} from '@fortawesome/free-solid-svg-icons/faCaretDown';
-import {faPlus} from '@fortawesome/free-solid-svg-icons/faPlus';
-
 import {getCopyFunctions} from '../../lib/config';
 import {CopyFunction} from '../../lib/function';
-
 import {FunctionItem, AddFunctionItem} from '../common/FunctionParts';
 import {DnDWrapper, useDnDItem} from './DnD';
-import {Section} from './Parts';
 import {Editor} from './Editor';
 import {reducer, initialState, DispatchType} from './FunctionsReducer';
+import {Section} from './Parts';
 import {useSubscribeFunctions} from './Subscribe';
 
 const FunctionItemBox = styled.div<{$isDragging?: boolean}>`

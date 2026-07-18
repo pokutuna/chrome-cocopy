@@ -1,6 +1,6 @@
-import {Page, isPage} from './page';
 import {CopyResult, RichContent} from './function';
 import {Modifier, isModifier} from './modifier';
+import {Page, isPage} from './page';
 
 export type FunctionArgument = Page & {
   modifier: Modifier;

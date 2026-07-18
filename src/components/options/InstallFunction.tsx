@@ -1,18 +1,17 @@
+import {faDizzy} from '@fortawesome/free-solid-svg-icons/faDizzy';
+import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {memo, useReducer, useMemo} from 'react';
 import {useLocation} from 'react-router-dom';
-
 import styled from 'styled-components';
-import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
-import {faDizzy} from '@fortawesome/free-solid-svg-icons/faDizzy';
 
+import {addCopyFunctions} from '../../lib/config';
 import {CopyFunction, isCopyFunction} from '../../lib/function';
 import {decodeSharable} from '../../lib/share';
-import {addCopyFunctions} from '../../lib/config';
 import {FunctionItem} from '../common/FunctionParts';
-import {Section, TextList} from './Parts';
 import {Editor} from './Editor';
 import {EditorBox} from './FunctionList';
 import {Action} from './FunctionsReducer';
+import {Section, TextList} from './Parts';
 
 interface State {
   fn?: CopyFunction;

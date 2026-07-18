@@ -8,11 +8,11 @@ cocopy is a Chrome extension (Manifest V3) that lets users define small JavaScri
 
 ## Tech Stack
 
-TypeScript 6 / React 19 / styled-components 6 / Vite (build: `vite.config.ts` + `scripts/vite-manifest-plugin.ts` for manifest generation) / Vitest 4 (test: `vitest.config.ts` + `vitest.setup.ts`) / gts 7 (lint). Node 24 (see `.node-version`), pnpm with committed lockfile (`pnpm-lock.yaml`); the pnpm version is pinned via `packageManager` in `package.json` (corepack).
+TypeScript 6 / React 19 / styled-components 6 / Vite (build: `vite.config.ts` + `scripts/vite-manifest-plugin.ts` for manifest generation) / Vitest 4 (test: `vitest.config.ts` + `vitest.setup.ts`) / oxlint + oxfmt (lint/format: `.oxlintrc.json` + `.oxfmtrc.json`) / `tsc --noEmit` (typecheck, since neither Vite nor oxlint type-check). Node 24 (see `.node-version`), pnpm with committed lockfile (`pnpm-lock.yaml`); the pnpm version is pinned via `packageManager` in `package.json` (corepack).
 
-TypeScript 6 and ESLint 9 are intentional: gts 7 bundles `typescript-eslint`,
-whose supported TypeScript/ESLint peer ranges do not extend to TypeScript 7
-or ESLint 10 yet.
+`tsconfig.json` is self-contained (previously extended gts's
+`tsconfig-google.json`; those compiler options are now inlined). TypeScript
+stays on 6 for now — a TS 7 upgrade is a separate, deliberately deferred task.
 
 See `package.json` for the full script list.
 
@@ -30,6 +30,6 @@ Storage uses `chrome.storage.sync` (`src/lib/config.ts`). Functions are validate
 
 ## Verifying Changes
 
-- `pnpm test` — Vitest tests (`vitest run`), then `gts check` via `posttest`. A lint failure fails the command; `pnpm run fix` auto-fixes most issues.
+- `pnpm test` — Vitest tests (`vitest run`), then `pnpm run check` (oxlint + `oxfmt --check` + `tsc --noEmit`) via `posttest`. A lint/format/typecheck failure fails the command; `pnpm run fix` (oxlint --fix + oxfmt write) auto-fixes lint/format issues.
 - `pnpm exec vitest run path/to/file.test.tsx` — run a single test file during focused development. `pnpm run test-watch` (`vitest`) for watch mode.
 - `pnpm run build` — confirms the extension compiles (bundles into `build/`); `pnpm run watch` for incremental builds during development.

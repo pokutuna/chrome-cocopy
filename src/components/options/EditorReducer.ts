@@ -1,6 +1,6 @@
-import {DispatchType as FnDispatchType} from './FunctionsReducer';
 import {CopyFunction, currentVersion} from '../../lib/function';
 import {textColorFromBgColor, isColorCode} from '../../lib/util';
+import {DispatchType as FnDispatchType} from './FunctionsReducer';
 
 interface State {
   fn: CopyFunction;
