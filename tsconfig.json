@@ -25,6 +25,8 @@
     "src/**/*",
     "gallery/**/*",
     "e2e/**/*",
-    "playwright.config.ts"
+    "scripts/**/*",
+    "playwright.config.ts",
+    "vite.config.ts"
   ]
 }

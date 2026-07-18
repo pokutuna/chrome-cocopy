@@ -8,7 +8,7 @@ cocopy is a Chrome extension (Manifest V3) that lets users define small JavaScri
 
 ## Tech Stack
 
-TypeScript 6 / React 19 / styled-components 6 / Webpack 5 / Jest 30 / gts 7 (lint). Node 24 (see `.node-version`), pnpm with committed lockfile (`pnpm-lock.yaml`); the pnpm version is pinned via `packageManager` in `package.json` (corepack).
+TypeScript 6 / React 19 / styled-components 6 / Vite (build: `vite.config.ts` + `scripts/vite-manifest-plugin.ts` for manifest generation) / Jest 30 / gts 7 (lint). Node 24 (see `.node-version`), pnpm with committed lockfile (`pnpm-lock.yaml`); the pnpm version is pinned via `packageManager` in `package.json` (corepack).
 
 TypeScript 6 and ESLint 9 are intentional: the current ts-jest/gts TypeScript
 ESLint peer ranges do not support TypeScript 7 or ESLint 10 yet.

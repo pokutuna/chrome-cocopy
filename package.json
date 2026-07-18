@@ -7,7 +7,7 @@
   "author": "pokutuna <mail@pokutuna.com>",
   "packageManager": "pnpm@10.12.2",
   "scripts": {
-    "build": "webpack",
+    "build": "vite build",
     "check": "gts check",
     "clean": "gts clean",
     "e2e": "playwright test",
@@ -19,7 +19,7 @@
     "test-watch": "jest --watch",
     "update-gallery": "ts-node ./gallery/generate.ts",
     "validator": "ajv compile -s ./src/lib/function.schema.json -o ./src/lib/function.ajv.js",
-    "watch": "webpack --watch",
+    "watch": "vite build --watch",
     "zip": "pnpm run build && zip -r build-$(cat build/manifest.json | jq -r '.version').zip ./build"
   },
   "lint-staged": {
@@ -65,15 +65,11 @@
     "@types/react": "19.2.17",
     "@types/react-dom": "19.2.3",
     "ajv-cli": "5.0.0",
-    "clean-webpack-plugin": "4.0.0",
-    "copy-webpack-plugin": "14.0.0",
-    "css-loader": "7.1.4",
     "eslint": "9.39.5",
     "eslint-plugin-jest": "29.15.4",
     "eslint-plugin-react": "7.37.5",
     "globals": "17.7.0",
     "gts": "7.0.0",
-    "html-webpack-plugin": "5.6.7",
     "husky": "9.1.7",
     "identity-obj-proxy": "3.0.0",
     "jest": "30.4.2",
@@ -81,15 +77,12 @@
     "jest-environment-jsdom": "30.4.1",
     "jest-styled-components": "7.4.0",
     "js-yaml": "5.2.1",
-    "license-webpack-plugin": "4.0.2",
     "lint-staged": "17.0.8",
-    "style-loader": "4.0.0",
+    "rollup-plugin-license": "^3.7.1",
     "ts-jest": "29.4.11",
-    "ts-loader": "9.6.2",
     "ts-node": "10.9.2",
     "typescript": "6.0.3",
-    "webpack": "5.108.4",
-    "webpack-cli": "7.2.1"
+    "vite": "^8.1.5"
   },
   "engines": {
     "node": ">=24"
