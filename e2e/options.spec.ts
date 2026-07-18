@@ -21,7 +21,14 @@ async function seedStorage(
     return new Promise<void>((resolve, reject) => {
       chrome.storage.sync.set({functions: fns}, () => {
         if (chrome.runtime.lastError) {
-          reject(chrome.runtime.lastError);
+          // chrome.runtime.lastError is a plain {message} object, not an
+          // Error; wrap it so page.evaluate's serialization keeps the message.
+          reject(
+            new Error(
+              chrome.runtime.lastError.message ??
+                'chrome.storage.sync.set failed',
+            ),
+          );
           return;
         }
         resolve();
