@@ -23,7 +23,7 @@
     "zip": "pnpm run build && zip -r build-$(cat build/manifest.json | jq -r '.version').zip ./build"
   },
   "lint-staged": {
-    "src/**/*.{ts,tsx}": [
+    "**/*.{ts,tsx}": [
       "oxlint --fix",
       "oxfmt"
     ]
