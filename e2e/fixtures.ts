@@ -42,7 +42,7 @@ function copyDir(src: string, dest: string) {
 function prepareExtensionDir(): string {
   if (!fs.existsSync(buildDir)) {
     throw new Error(
-      `build/ not found at ${buildDir}. Run \`yarn build\` before the e2e tests.`,
+      `build/ not found at ${buildDir}. Run \`pnpm build\` before the e2e tests.`,
     );
   }
 

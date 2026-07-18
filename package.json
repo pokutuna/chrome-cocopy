@@ -5,29 +5,32 @@
   "repository": "ssh://git@github.com/pokutuna/chrome-cocopy.git",
   "license": "MIT",
   "author": "pokutuna <mail@pokutuna.com>",
+  "packageManager": "pnpm@10.12.2",
   "scripts": {
     "build": "webpack",
     "check": "gts check",
     "clean": "gts clean",
     "e2e": "playwright test",
-    "pree2e": "yarn build",
+    "pree2e": "pnpm run build",
     "fix": "gts fix",
     "prepare": "husky",
     "test": "jest",
-    "posttest": "yarn run check",
+    "posttest": "pnpm run check",
     "test-watch": "jest --watch",
     "update-gallery": "ts-node ./gallery/generate.ts",
     "validator": "ajv compile -s ./src/lib/function.schema.json -o ./src/lib/function.ajv.js",
     "watch": "webpack --watch",
-    "zip": "yarn build && zip -r build-$(cat build/manifest.json | jq -r '.version').zip ./build"
+    "zip": "pnpm run build && zip -r build-$(cat build/manifest.json | jq -r '.version').zip ./build"
   },
   "lint-staged": {
     "src/**/*.{ts,tsx}": [
       "gts fix"
     ]
   },
-  "resolutions": {
-    "@types/react": "19.2.17"
+  "pnpm": {
+    "overrides": {
+      "@types/react": "19.2.17"
+    }
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "7.3.1",

@@ -10,12 +10,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v6
         with:
           node-version-file: .node-version
-          cache: yarn
-      - run: yarn install --frozen-lockfile
-      - run: yarn update-gallery
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run update-gallery
       - id: vars
         run: |
           FILES=$(git status --porcelain -- gallery | wc -l)

@@ -37,9 +37,15 @@ extension ID を固定、headless chromium にロード) + `e2e/popup.spec.ts` (
 
 依存関係の都合で Vite → Vitest の順。lint/format は独立していていつでもよい。
 
-### 1-0. Yarn (classic) → pnpm
+### 1-0. Yarn (classic) → pnpm — **完了 (2026-07-18)**
 
 依存の入れ替えが本格化する前、Phase 1 の最初にやる (ロックファイル切り替えの衝突を避ける)。
+
+実施済み: pnpm@10.12.2 (`packageManager` で固定)。`pnpm import` でバージョン維持のまま
+lock 切り替え、`resolutions` → `pnpm.overrides`、scripts/husky/CI/docs の yarn 参照を更新。
+幽霊依存は無し。唯一のハマりどころは jest の `transformIgnorePatterns` が pnpm の
+`.pnpm` ネスト構造で効かなくなる件で、除外パターンに `\.pnpm` を追加して解決
+(Vitest 移行時にこの設定ごと消える予定)。
 
 - `pnpm import` で yarn.lock から pnpm-lock.yaml を生成し、バージョンを維持したまま切り替える
 - `package.json` の `packageManager` フィールドで pnpm のバージョンを固定 (corepack)

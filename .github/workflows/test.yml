@@ -10,11 +10,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v6
         with:
           node-version-file: .node-version
-          cache: yarn
-      - run: yarn install --frozen-lockfile
-      - run: yarn validator
-      - run: yarn test
-      - run: yarn build
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run validator
+      - run: pnpm test
+      - run: pnpm run build

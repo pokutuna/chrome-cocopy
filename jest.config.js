@@ -3,7 +3,7 @@ module.exports = {
   preset: 'ts-jest/presets/js-with-ts',
   testEnvironment: 'jest-environment-jsdom',
   setupFilesAfterEnv: ['./src/jest.setup.js'],
-  // e2e/ holds Playwright specs, run via `yarn e2e`, not Jest.
+  // e2e/ holds Playwright specs, run via `pnpm e2e`, not Jest.
   testPathIgnorePatterns: ['/node_modules/', '<rootDir>/e2e/'],
   transform: {
     '^.+\\.[tj]sx?$': ['ts-jest'],
@@ -13,5 +13,9 @@ module.exports = {
   },
 
   // https://github.com/react-dnd/react-dnd/issues/3443
-  transformIgnorePatterns: ['/node_modules/(?!react-dnd|dnd-core|@react-dnd)'],
+  // pnpm nests packages under node_modules/.pnpm/<pkg>/node_modules/<pkg>,
+  // so the pattern must also let the `.pnpm` segment through.
+  transformIgnorePatterns: [
+    '/node_modules/(?!\\.pnpm|react-dnd|dnd-core|@react-dnd)',
+  ],
 };
