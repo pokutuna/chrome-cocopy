@@ -31,3 +31,11 @@ Object.assign(global, {
     },
   },
 });
+
+// jsdom does not implement Range#getClientRects, which CodeMirror uses while
+// measuring its selection and cursor layers. The tests do not assert layout,
+// so an empty list is sufficient here.
+Object.defineProperty(Range.prototype, 'getClientRects', {
+  configurable: true,
+  value: () => [],
+});

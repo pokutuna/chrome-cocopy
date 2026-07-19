@@ -2,7 +2,7 @@
    Naming is mechanical: --space-<n>, --size-<name>, --font-<weight-name>,
    --color-<name>, --font-monospace / --font-default, --constants-<name>.
    Imported once from each entry point (popup.tsx / options.tsx), same
-   pattern as the existing code.css / prism.css imports. */
+   pattern as the existing editor stylesheet imports. */
 :root {
   /* space */
   --space-0: 0;

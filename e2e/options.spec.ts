@@ -3,14 +3,24 @@ import {test, expect} from './fixtures';
 async function getStoredFunctionNames(
   page: import('@playwright/test').Page,
 ): Promise<string[]> {
+  const functions = await getStoredFunctions(page);
+  return functions.map(f => f.name);
+}
+
+async function getStoredFunctions(
+  page: import('@playwright/test').Page,
+): Promise<Array<{name: string; code: string}>> {
   return page.evaluate(() => {
-    return new Promise<string[]>(resolve => {
+    return new Promise<Array<{name: string; code: string}>>(resolve => {
       chrome.storage.sync.get({functions: []}, value => {
-        const fns = (value.functions || []) as Array<{name: string}>;
-        resolve(fns.map(f => f.name));
+        const fns = (value.functions || []) as Array<{
+          name: string;
+          code: string;
+        }>;
+        resolve(fns);
       });
     });
-  });
+  }) as Promise<Array<{name: string; code: string}>>;
 }
 
 async function seedStorage(
@@ -125,6 +135,10 @@ test('editing a function via the options UI persists the changes', async ({
   const saveButton = options.getByRole('button', {name: 'Save'});
   await expect(nameInput).toHaveValue('E2E Function B');
   await nameInput.fill('E2E Function B edited');
+  const codeEditor = options.locator('#code');
+  await expect(codeEditor).toContainText('() => "b"');
+  await codeEditor.fill('() => "edited"');
+  await expect(codeEditor).toContainText('() => "edited"');
   await saveButton.click();
 
   // Existing functions keep the editor open after saving and change the
@@ -133,9 +147,14 @@ test('editing a function via the options UI persists the changes', async ({
   await expect
     .poll(() => getStoredFunctionNames(options))
     .toEqual(['E2E Function B edited']);
+  await expect
+    .poll(async () => (await getStoredFunctions(options))[0]?.code)
+    .toBe('() => "edited"');
 
   await options.reload();
   await expect(options.getByText('E2E Function B edited')).toBeVisible();
+  await options.getByText('E2E Function B edited').click();
+  await expect(options.locator('#code')).toContainText('() => "edited"');
   await expect(
     options.getByText('E2E Function B', {exact: true}),
   ).not.toBeVisible();

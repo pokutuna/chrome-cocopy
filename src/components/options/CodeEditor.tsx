@@ -1,33 +1,42 @@
-import {highlight as hl, languages} from 'prismjs/components/prism-core';
-import {useCallback, useEffect} from 'react';
-import {default as SimpleCodeEditor} from 'react-simple-code-editor';
-import 'prismjs/components/prism-clike';
-import 'prismjs/components/prism-javascript';
+import {javascript} from '@codemirror/lang-javascript';
+import CodeMirror, {EditorView} from '@uiw/react-codemirror';
+import {useCallback} from 'react';
 
 import {theme} from '../common/Theme';
 import {InputBox, Label, LabelSub, ErrorMessage} from './Input';
 
 import './code.css';
 
-const textareaId = 'code';
+const editorId = 'code';
+
+const editorExtensions = [
+  javascript(),
+  EditorView.theme({
+    '&': {
+      backgroundColor: theme.color.codeBg,
+      fontFamily: theme.fontFamily.monospace,
+      fontSize: theme.size.base,
+    },
+    '.cm-content': {
+      padding: theme.space[2],
+    },
+    '.cm-line': {
+      padding: 0,
+    },
+    '.cm-scroller': {
+      fontFamily: theme.fontFamily.monospace,
+    },
+  }),
+];
 
 export const CodeEditor = (props: {
   code: string;
   setCode: (code: string) => void;
   error?: string;
 }) => {
-  const highlight = useCallback((code: string) => {
-    const result = hl(code, languages.js);
-    return result;
-  }, []);
-
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      const textarea = document.getElementById(textareaId);
-      if (textarea) textarea.spellcheck = false;
-    }, 50);
-
-    return () => clearTimeout(timeoutId);
+  const onCreateEditor = useCallback((view: EditorView) => {
+    view.contentDOM.id = editorId;
+    view.contentDOM.spellcheck = false;
   }, []);
 
   return (
@@ -36,19 +45,18 @@ export const CodeEditor = (props: {
         Code
         <LabelSub>Must be a single function.</LabelSub>
       </Label>
-      <SimpleCodeEditor
+      <CodeMirror
         value={props.code}
-        onValueChange={props.setCode}
-        highlight={highlight}
-        padding={theme.space[2]}
-        textareaId={textareaId}
-        style={{
-          fontSize: theme.size.base,
-          fontFamily: theme.fontFamily.monospace,
-          backgroundColor: theme.color.codeBg,
+        onChange={props.setCode}
+        onCreateEditor={onCreateEditor}
+        extensions={editorExtensions}
+        basicSetup={{
+          lineNumbers: false,
+          foldGutter: false,
+          highlightActiveLineGutter: false,
         }}
-        textareaClassName="editor-additional-styles"
-        preClassName="editor-additional-styles"
+        theme="none"
+        aria-label="Code"
       />
       <ErrorMessage>{props.error}</ErrorMessage>
     </InputBox>

@@ -84,9 +84,11 @@ test('render install page', async () => {
     ),
   ).toBeInTheDocument();
 
-  // Form fields carry the decoded function's values. The labels contain
-  // nested elements (hint text/tooltip), so match by input id instead of
-  // getByLabelText's exact-text matching.
+  // Form fields carry the decoded function's values. The code editor is a
+  // contenteditable CodeMirror surface rather than a native textarea.
   expect(document.getElementById('pattern')).toHaveValue(fn.pattern ?? '');
-  expect(document.getElementById('code')).toHaveValue(fn.code);
+  const code = [...document.querySelectorAll('#code .cm-line')]
+    .map(line => line.textContent ?? '')
+    .join('\n');
+  expect(code).toBe(fn.code);
 });
