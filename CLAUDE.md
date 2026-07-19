@@ -8,11 +8,12 @@ cocopy is a Chrome extension (Manifest V3) that lets users define small JavaScri
 
 ## Tech Stack
 
-TypeScript 6 / React 19 / styled-components 6 / Vite (build: `vite.config.ts` + `scripts/vite-manifest-plugin.ts` for manifest generation) / Vitest 4 (test: `vitest.config.ts` + `vitest.setup.ts`) / oxlint + oxfmt (lint/format: `.oxlintrc.json` + `.oxfmtrc.json`) / `tsc --noEmit` (typecheck, since neither Vite nor oxlint type-check). Node 24 (see `.node-version`), pnpm with committed lockfile (`pnpm-lock.yaml`); the pnpm version is pinned via `packageManager` in `package.json` (corepack).
+TypeScript 7 / React 19 / CSS Modules / Vite (build: `vite.config.ts` + `scripts/vite-manifest-plugin.ts` for manifest generation) / Vitest 4 (test: `vitest.config.ts` + `vitest.setup.ts`) / oxlint + oxfmt (lint/format: `.oxlintrc.json` + `.oxfmtrc.json`) / `tsc --noEmit` (typecheck, since neither Vite nor oxlint type-check) / tsx (gallery script runner). Node 24 (see `.node-version`), pnpm with committed lockfile (`pnpm-lock.yaml`); the pnpm version is pinned via `packageManager` in `package.json` (corepack).
 
 `tsconfig.json` is self-contained (previously extended gts's
-`tsconfig-google.json`; those compiler options are now inlined). TypeScript
-stays on 6 for now — a TS 7 upgrade is a separate, deliberately deferred task.
+`tsconfig-google.json`; those compiler options are now inlined). TypeScript 7
+is used for typechecking; gallery generation runs through tsx because ts-node
+10 does not support TypeScript 7's compiler API.
 
 See `package.json` for the full script list.
 
