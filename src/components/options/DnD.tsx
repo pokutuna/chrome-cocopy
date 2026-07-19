@@ -1,64 +1,46 @@
-import React, {useCallback} from 'react';
-import {DndProvider, useDrag, useDrop, DropTargetMonitor} from 'react-dnd';
-import {HTML5Backend} from 'react-dnd-html5-backend';
+import {DragDropProvider} from '@dnd-kit/react';
+import {isSortable, useSortable} from '@dnd-kit/react/sortable';
+import React from 'react';
 
-export function DnDWrapper(props: {children: React.ReactNode}) {
-  return <DndProvider backend={HTML5Backend}>{props.children}</DndProvider>;
-}
+type DnDWrapperProps = {
+  children: React.ReactNode;
+  move: (dragIndex: number, hoverIndex: number) => void;
+  onDropped: () => void;
+};
 
-const type = 'function';
+export function DnDWrapper(props: DnDWrapperProps) {
+  return (
+    <DragDropProvider
+      onDragEnd={event => {
+        if (event.canceled) return;
 
-interface DragItem {
-  index: number;
-  id: string;
-  type: string;
+        const {source} = event.operation;
+        if (!isSortable(source) || source.initialIndex === source.index) {
+          return;
+        }
+
+        props.move(source.initialIndex, source.index);
+        props.onDropped();
+      }}
+    >
+      {props.children}
+    </DragDropProvider>
+  );
 }
 
 type DnDItemArgs = {
   id: string;
   index: number;
-  ref: React.RefObject<HTMLElement | null>;
-  move: (dragIndex: number, hoverIndex: number) => void;
   canDrag?: boolean;
-  onDropped?: (item: DragItem, monitor: DropTargetMonitor) => void;
 };
 
-const collect = (monitor: any) => ({isDragging: monitor.isDragging()});
-
 export function useDnDItem(props: DnDItemArgs) {
-  const {id, index, ref, move, canDrag, onDropped} = props;
-
-  const hover = useCallback(
-    (item: DragItem) => {
-      if (!props.ref.current) return;
-      const dragIndex = item.index;
-      const hoverIndex = index;
-      if (dragIndex === hoverIndex) return;
-      props.move(dragIndex, hoverIndex);
-      item.index = hoverIndex;
+  return useSortable({
+    id: props.id,
+    index: props.index,
+    disabled: {
+      draggable: !props.canDrag,
+      droppable: props.index < 0,
     },
-    [ref, index, move],
-  );
-  const [, drop] = useDrop({
-    accept: type,
-    hover,
-    drop: onDropped,
   });
-
-  const [{isDragging}, drag, dragPreview] = useDrag(
-    {
-      type,
-      item: {id, index},
-      collect,
-      canDrag,
-    },
-    [id, index, canDrag],
-  );
-
-  dragPreview(drop(ref));
-
-  return {
-    isDragging,
-    drag,
-  };
 }
