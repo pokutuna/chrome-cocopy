@@ -131,9 +131,18 @@ oxfmt の対象は ts/tsx/js のみ (md/html/css/json は ignore し無関係な
 並び替え・削除のテストを追加する。
 (実ページの title/url 取得は activeTab が automation で発火しない制約により E2E 対象外のまま)
 
-- **styled-components**(メンテナンスモード宣言済み)→ CSS Modules か vanilla-extract
+- **styled-components**(メンテナンスモード宣言済み)→ **CSS Modules に決定 (2026-07-19, branch: css-migration-trial)**
+  - 1 コンポーネント試行 (popup の Function 系 3 ファイル、動的テーマ色 + keyframes 継承の最難関ケース) の結論:
+    動的テーマ色は CSS Modules / vanilla-extract どちらでも同じ CSS カスタムプロパティ
+    (`style={{'--text-color': ...}}` → `var(--text-color)`) に帰着し難易度に差がない。
+    vanilla-extract は静的スタイルの型安全で勝るが依存 2〜3 個 + Vite プラグインが必要で、
+    Vite ネイティブ・追加依存ゼロの CSS Modules が「薄く、脱出容易」方針に沿う。
+    詳細は tmp/css-migration-notes.md (利用パターン分類 37 定義/10 ファイル、
+    ThemeProvider → :root CSS 変数 + コンポーネントローカル変数の二層構造案を含む)
   - UI 全面に及ぶので一括ではなくコンポーネント単位で段階移行
-  - 最初に 1 コンポーネントで試してから移行先を確定する
+  - 残移行時の注意: `${Item} + ${Item}` コンポーネントセレクタ (options/Parts.tsx) は
+    gap 等への書き換えが必要な唯一の非機械的パターン。CSS 変数の命名規約を先に決める。
+    `*.module.css` の型生成ツール導入は必要になった時点で判断
 - **react-dnd**(実質未メンテ)→ `dnd-kit` か `pragmatic-drag-and-drop`
   - 関数が多くなった時の並び替え性能にも直結
 - **prismjs + react-simple-code-editor** → CodeMirror 6(編集体験も改善)
@@ -172,5 +181,5 @@ Firefox / Safari は非対応のため、ユーザーコード実行の仕組み
 |---|---|
 | パッケージマネージャ | **決定済み (2026-07-18): pnpm**。npm (最薄・脱出容易だが速度と厳密さで劣る) と bun (最速だがランタイムごと寄せる意図がないなら PM だけ使う旨味が薄い) も検討した上で、速度・ディスク効率・幽霊依存検出・corepack でのバージョン固定を評価して pnpm を選択 |
 | フォーマッタ(oxfmt / Biome / Prettier 継続) | **決定済み (2026-07-18): oxfmt + oxlint**。oxc に一本化。Vite+ (oxlint/oxfmt/tsgo を束ねる統合ツール) は 2026-07-02 に beta が出たばかりのため今回は見送り、stable 到達時に再検討 |
-| styled-components の移行先 | Phase 2 冒頭に 1 コンポーネントで試してから |
+| styled-components の移行先 | **決定済み (2026-07-19): CSS Modules**。1 コンポーネント試行の結果、最難関の動的テーマ色で vanilla-extract と難易度差がなく、追加依存ゼロの CSS Modules が方針に合致 |
 | Safari をスコープに入れるか | Phase 3 の設計には影響しない(QuickJS 案ならどちらでも同じ)ので後回しで OK |

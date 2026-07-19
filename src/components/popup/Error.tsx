@@ -1,17 +1,11 @@
-import styled from 'styled-components';
-
 import {EvalError} from '../../lib/eval';
 
-const FunctionErrorBox = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-`;
+import styles from './Error.module.css';
 
 export function FunctionError(props: {error: EvalError}) {
   return (
-    <FunctionErrorBox>
+    <div className={styles.functionErrorBox}>
       {props.error.name}: {props.error.message}
-    </FunctionErrorBox>
+    </div>
   );
 }
