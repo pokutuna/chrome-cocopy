@@ -6,6 +6,13 @@ import {vi} from 'vitest';
 // relevant method with mockImplementation, mirroring the previous
 // jest-chrome usage.
 Object.assign(global, {
+  // dnd-kit observes sortable item sizes in the browser. jsdom does not
+  // provide ResizeObserver, and these tests do not need resize callbacks.
+  ResizeObserver: class {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  },
   chrome: {
     tabs: {
       query: vi.fn(),
