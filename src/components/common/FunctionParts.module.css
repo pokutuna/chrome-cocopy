@@ -2,8 +2,8 @@
   display: flex;
   flex-direction: row;
   align-items: center;
-  width: var(--function-width, 380px);
-  height: var(--function-height, 32px);
+  width: var(--constants-functionWidth);
+  height: var(--constants-functionHeight);
   padding: var(--space-1, 0.25rem) var(--space-2, 0.5rem);
   color: var(--text-color);
   background-color: var(--background-color);
@@ -23,8 +23,7 @@
   padding: 0 var(--space-1, 0.25rem);
   margin-right: var(--space-2, 0.5rem);
   font-size: var(--size-lg, 1.125rem);
-  font-family: Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New',
-    monospace;
+  font-family: var(--font-monospace);
 
   border-radius: var(--space-1, 0.25rem);
   border: 2px solid var(--text-color);

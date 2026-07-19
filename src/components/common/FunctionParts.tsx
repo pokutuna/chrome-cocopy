@@ -2,7 +2,6 @@ import React, {useCallback} from 'react';
 
 import {CopyFunction} from '../../lib/function';
 import {PatternIcon} from './Icon';
-import {theme} from './Theme';
 
 import styles from './FunctionParts.module.css';
 
@@ -17,8 +16,6 @@ function functionBoxVars(props: FunctionBoxProps): React.CSSProperties {
   return {
     '--text-color': props.$textColor,
     '--background-color': props.$backgroundColor,
-    '--function-width': theme.constants.functionWidth,
-    '--function-height': theme.constants.functionHeight,
   } as React.CSSProperties;
 }
 

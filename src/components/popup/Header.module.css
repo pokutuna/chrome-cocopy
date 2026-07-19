@@ -33,7 +33,7 @@
   right: 0;
   font-size: var(--size-xl);
   margin-right: var(--space-4);
-  color: #666;
+  color: var(--color-gray);
 }
 .optionLink:hover,
 .optionLink:focus {

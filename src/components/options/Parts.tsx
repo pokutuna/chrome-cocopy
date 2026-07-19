@@ -17,6 +17,8 @@ export const Title = memo(() => {
       <Link to="/">
         <div
           className={[styles.titleIcon, dev ? styles.dev : ''].join(' ').trim()}
+          role="img"
+          aria-label="cocopy"
         />
       </Link>
     </header>

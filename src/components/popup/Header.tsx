@@ -10,8 +10,17 @@ export function PopupHeader() {
   const dev = useMemo(() => isDev(), []);
   return (
     <div className={styles.headerBox}>
-      <div className={[styles.title, dev ? styles.dev : ''].join(' ').trim()} />
-      <a className={styles.optionLink} href="/options.html" target="_blank">
+      <div
+        className={[styles.title, dev ? styles.dev : ''].join(' ').trim()}
+        role="img"
+        aria-label="cocopy"
+      />
+      <a
+        className={styles.optionLink}
+        href="/options.html"
+        target="_blank"
+        aria-label="Settings"
+      >
         <FontAwesomeIcon icon={faCog} />
       </a>
     </div>
