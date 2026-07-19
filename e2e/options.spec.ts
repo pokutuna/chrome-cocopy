@@ -160,6 +160,28 @@ test('editing a function via the options UI persists the changes', async ({
   ).not.toBeVisible();
 });
 
+test('shows destructured variables in the function body', async ({
+  context,
+  extensionId,
+}) => {
+  const options = await context.newPage();
+  await options.goto(`chrome-extension://${extensionId}/options.html`);
+  await seedStorage(options, [{...threeFunctions[1], code: '() => "b"'}]);
+  await options.reload();
+
+  await options.getByText('E2E Function B').click();
+
+  const codeEditor = options.locator('#code');
+  await codeEditor.fill('({title}) => {\n  ');
+  await codeEditor.pressSequentially('ti', {delay: 50});
+
+  const completion = options.locator('.cm-tooltip-autocomplete');
+  await expect(completion).toBeVisible();
+  await expect(
+    completion.locator('.cm-completionLabel', {hasText: 'title'}),
+  ).toBeVisible();
+});
+
 test('disables saving when the function name is empty', async ({
   context,
   extensionId,

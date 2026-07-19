@@ -1,8 +1,9 @@
-import {javascript} from '@codemirror/lang-javascript';
+import {javascript, javascriptLanguage} from '@codemirror/lang-javascript';
 import CodeMirror, {EditorView} from '@uiw/react-codemirror';
 import {useCallback} from 'react';
 
 import {theme} from '../common/Theme';
+import {cocopyCompletionSource} from './completions';
 import {InputBox, Label, LabelSub, ErrorMessage} from './Input';
 
 import './code.css';
@@ -11,6 +12,7 @@ const editorId = 'code';
 
 const editorExtensions = [
   javascript(),
+  javascriptLanguage.data.of({autocomplete: cocopyCompletionSource}),
   EditorView.theme({
     '&': {
       backgroundColor: theme.color.codeBg,
