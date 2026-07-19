@@ -18,7 +18,6 @@
     "test-watch": "vitest",
     "typecheck": "tsc --noEmit",
     "update-gallery": "ts-node ./gallery/generate.ts",
-    "validator": "ajv compile -s ./src/lib/function.schema.json -o ./src/lib/function.ajv.js",
     "watch": "vite build --watch",
     "zip": "pnpm run build && zip -r build-$(cat build/manifest.json | jq -r '.version').zip ./build"
   },
@@ -37,7 +36,6 @@
     "@fortawesome/fontawesome-svg-core": "7.3.1",
     "@fortawesome/free-solid-svg-icons": "7.3.1",
     "@fortawesome/react-fontawesome": "3.4.0",
-    "ajv": "8.20.0",
     "chroma-js": "3.2.0",
     "jsx-runtime": "1.2.0",
     "lodash.debounce": "4.0.8",
@@ -48,7 +46,8 @@
     "react-dnd-html5-backend": "16.0.1",
     "react-dom": "19.2.7",
     "react-router-dom": "7.18.1",
-    "react-simple-code-editor": "0.14.1"
+    "react-simple-code-editor": "0.14.1",
+    "valibot": "1.4.2"
   },
   "devDependencies": {
     "@playwright/test": "^1.61.1",
@@ -63,7 +62,6 @@
     "@types/node": "26.1.1",
     "@types/react": "19.2.17",
     "@types/react-dom": "19.2.3",
-    "ajv-cli": "5.0.0",
     "husky": "9.1.7",
     "js-yaml": "5.2.1",
     "jsdom": "^29.1.1",
