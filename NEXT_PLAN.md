@@ -122,7 +122,7 @@ rule の判断メモ (.oxlintrc.json にコメントで記載):
 oxfmt の対象は ts/tsx/js のみ (md/html/css/json は ignore し無関係な差分を回避)。
 
 - gts (が bundle する typescript-eslint) が消えると「TS 7 / ESLint 10 に上げられない」制約が解消される
-  → **TypeScript 7 (tsgo) へのアップグレードは別タスクとして意図的に先送り**
+  → PR #189 で TypeScript 7 へ移行。gallery 生成は ts-node が TS7 の Compiler API と互換性がないため tsx に移行
 - husky / lint-staged の hook も新ツールに合わせて更新
 
 ## Phase 2: ライブラリ置換・堅牢化

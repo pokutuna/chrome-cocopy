@@ -17,7 +17,7 @@
     "posttest": "pnpm run check",
     "test-watch": "vitest",
     "typecheck": "tsc --noEmit",
-    "update-gallery": "ts-node ./gallery/generate.ts",
+    "update-gallery": "tsx ./gallery/generate.ts",
     "watch": "vite build --watch",
     "zip": "pnpm run build && zip -r build-$(cat build/manifest.json | jq -r '.version').zip ./build"
   },
@@ -69,7 +69,7 @@
     "oxfmt": "^0.59.0",
     "oxlint": "^1.74.0",
     "rollup-plugin-license": "^3.7.1",
-    "ts-node": "10.9.2",
+    "tsx": "^4.23.1",
     "typescript": "7.0.2",
     "vite": "^8.1.5",
     "vitest": "^4.1.10"
