@@ -5,7 +5,7 @@
   "repository": "ssh://git@github.com/pokutuna/chrome-cocopy.git",
   "license": "MIT",
   "author": "pokutuna <mail@pokutuna.com>",
-  "packageManager": "pnpm@10.12.2",
+  "packageManager": "pnpm@10.34.5",
   "scripts": {
     "build": "vite build",
     "check": "oxlint && oxfmt --check . && pnpm run typecheck",
@@ -65,7 +65,7 @@
     "husky": "9.1.7",
     "js-yaml": "5.2.1",
     "jsdom": "^29.1.1",
-    "lint-staged": "17.0.8",
+    "lint-staged": "17.1.0",
     "oxfmt": "^0.59.0",
     "oxlint": "^1.74.0",
     "rollup-plugin-license": "^3.7.1",
