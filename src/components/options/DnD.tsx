@@ -15,7 +15,12 @@ export function DnDWrapper(props: DnDWrapperProps) {
         if (event.canceled) return;
 
         const {source} = event.operation;
-        if (!isSortable(source) || source.initialIndex === source.index) {
+        if (
+          !isSortable(source) ||
+          typeof source.initialIndex !== 'number' ||
+          typeof source.index !== 'number' ||
+          source.initialIndex === source.index
+        ) {
           return;
         }
 
@@ -39,7 +44,7 @@ export function useDnDItem(props: DnDItemArgs) {
     id: props.id,
     index: props.index,
     disabled: {
-      draggable: !props.canDrag,
+      draggable: props.canDrag === false,
       droppable: props.index < 0,
     },
   });

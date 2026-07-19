@@ -22,10 +22,12 @@ export const CodeEditor = (props: {
   }, []);
 
   useEffect(() => {
-    setTimeout(() => {
+    const timeoutId = setTimeout(() => {
       const textarea = document.getElementById(textareaId);
       if (textarea) textarea.spellcheck = false;
     }, 50);
+
+    return () => clearTimeout(timeoutId);
   }, []);
 
   return (
