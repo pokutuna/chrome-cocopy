@@ -1,0 +1,41 @@
+.functionItemBox {
+  opacity: 1;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+.functionItemBox.dragging {
+  opacity: 0.5;
+  margin-top: var(--space-1);
+  margin-bottom: var(--space-1);
+}
+
+.itemButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--size-4xl);
+  height: var(--constants-functionHeight);
+  cursor: pointer;
+}
+
+.dragKnobBox {
+  width: var(--size-4xl);
+  opacity: 0.3;
+  cursor: default;
+}
+.dragKnobBox.draggable {
+  opacity: 1;
+  cursor: move;
+}
+
+.editorBox {
+  margin-left: var(--size-4xl);
+  margin-bottom: var(--size-4xl);
+}
+
+.addFunctionBox {
+  margin-top: var(--space-2);
+}

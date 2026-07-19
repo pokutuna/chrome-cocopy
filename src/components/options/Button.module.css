@@ -1,0 +1,26 @@
+.button {
+  padding: var(--space-2);
+  background-color: transparent;
+  border: solid 1px;
+  border-radius: var(--space-1);
+  cursor: pointer;
+}
+
+.primary:hover:not(:disabled),
+.primary:focus:not(:disabled) {
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+  outline-color: var(--color-primary);
+}
+
+.danger {
+  color: var(--color-danger);
+}
+.danger:hover:not(:disabled),
+.danger:focus:not(:disabled) {
+  outline-color: var(--color-danger);
+}
+
+.buttonIcon {
+  margin-right: var(--space-1);
+}

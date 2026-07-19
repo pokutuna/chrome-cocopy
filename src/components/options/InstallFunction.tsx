@@ -2,7 +2,6 @@ import {faDizzy} from '@fortawesome/free-solid-svg-icons/faDizzy';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {memo, useReducer, useMemo} from 'react';
 import {useLocation} from 'react-router-dom';
-import styled from 'styled-components';
 
 import {addCopyFunctions} from '../../lib/config';
 import {CopyFunction, isCopyFunction} from '../../lib/function';
@@ -12,6 +11,8 @@ import {Editor} from './Editor';
 import {EditorBox} from './FunctionList';
 import {Action} from './FunctionsReducer';
 import {Section, TextList} from './Parts';
+
+import styles from './InstallFunction.module.css';
 
 interface State {
   fn?: CopyFunction;
@@ -40,34 +41,23 @@ function reduce(state: State, action: Action): State {
   }
 }
 
-const NoticeFrame = styled.div`
-  border: 1px solid ${p => p.theme.color.warning};
-  color: ${p => p.theme.color.warning};
-  margin-bottom: ${p => p.theme.space[4]};
-`;
 const Notice = memo(() => {
   return (
-    <NoticeFrame>
+    <div className={styles.noticeFrame}>
       <TextList>
         <li>Sharing this URL makes others can use this function.</li>
         <li>You can edit the code and every fields before installation.</li>
       </TextList>
-    </NoticeFrame>
+    </div>
   );
 });
 
-const Center = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-`;
-
 const FailedMessage = memo(() => {
   return (
-    <Center>
+    <div className={styles.center}>
       <FontAwesomeIcon icon={faDizzy} size="10x" />
       <h3>This URL is broken.</h3>
-    </Center>
+    </div>
   );
 });
 

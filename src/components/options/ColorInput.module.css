@@ -1,0 +1,39 @@
+.inputWrap {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.colorPickerBox {
+  position: relative;
+  margin-left: calc(var(--size-2xl) * -1);
+  font-size: var(--size-lg);
+  cursor: pointer;
+}
+
+.paletteBox {
+  position: absolute;
+  z-index: 999;
+  background-color: #fff;
+
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+
+  width: 130px;
+  margin-top: var(--space-2);
+  padding: var(--space-1);
+  border: 1px solid var(--color-gray);
+}
+
+.paletteColorBox {
+  background-color: var(--palette-color);
+  width: var(--size-2xl);
+  height: var(--size-2xl);
+  margin: var(--space-1);
+  cursor: pointer;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}

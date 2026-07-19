@@ -131,7 +131,7 @@ oxfmt の対象は ts/tsx/js のみ (md/html/css/json は ignore し無関係な
 並び替え・削除のテストを追加する。
 (実ページの title/url 取得は activeTab が automation で発火しない制約により E2E 対象外のまま)
 
-- **styled-components**(メンテナンスモード宣言済み)→ **CSS Modules に決定 (2026-07-19, branch: css-migration-trial)**
+- **styled-components**(メンテナンスモード宣言済み)→ **CSS Modules に決定 (2026-07-19, branch: css-migration-trial)** — **全面移行完了 (2026-07-19)**
   - 1 コンポーネント試行 (popup の Function 系 3 ファイル、動的テーマ色 + keyframes 継承の最難関ケース) の結論:
     動的テーマ色は CSS Modules / vanilla-extract どちらでも同じ CSS カスタムプロパティ
     (`style={{'--text-color': ...}}` → `var(--text-color)`) に帰着し難易度に差がない。
@@ -143,6 +143,20 @@ oxfmt の対象は ts/tsx/js のみ (md/html/css/json は ignore し無関係な
   - 残移行時の注意: `${Item} + ${Item}` コンポーネントセレクタ (options/Parts.tsx) は
     gap 等への書き換えが必要な唯一の非機械的パターン。CSS 変数の命名規約を先に決める。
     `*.module.css` の型生成ツール導入は必要になった時点で判断
+  - **実施結果**: `src/theme.css` に `theme.ts` の値を `:root` の CSS カスタムプロパティ
+    (`--space-*` / `--size-*` / `--color-*` / `--font-*` / `--constants-*`) として列挙し、
+    popup.tsx / options.tsx の両エントリで import (`code.css`/`prism.css` と同じ前例踏襲)。
+    残っていた popup (Header/App) と options 全ファイル (Button/Input/ColorInput/
+    FunctionList/InstallFunction/Parts/App) を CSS Modules に変換。
+    `${Item} + ${Item}` は `Row` を `display:flex; gap: 0 var(--space-4)` にする方針で解消
+    (見た目上は隣接要素間のみに margin が付く元の挙動と、gap による「全アイテム間」の
+    間隔が実質的に同一になる並びのみだったため採用)。`$mode` 等のバリアントは
+    `styles.primary`/`styles.danger` のクラス切替に置換。`ThemeProvider` は popup/App.tsx,
+    options/App.tsx, common/ForTest.tsx から撤去、`styled-components` を `pnpm remove`、
+    `src/styled.d.ts` を削除。`options/CodeEditor.tsx` は styled-components ではなく
+    `react-simple-code-editor` に TS の値として直接テーマ値を渡す箇所のため `Theme.ts` を
+    そのまま import し続ける唯一の残存箇所として温存。
+    `pnpm test` (22 vitest + check) / `pnpm run build` / `pnpm e2e` (4/4) 全て green。
 - **react-dnd**(実質未メンテ)→ `dnd-kit` か `pragmatic-drag-and-drop`
   - 関数が多くなった時の並び替え性能にも直結
 - **prismjs + react-simple-code-editor** → CodeMirror 6(編集体験も改善)

@@ -48,8 +48,7 @@
     "react-dnd-html5-backend": "16.0.1",
     "react-dom": "19.2.7",
     "react-router-dom": "7.18.1",
-    "react-simple-code-editor": "0.14.1",
-    "styled-components": "6.4.3"
+    "react-simple-code-editor": "0.14.1"
   },
   "devDependencies": {
     "@playwright/test": "^1.61.1",

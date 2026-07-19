@@ -1,0 +1,39 @@
+.inputBox {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  margin-bottom: var(--space-2);
+  border-radius: var(--space-1);
+}
+
+.label {
+  font-size: var(--size-lg);
+  margin: var(--space-2) 0;
+  display: flex;
+}
+
+.labelSub {
+  margin-left: var(--space-2);
+  font-size: var(--size-sm);
+  align-self: flex-end;
+  color: var(--color-gray);
+}
+
+.input {
+  padding: var(--space-1);
+  font-size: var(--size-lg);
+  width: 100%;
+  border: 1px solid;
+  border-color: inherit;
+}
+.input.error {
+  border-color: var(--color-error);
+}
+.input.error:focus {
+  outline-color: var(--color-error);
+}
+
+.errorMessage {
+  color: var(--color-error);
+  margin-left: var(--space-1);
+}

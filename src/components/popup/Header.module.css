@@ -1,0 +1,42 @@
+.headerBox {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.title {
+  width: 84px;
+  height: 40px;
+  background: no-repeat center/contain url('../../img/logo.png');
+  margin: var(--space-1);
+  padding: 0 var(--space-1);
+  filter: none;
+}
+.title.dev {
+  filter: invert(24%) sepia(85%) saturate(3947%) hue-rotate(167deg)
+    brightness(93%) contrast(101%);
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.optionLink {
+  position: absolute;
+  right: 0;
+  font-size: var(--size-xl);
+  margin-right: var(--space-4);
+  color: #666;
+}
+.optionLink:hover,
+.optionLink:focus {
+  color: #333;
+  animation: spin 1.5s linear infinite;
+}

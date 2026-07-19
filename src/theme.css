@@ -1,0 +1,58 @@
+/* Global CSS custom properties mirroring src/components/common/Theme.ts.
+   Naming is mechanical: --space-<n>, --size-<name>, --font-<weight-name>,
+   --color-<name>, --font-monospace / --font-default, --constants-<name>.
+   Imported once from each entry point (popup.tsx / options.tsx), same
+   pattern as the existing code.css / prism.css imports. */
+:root {
+  /* space */
+  --space-0: 0;
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+
+  /* size */
+  --size-xs: 0.75rem;
+  --size-sm: 0.875rem;
+  --size-base: 1rem;
+  --size-lg: 1.125rem;
+  --size-xl: 1.25rem;
+  --size-2xl: 1.5rem;
+  --size-3xl: 1.875rem;
+  --size-4xl: 2.25rem;
+  --size-5xl: 3rem;
+  --size-6xl: 4rem;
+
+  /* font weight */
+  --font-hairline: 100;
+  --font-thin: 200;
+  --font-light: 300;
+  --font-normal: 400;
+  --font-medium: 500;
+  --font-semibold: 600;
+  --font-bold: 700;
+  --font-extrabold: 800;
+  --font-black: 900;
+
+  /* color */
+  --color-gray: #666;
+  --color-lightgray: #ddd;
+  --color-codeBg: #f5f2f0;
+  --color-error: #f44336;
+  --color-danger: #f44336;
+  --color-warning: #4338ca;
+  --color-primary: #007bff;
+
+  /* font family */
+  --font-default: inherit;
+  --font-monospace:
+    Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+
+  /* constants */
+  --constants-functionWidth: 380px;
+  --constants-functionHeight: 32px;
+}

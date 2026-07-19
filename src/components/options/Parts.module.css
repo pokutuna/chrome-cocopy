@@ -1,0 +1,91 @@
+.mainColumn {
+  padding: 0;
+  width: 840px;
+  margin: 20px auto;
+}
+
+.titleIcon {
+  display: inline-block;
+  background: no-repeat center/contain url('../../img/logo.png');
+  width: 123px;
+  height: 60px;
+  filter: none;
+}
+.titleIcon.dev {
+  filter: invert(24%) sepia(85%) saturate(3947%) hue-rotate(167deg)
+    brightness(93%) contrast(101%);
+}
+
+.sectionBox {
+  margin-bottom: var(--space-8);
+}
+
+.sectionTitleHeader {
+  font-family: var(--font-monospace);
+  font-size: var(--size-xl);
+}
+
+.sectionInner {
+  margin-left: var(--space-2);
+}
+
+.textList {
+  font-size: var(--size-sm);
+  margin-bottom: var(--space-4);
+}
+.textList li {
+  margin-bottom: var(--space-2);
+}
+.textList code {
+  font-size: var(--size-xs);
+  font-family: var(--font-monospace);
+  background-color: var(--color-codeBg);
+}
+
+.box {
+  display: flex;
+  flex-flow: column wrap;
+}
+
+.item {
+  display: flex;
+  flex-grow: var(--item-grow, 0);
+}
+
+/* Row lays out Items in a wrapping flex row. The gap between adjacent
+   Items replaces styled-components' `${Item} + ${Item}` component
+   selector (no CSS Modules equivalent for generated-class adjacency). */
+.row {
+  display: flex;
+  flex-flow: row wrap;
+  gap: 0 var(--space-4);
+}
+
+.dividerH {
+  margin: var(--space-4) 0;
+  height: var(--space-1);
+  background: linear-gradient(
+    90deg,
+    transparent 20%,
+    var(--color-lightgray) 20%,
+    var(--color-lightgray) 80%,
+    transparent 80%
+  );
+}
+
+.dividerV {
+  margin: 0 var(--space-2);
+  width: var(--space-1);
+  height: 100%;
+  background: linear-gradient(
+    180deg,
+    transparent 20%,
+    var(--color-lightgray) 20%,
+    var(--color-lightgray) 80%,
+    transparent 80%
+  );
+}
+
+.center {
+  text-align: center;
+}

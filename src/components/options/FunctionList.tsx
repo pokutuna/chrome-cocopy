@@ -4,7 +4,6 @@ import {faCaretRight} from '@fortawesome/free-solid-svg-icons/faCaretRight';
 import {faPlus} from '@fortawesome/free-solid-svg-icons/faPlus';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {useEffect, useCallback, useRef, useReducer} from 'react';
-import styled from 'styled-components';
 
 import {getCopyFunctions} from '../../lib/config';
 import {CopyFunction} from '../../lib/function';
@@ -15,64 +14,47 @@ import {reducer, initialState, DispatchType} from './FunctionsReducer';
 import {Section} from './Parts';
 import {useSubscribeFunctions} from './Subscribe';
 
-const FunctionItemBox = styled.div<{$isDragging?: boolean}>`
-  opacity: ${props => (props.$isDragging ? 0.5 : 1)};
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  margin-top: ${props => (props.$isDragging ? props.theme.space[1] : 0)};
-  margin-bottom: ${props => (props.$isDragging ? props.theme.space[1] : 0)};
-`;
-
-const ItemButton = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: ${props => props.theme.size['4xl']};
-  height: ${props => props.theme.constants.functionHeight};
-  cursor: pointer;
-`;
+import styles from './FunctionList.module.css';
 
 const Caret = (props: {active: boolean; onClick: () => void}) => {
   const {active, onClick} = props;
   return (
-    <ItemButton onClick={onClick}>
+    <div className={styles.itemButton} onClick={onClick}>
       <FontAwesomeIcon icon={active ? faCaretDown : faCaretRight} size="lg" />
-    </ItemButton>
+    </div>
   );
 };
-
-const DragKnobBox = styled(ItemButton)<{draggable?: boolean}>`
-  width: ${props => props.theme.size['4xl']};
-  opacity: ${props => (props.draggable ? 1 : 0.3)};
-  cursor: ${props => (props.draggable ? 'move' : 'default')};
-`;
 
 const DragKnob = (props: {draggable: boolean}) => {
   return (
-    <DragKnobBox draggable={props.draggable}>
+    // dragKnobBox extends itemButton (was styled(ItemButton)); keep both
+    // classes so the flex centering and size come from itemButton.
+    <div
+      className={[
+        styles.itemButton,
+        styles.dragKnobBox,
+        props.draggable ? styles.draggable : '',
+      ]
+        .join(' ')
+        .trim()}
+    >
       <FontAwesomeIcon icon={faBars} />
-    </DragKnobBox>
+    </div>
   );
 };
 
-export const EditorBox = styled.div`
-  margin-left: ${props => props.theme.size['4xl']};
-  margin-bottom: ${props => props.theme.size['4xl']};
-`;
-
-const AddFunctionBox = styled.div`
-  margin-top: ${props => props.theme.space[2]};
-`;
+export function EditorBox(props: {children?: React.ReactNode}) {
+  return <div className={styles.editorBox}>{props.children}</div>;
+}
 
 function AddFunction(props: {onClick: () => void}) {
   return (
-    <FunctionItemBox>
-      <ItemButton onClick={props.onClick}>
+    <div className={styles.functionItemBox}>
+      <div className={styles.itemButton} onClick={props.onClick}>
         <FontAwesomeIcon icon={faPlus} />
-      </ItemButton>
+      </div>
       <AddFunctionItem onClick={props.onClick} />
-    </FunctionItemBox>
+    </div>
   );
 }
 
@@ -113,7 +95,11 @@ function FunctionListItem(props: FunctionListItemProps) {
 
   return (
     <div ref={ref}>
-      <FunctionItemBox $isDragging={isDragging}>
+      <div
+        className={[styles.functionItemBox, isDragging ? styles.dragging : '']
+          .join(' ')
+          .trim()}
+      >
         <Caret active={active} onClick={onClick} />
         <FunctionItem fn={fn} onClick={onClick} />
         <div
@@ -123,7 +109,7 @@ function FunctionListItem(props: FunctionListItemProps) {
         >
           <DragKnob draggable={draggable} />
         </div>
-      </FunctionItemBox>
+      </div>
       {active && (
         <EditorBox>
           <Editor function={fn} dispatch={dispatch} />
@@ -165,7 +151,7 @@ export function FunctionList() {
         ))}
 
         {/* New Function */}
-        <AddFunctionBox>
+        <div className={styles.addFunctionBox}>
           {state.activeId !== 'new' ? (
             <AddFunction onClick={onClickAdd} />
           ) : (
@@ -177,7 +163,7 @@ export function FunctionList() {
               dispatch={dispatch}
             />
           )}
-        </AddFunctionBox>
+        </div>
       </DnDWrapper>
     </Section>
   );

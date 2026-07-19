@@ -2,52 +2,26 @@ import {faPalette} from '@fortawesome/free-solid-svg-icons/faPalette';
 import {faRandom} from '@fortawesome/free-solid-svg-icons/faRandom';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import chroma from 'chroma-js';
-import {useCallback, useEffect, useRef} from 'react';
-import styled from 'styled-components';
+import React, {useCallback, useEffect, useRef} from 'react';
 
 import {colorPalette} from '../../lib/function';
-import {theme} from '../common/Theme';
 import {InputBox, Label, Input} from './Input';
 
-const InputWrap = styled.div`
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-`;
+import styles from './ColorInput.module.css';
 
-const ColorPickerBox = styled.div`
-  position: relative;
-  margin-left: -${props => props.theme.size['2xl']};
-  font-size: ${props => props.theme.size.lg};
-  cursor: pointer;
-`;
-
-const PaletteBox = styled.div`
-  position: absolute;
-  z-index: 999;
-  background-color: #fff;
-
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-
-  width: 130px;
-  margin-top: ${props => props.theme.space[2]};
-  padding: ${props => props.theme.space[1]};
-  border: 1px solid ${props => props.theme.color.gray};
-`;
-
-const PaletteColorBox = styled.div<{$color: string}>`
-  background-color: ${props => props.$color};
-  width: ${props => props.theme.size['2xl']};
-  height: ${props => props.theme.size['2xl']};
-  margin: ${props => props.theme.space[1]};
-  cursor: pointer;
-
-  display: flex;
-  justify-content: center;
-  align-items: center;
-`;
+const PaletteColorBox = (props: {
+  $color: string;
+  onClick: () => void;
+  children?: React.ReactNode;
+}) => (
+  <div
+    className={styles.paletteColorBox}
+    style={{'--palette-color': props.$color} as React.CSSProperties}
+    onClick={props.onClick}
+  >
+    {props.children}
+  </div>
+);
 
 const PaletteColor = (props: {
   color: string;
@@ -96,22 +70,22 @@ export function ColorPicker(props: ColorPickerProps) {
   }, [props.show, props.togglePalette]);
 
   return (
-    <ColorPickerBox ref={ref}>
+    <div className={styles.colorPickerBox} ref={ref}>
       <FontAwesomeIcon
         icon={faPalette}
         onClick={props.togglePalette}
-        color={props.show ? theme.color.primary : undefined}
+        color={props.show ? 'var(--color-primary)' : undefined}
         data-testid="toggle-palette"
       />
       {props.show && (
-        <PaletteBox data-testid="palette">
+        <div className={styles.paletteBox} data-testid="palette">
           {colorPalette.map((c, i) => (
             <PaletteColor key={i} color={c} onClick={props.onSelect} />
           ))}
           <PaletteColorRandom onClick={props.onSelect} />
-        </PaletteBox>
+        </div>
       )}
-    </ColorPickerBox>
+    </div>
   );
 }
 
@@ -141,7 +115,7 @@ export function ColorInput(props: ColorInputProps) {
   return (
     <InputBox>
       <Label htmlFor="color">Color</Label>
-      <InputWrap>
+      <div className={styles.inputWrap}>
         <Input
           type="text"
           value={props.value}
@@ -158,7 +132,7 @@ export function ColorInput(props: ColorInputProps) {
           onSelect={onSelect}
           togglePalette={props.togglePalette}
         />
-      </InputWrap>
+      </div>
     </InputBox>
   );
 }
