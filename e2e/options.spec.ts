@@ -38,7 +38,7 @@ async function seedStorage(
 }
 
 // Minimal CopyFunction fixtures matching src/lib/function.ts's CopyFunction
-// shape / src/lib/function.schema.json. `pattern` is intentionally omitted.
+// shape / src/lib/function.schema.ts. `pattern` is intentionally omitted.
 const threeFunctions = [
   {
     id: 'e2e-fn-a',
@@ -108,6 +108,99 @@ test('adding a function via the options UI persists to chrome.storage.sync', asy
   // not just held in in-memory state).
   await options.reload();
   await expect(options.getByText(newFunctionName)).toBeVisible();
+});
+
+test('editing a function via the options UI persists the changes', async ({
+  context,
+  extensionId,
+}) => {
+  const options = await context.newPage();
+  await options.goto(`chrome-extension://${extensionId}/options.html`);
+  await seedStorage(options, [threeFunctions[1]]);
+  await options.reload();
+
+  await options.getByText('E2E Function B').click();
+
+  const nameInput = options.locator('#name');
+  const saveButton = options.getByRole('button', {name: 'Save'});
+  await expect(nameInput).toHaveValue('E2E Function B');
+  await nameInput.fill('E2E Function B edited');
+  await saveButton.click();
+
+  // Existing functions keep the editor open after saving and change the
+  // button label to "Saved".
+  await expect(saveButton).toHaveText('Saved');
+  await expect
+    .poll(() => getStoredFunctionNames(options))
+    .toEqual(['E2E Function B edited']);
+
+  await options.reload();
+  await expect(options.getByText('E2E Function B edited')).toBeVisible();
+  await expect(
+    options.getByText('E2E Function B', {exact: true}),
+  ).not.toBeVisible();
+});
+
+test('disables saving when the function name is empty', async ({
+  context,
+  extensionId,
+}) => {
+  const options = await context.newPage();
+  await options.goto(`chrome-extension://${extensionId}/options.html`);
+  await seedStorage(options, [threeFunctions[1]]);
+  await options.reload();
+  await options.getByText('E2E Function B').click();
+
+  const saveButton = options.getByRole('button', {name: 'Save'});
+  await options.locator('#name').fill('');
+
+  await expect(options.getByText('Cannot be empty.')).toBeVisible();
+  await expect(saveButton).toBeDisabled();
+  await expect
+    .poll(() => getStoredFunctionNames(options))
+    .toEqual(['E2E Function B']);
+});
+
+test('disables saving when the URL pattern is invalid', async ({
+  context,
+  extensionId,
+}) => {
+  const options = await context.newPage();
+  await options.goto(`chrome-extension://${extensionId}/options.html`);
+  await seedStorage(options, [threeFunctions[1]]);
+  await options.reload();
+  await options.getByText('E2E Function B').click();
+
+  const saveButton = options.getByRole('button', {name: 'Save'});
+  await options.locator('#pattern').fill('[');
+
+  await expect(options.getByText(/Invalid regular expression/)).toBeVisible();
+  await expect(saveButton).toBeDisabled();
+  await expect
+    .poll(() => getStoredFunctionNames(options))
+    .toEqual(['E2E Function B']);
+});
+
+test('disables saving when the function code has a syntax error', async ({
+  context,
+  extensionId,
+}) => {
+  const options = await context.newPage();
+  await options.goto(`chrome-extension://${extensionId}/options.html`);
+  await seedStorage(options, [threeFunctions[1]]);
+  await options.reload();
+  await options.getByText('E2E Function B').click();
+
+  const saveButton = options.getByRole('button', {name: 'Save'});
+  await options.locator('#code').fill('}');
+
+  // Code parsing is debounced and performed by the sandbox iframe, so wait
+  // for the returned syntax error before checking the disabled state.
+  await expect(options.getByText(/Unexpected token/)).toBeVisible();
+  await expect(saveButton).toBeDisabled();
+  await expect
+    .poll(() => getStoredFunctionNames(options))
+    .toEqual(['E2E Function B']);
 });
 
 test('deleting a function via the options UI removes it from chrome.storage.sync', async ({

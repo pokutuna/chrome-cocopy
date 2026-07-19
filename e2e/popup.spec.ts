@@ -1,7 +1,7 @@
 import {test, expect, EXTENSION_ID} from './fixtures';
 
 // Minimal CopyFunction fixtures matching src/lib/function.ts's CopyFunction
-// shape / src/lib/function.schema.json. `pattern` is intentionally omitted
+// shape / src/lib/function.schema.ts. `pattern` is intentionally omitted
 // so the function is shown regardless of the active tab's URL
 // (see filterFunctions in src/lib/function.ts).
 const seedFunctions = [

@@ -18,8 +18,8 @@ Firefox/Edge へ本格展開 + ストア提出の CI 自動化までやりたく
 実装済み: `e2e/fixtures.ts` (build/ を一時 dir にコピーし manifest に `key` を注入して
 extension ID を固定、headless chromium にロード) + `e2e/popup.spec.ts` (storage seed →
 関数クリック → sandbox 評価 → クリップボード内容まで検証) + `e2e/options.spec.ts`
-(UI から関数追加 → storage.sync 永続化 + reload 後の表示を検証)。`yarn e2e` で実行
-(`pree2e` が build を挟む)。
+(UI から関数追加・編集・削除・並び替え、保存不可入力 → storage.sync 永続化または
+エラー表示 + reload 後の表示を検証)。`pnpm e2e` で実行 (`pree2e` が build を挟む)。
 
 既知の制約: Playwright は popup を「ただのページ」として開くため `activeTab` の
 権限付与が発火しない。E2E 用の一時 manifest にのみ `host_permissions: <all_urls>` と
@@ -29,8 +29,9 @@ extension ID を固定、headless chromium にロード) + `e2e/popup.spec.ts` (
 - Playwright で拡張を実際に Chrome にロードする E2E を用意する
   - 対象は挙動を守りたいコアパス:
     1. popup を開いて関数一覧が表示され、クリックでコピー結果が得られる(sandbox プロトコル経由の評価)
-    2. options で関数を追加・編集・保存し、storage に永続化される
-  - 本数は最小限(1〜3 本)。移行中も常に green を保つ
+    2. options で関数を追加・編集・削除・並び替えし、storage に永続化される
+    3. options で名前・URL Pattern・コードを不正にした場合、保存できずエラー表示される
+  - 本数は最小限。移行中も常に green を保つ
 - 既存 Jest テストの棚卸し: snapshot 依存のもの、jest-chrome / jest-styled-components 依存のものを把握しておく(Phase 1-2 の移行コスト見積りに使う)
 
 ## Phase 1: ビルド・開発ツール最新化
@@ -126,9 +127,8 @@ oxfmt の対象は ts/tsx/js のみ (md/html/css/json は ignore し無関係な
 
 ## Phase 2: ライブラリ置換・堅牢化
 
-着手前に E2E を拡充する: 現状の E2E は sandbox 評価往復と storage 永続化のみをカバーし、
-関数の編集・削除・並び替え (react-dnd) は未カバー。react-dnd と storage を触る前に
-並び替え・削除のテストを追加する。
+E2E 拡充済み (2026-07-19): options の関数追加・編集・削除・並び替え (react-dnd)、
+入力バリデーションによる保存不可、storage 永続化をカバーしている。
 (実ページの title/url 取得は activeTab が automation で発火しない制約により E2E 対象外のまま)
 
 - **styled-components**(メンテナンスモード宣言済み)→ **CSS Modules に決定 (2026-07-19, branch: css-migration-trial)** — **全面移行完了 (2026-07-19)**
@@ -160,8 +160,10 @@ oxfmt の対象は ts/tsx/js のみ (md/html/css/json は ignore し無関係な
 - **react-dnd**(実質未メンテ)→ `dnd-kit` か `pragmatic-drag-and-drop`
   - 関数が多くなった時の並び替え性能にも直結
 - **prismjs + react-simple-code-editor** → CodeMirror 6(編集体験も改善)
-- **ajv + チェックイン済み `function.ajv.js`** → zod / valibot
-  - 生成ファイルと `yarn validator` の運用が消え、schema と validator のドリフト問題も解消
+- **ajv + チェックイン済み `function.ajv.js`** → **Valibot に決定・移行完了 (2026-07-19)**
+  - `src/lib/function.schema.ts` に schema と validator を集約し、`function.schema.json`、
+    `function.ajv.js`、`ajv-cli`、`validator` script を削除
+  - `strictObject` で未知キーを拒否し、既存 JSON Schema の検証条件を維持
 - **storage の堅牢化(「関数が多くなると壊れる」の本丸)**:
   - `chrome.storage.sync` は 1 item 8KB / 全体 100KB の quota があり、関数が増えるとここで壊れる
   - チャンク分割 or `storage.local` フォールバック + エクスポート/インポート機能
@@ -196,4 +198,5 @@ Firefox / Safari は非対応のため、ユーザーコード実行の仕組み
 | パッケージマネージャ | **決定済み (2026-07-18): pnpm**。npm (最薄・脱出容易だが速度と厳密さで劣る) と bun (最速だがランタイムごと寄せる意図がないなら PM だけ使う旨味が薄い) も検討した上で、速度・ディスク効率・幽霊依存検出・corepack でのバージョン固定を評価して pnpm を選択 |
 | フォーマッタ(oxfmt / Biome / Prettier 継続) | **決定済み (2026-07-18): oxfmt + oxlint**。oxc に一本化。Vite+ (oxlint/oxfmt/tsgo を束ねる統合ツール) は 2026-07-02 に beta が出たばかりのため今回は見送り、stable 到達時に再検討 |
 | styled-components の移行先 | **決定済み (2026-07-19): CSS Modules**。1 コンポーネント試行の結果、最難関の動的テーマ色で vanilla-extract と難易度差がなく、追加依存ゼロの CSS Modules が方針に合致 |
+| AJV の移行先 | **決定済み (2026-07-19): Valibot**。schema を TypeScript に集約し、生成 validator と CLI の運用を廃止 |
 | Safari をスコープに入れるか | Phase 3 の設計には影響しない(QuickJS 案ならどちらでも同じ)ので後回しで OK |

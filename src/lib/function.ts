@@ -1,5 +1,7 @@
+import * as v from 'valibot';
+
 import {initialCode} from './builtin';
-import validate from './function.ajv';
+import {copyFunctionSchema} from './function.schema';
 import {Library} from './library';
 import {Page} from './page';
 import {textColorFromBgColor} from './util';
@@ -83,6 +85,6 @@ export const colorPalette = [
   '#607D8B',
 ];
 
-export function isCopyFunction(f: any): f is CopyFunction {
-  return validate(f) as boolean;
+export function isCopyFunction(f: unknown): f is CopyFunction {
+  return v.safeParse(copyFunctionSchema, f).success;
 }
