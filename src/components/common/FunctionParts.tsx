@@ -1,45 +1,45 @@
 import React, {useCallback} from 'react';
-import styled from 'styled-components';
 
 import {CopyFunction} from '../../lib/function';
 import {PatternIcon} from './Icon';
+
+import styles from './FunctionParts.module.css';
 
 export type FunctionBoxProps = {
   $textColor: string;
   $backgroundColor: string;
 };
 
-export const FunctionBox = styled.div<FunctionBoxProps>`
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  width: ${props => props.theme.constants.functionWidth};
-  height: ${props => props.theme.constants.functionHeight};
-  padding: ${props => props.theme.space[1]} ${props => props.theme.space[2]};
-  color: ${props => props.$textColor};
-  background-color: ${props => props.$backgroundColor};
-  &:focus,
-  &:hover {
-    filter: brightness(110%);
-  }
-  cursor: pointer;
-`;
+// CSS custom properties shared by FunctionBox and its descendants that need
+// per-function dynamic colors (was styled-components props -> theme interpolation).
+function functionBoxVars(props: FunctionBoxProps): React.CSSProperties {
+  return {
+    '--text-color': props.$textColor,
+    '--background-color': props.$backgroundColor,
+  } as React.CSSProperties;
+}
 
-const ShortcutBox = styled.div`
-  width: 32px;
-`;
+export const FunctionBox = React.forwardRef<
+  HTMLDivElement,
+  FunctionBoxProps &
+    Omit<React.HTMLAttributes<HTMLDivElement>, 'className' | 'style'> & {
+      className?: string;
+    }
+>(function FunctionBox(props, ref) {
+  const {$textColor, $backgroundColor, className, ...rest} = props;
+  return (
+    <div
+      ref={ref}
+      className={[styles.functionBox, className].filter(Boolean).join(' ')}
+      style={functionBoxVars({$textColor, $backgroundColor})}
+      {...rest}
+    />
+  );
+});
 
-const ShortcutKey = styled.kbd<{$textColor: string}>`
-  text-align: center;
-  padding: 0 ${props => props.theme.space[1]};
-  margin-right: ${props => props.theme.space[2]};
-  font-size: ${props => props.theme.size.lg};
-  font-family: ${props => props.theme.fontFamily.monospace};
-
-  border-radius: ${props => props.theme.space[1]};
-  border: 2px solid ${props => props.$textColor};
-  box-shadow: 2px 2px 0px 0px rgba(0, 0, 0, 0.3);
-`;
+const ShortcutBox = (props: {children?: React.ReactNode}) => (
+  <div className={styles.shortcutBox}>{props.children}</div>
+);
 
 type ShortcutProps = {
   textColor: string;
@@ -49,26 +49,33 @@ type ShortcutProps = {
 export function Shortcut(props: ShortcutProps) {
   return typeof props.shortcut !== 'undefined' ? (
     <ShortcutBox>
-      <ShortcutKey $textColor={props.textColor}>{props.shortcut}</ShortcutKey>
+      <kbd
+        className={styles.shortcutKey}
+        style={{'--text-color': props.textColor} as React.CSSProperties}
+      >
+        {props.shortcut}
+      </kbd>
     </ShortcutBox>
   ) : (
     <ShortcutBox />
   );
 }
 
-export const FunctionName = styled.div`
-  font-size: ${props => props.theme.size.base};
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  user-select: none; /* prevent accidental selection for form */
-`;
+export const FunctionName = (props: {children?: React.ReactNode}) => (
+  <div className={styles.functionName}>{props.children}</div>
+);
 
-export const RigthIconBox = styled.div<{$color: string}>`
-  margin-left: auto;
-  width: ${p => p.theme.size.lg};
-  color: ${p => p.$color};
-`;
+export const RigthIconBox = (props: {
+  $color: string;
+  children?: React.ReactNode;
+}) => (
+  <div
+    className={styles.rightIconBox}
+    style={{'--icon-color': props.$color} as React.CSSProperties}
+  >
+    {props.children}
+  </div>
+);
 
 type FunctionItemProps = {
   fn: CopyFunction;
@@ -98,23 +105,16 @@ export function FunctionItem(props: FunctionItemProps) {
   );
 }
 
-const AddNewFunctionBox = styled(FunctionBox)`
-  border: 1px solid ${p => p.$textColor};
-  &:hover {
-    color: ${p => p.theme.color.primary};
-    border-color: ${p => p.theme.color.primary};
-  }
-`;
-
 export function AddFunctionItem(props: {onClick?: () => void}) {
   return (
-    <AddNewFunctionBox
+    <FunctionBox
+      className={styles.addNewFunctionBox}
       $textColor="#010203"
       $backgroundColor="#FFF"
       onClick={props.onClick}
     >
       <ShortcutBox />
       <FunctionName>Create New Function</FunctionName>
-    </AddNewFunctionBox>
+    </FunctionBox>
   );
 }

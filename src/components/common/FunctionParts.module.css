@@ -1,0 +1,53 @@
+.functionBox {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  width: var(--constants-functionWidth);
+  height: var(--constants-functionHeight);
+  padding: var(--space-1, 0.25rem) var(--space-2, 0.5rem);
+  color: var(--text-color);
+  background-color: var(--background-color);
+  cursor: pointer;
+}
+.functionBox:focus,
+.functionBox:hover {
+  filter: brightness(110%);
+}
+
+.shortcutBox {
+  width: 32px;
+}
+
+.shortcutKey {
+  text-align: center;
+  padding: 0 var(--space-1, 0.25rem);
+  margin-right: var(--space-2, 0.5rem);
+  font-size: var(--size-lg, 1.125rem);
+  font-family: var(--font-monospace);
+
+  border-radius: var(--space-1, 0.25rem);
+  border: 2px solid var(--text-color);
+  box-shadow: 2px 2px 0px 0px rgba(0, 0, 0, 0.3);
+}
+
+.functionName {
+  font-size: var(--size-base, 1rem);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  user-select: none; /* prevent accidental selection for form */
+}
+
+.rightIconBox {
+  margin-left: auto;
+  width: var(--size-lg, 1.125rem);
+  color: var(--icon-color);
+}
+
+.addNewFunctionBox {
+  border: 1px solid var(--text-color);
+}
+.addNewFunctionBox:hover {
+  color: var(--color-primary, #007bff);
+  border-color: var(--color-primary, #007bff);
+}

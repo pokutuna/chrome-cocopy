@@ -1,43 +1,43 @@
 import React, {useCallback} from 'react';
-import styled from 'styled-components';
 
-export const InputBox = styled.div`
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  margin-bottom: ${props => props.theme.space[2]};
-  border-radius: ${props => props.theme.space[1]};
-`;
+import styles from './Input.module.css';
 
-export const Label = styled.label`
-  font-size: ${props => props.theme.size.lg};
-  margin: ${props => props.theme.space[2]} 0;
-  display: flex;
-`;
+export const InputBox = (props: {children?: React.ReactNode}) => (
+  <div className={styles.inputBox}>{props.children}</div>
+);
 
-export const LabelSub = styled.span`
-  margin-left: ${props => props.theme.space[2]};
-  font-size: ${props => props.theme.size.sm};
-  align-self: flex-end;
-  color: ${props => props.theme.color.gray};
-`;
+export const Label = (props: {
+  htmlFor?: string;
+  children?: React.ReactNode;
+}) => (
+  <label className={styles.label} htmlFor={props.htmlFor}>
+    {props.children}
+  </label>
+);
 
-export const Input = styled.input<{$error?: boolean}>`
-  padding: ${props => props.theme.space[1]};
-  font-size: ${props => props.theme.size.lg};
-  width: 100%;
-  border: 1px solid;
+export const LabelSub = (props: {children?: React.ReactNode}) => (
+  <span className={styles.labelSub}>{props.children}</span>
+);
 
-  border-color: ${p => (p.$error ? p.theme.color.error : 'inherit')};
-  &:focus {
-    ${p => p.$error && `outline-color: ${p.theme.color.error}`};
+export const Input = React.forwardRef<
+  HTMLInputElement,
+  Omit<React.InputHTMLAttributes<HTMLInputElement>, 'className'> & {
+    $error?: boolean;
   }
-`;
+>(function Input(props, ref) {
+  const {$error, ...rest} = props;
+  return (
+    <input
+      ref={ref}
+      className={[styles.input, $error ? styles.error : ''].join(' ').trim()}
+      {...rest}
+    />
+  );
+});
 
-export const ErrorMessage = styled.span`
-  color: ${p => p.theme.color.error};
-  margin-left: ${p => p.theme.space[1]};
-`;
+export const ErrorMessage = (props: {children?: React.ReactNode}) => (
+  <span className={styles.errorMessage}>{props.children}</span>
+);
 
 export const TextInput = (props: {
   label: string;

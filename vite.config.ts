@@ -13,8 +13,6 @@ const srcDir = path.join(rootDir, 'src');
 // LICENSE file. Mirrors licenseTextOverrides from the previous
 // license-webpack-plugin config.
 const licenseTextOverrides: Record<string, string> = {
-  'styled-components':
-    'https://github.com/styled-components/styled-components/blob/master/LICENSE',
   isarray: 'https://github.com/juliangruber/isarray/blob/master/LICENSE',
   '@react-dnd/invariant':
     'https://github.com/react-dnd/react-dnd/blob/main/LICENSE',
