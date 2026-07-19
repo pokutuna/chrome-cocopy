@@ -5,7 +5,7 @@
   "repository": "ssh://git@github.com/pokutuna/chrome-cocopy.git",
   "license": "MIT",
   "author": "pokutuna <mail@pokutuna.com>",
-  "packageManager": "pnpm@10.12.2",
+  "packageManager": "pnpm@10.34.5",
   "scripts": {
     "build": "vite build",
     "check": "oxlint && oxfmt --check . && pnpm run typecheck",
@@ -33,6 +33,7 @@
     }
   },
   "dependencies": {
+    "@dnd-kit/react": "0.5.0",
     "@fortawesome/fontawesome-svg-core": "7.3.1",
     "@fortawesome/free-solid-svg-icons": "7.3.1",
     "@fortawesome/react-fontawesome": "3.4.0",
@@ -42,8 +43,6 @@
     "mustache": "4.2.0",
     "prismjs": "1.30.0",
     "react": "19.2.7",
-    "react-dnd": "16.0.1",
-    "react-dnd-html5-backend": "16.0.1",
     "react-dom": "19.2.7",
     "react-router-dom": "7.18.1",
     "react-simple-code-editor": "0.14.1",
@@ -65,7 +64,7 @@
     "husky": "9.1.7",
     "js-yaml": "5.2.1",
     "jsdom": "^29.1.1",
-    "lint-staged": "17.0.8",
+    "lint-staged": "17.1.0",
     "oxfmt": "^0.59.0",
     "oxlint": "^1.74.0",
     "rollup-plugin-license": "^3.7.1",

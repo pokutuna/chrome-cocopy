@@ -3,7 +3,7 @@ import {faCaretDown} from '@fortawesome/free-solid-svg-icons/faCaretDown';
 import {faCaretRight} from '@fortawesome/free-solid-svg-icons/faCaretRight';
 import {faPlus} from '@fortawesome/free-solid-svg-icons/faPlus';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
-import {useEffect, useCallback, useRef, useReducer} from 'react';
+import {useEffect, useCallback, useReducer} from 'react';
 
 import {getCopyFunctions} from '../../lib/config';
 import {CopyFunction} from '../../lib/function';
@@ -69,27 +69,14 @@ type FunctionListItemProps = {
 function FunctionListItem(props: FunctionListItemProps) {
   const {fn, index, active, draggable, dispatch} = props;
 
-  const ref = useRef<HTMLDivElement>(null);
-
-  const move = useCallback(
-    (dragIndex: number, hoverIndex: number) =>
-      dispatch({t: 'dragging', dragIndex, hoverIndex}),
-    [dispatch],
-  );
-
-  const onDropped = useCallback(() => dispatch({t: 'dropped'}), []);
-
   const onClick = useCallback(
     () => dispatch({t: 'select', functionId: fn.id}),
     [fn.id],
   );
 
-  const {isDragging, drag} = useDnDItem({
+  const {isDragging, ref, handleRef} = useDnDItem({
     id: fn.id,
     index,
-    ref,
-    move,
-    onDropped,
     canDrag: draggable,
   });
 
@@ -102,11 +89,7 @@ function FunctionListItem(props: FunctionListItemProps) {
       >
         <Caret active={active} onClick={onClick} />
         <FunctionItem fn={fn} onClick={onClick} />
-        <div
-          ref={node => {
-            drag(node);
-          }}
-        >
+        <div ref={handleRef}>
           <DragKnob draggable={draggable} />
         </div>
       </div>
@@ -129,6 +112,13 @@ export function FunctionList() {
 
   const onClickAdd = useCallback(() => dispatch({t: 'add'}), [dispatch]);
 
+  const onMove = useCallback(
+    (dragIndex: number, hoverIndex: number) =>
+      dispatch({t: 'dragging', dragIndex, hoverIndex}),
+    [dispatch],
+  );
+  const onDropped = useCallback(() => dispatch({t: 'dropped'}), [dispatch]);
+
   // refresh when functions are updated with opening multiple options pages.
   const onUpdateFunctionsBackground = useCallback(
     (functions: CopyFunction[]) => dispatch({t: 'refresh', functions}),
@@ -138,7 +128,7 @@ export function FunctionList() {
 
   return (
     <Section title="Functions">
-      <DnDWrapper>
+      <DnDWrapper move={onMove} onDropped={onDropped}>
         {state.functions.map((fn, idx) => (
           <FunctionListItem
             key={fn.id}

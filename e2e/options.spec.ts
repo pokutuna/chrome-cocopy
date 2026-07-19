@@ -256,23 +256,21 @@ test('reordering functions via drag & drop persists the new order to chrome.stor
   await expect(options.getByText('E2E Function B')).toBeVisible();
   await expect(options.getByText('E2E Function C')).toBeVisible();
 
-  // Reordering uses react-dnd's HTML5Backend (see
+  // Reordering uses dnd-kit's pointer sensor (see
   // src/components/options/DnD.tsx / FunctionList.tsx). Playwright's
   // `locator.dragTo()` performs real mouse down/move/up sequences via CDP,
-  // which Chromium translates into native HTML5 drag events, so it works
-  // here without any manual dataTransfer wiring.
+  // so it works here without any manual event wiring.
   //
   // Each function row renders a "drag knob" (the faBars icon) as the drag
-  // handle (see DragKnob in FunctionList.tsx); grab it via the icon rather
-  // than styled-components' generated class names, which aren't stable
-  // selectors. Rows render in storage order (seeded as A, B, C above), so
-  // knob index N corresponds to the Nth seeded function.
+  // handle (see DragKnob in FunctionList.tsx); grab the source via the icon
+  // rather than styled-components' generated class names, which aren't
+  // stable selectors. Rows render in storage order (seeded as A, B, C above).
   const dragKnobs = options.locator('svg[data-icon="bars"] >> xpath=..');
 
   // Drag "E2E Function A" (index 0) down past "E2E Function C" (index 2).
-  // react-dnd's hover-based reorder swaps step by step as the dragged item
-  // crosses each sibling, ending with A placed after C: [B, C, A].
-  await dragKnobs.nth(0).dragTo(dragKnobs.nth(2));
+  // dnd-kit's optimistic sorting moves the item across each sibling,
+  // ending with A placed after C: [B, C, A].
+  await dragKnobs.nth(0).dragTo(options.getByText('E2E Function C'));
 
   const expectedOrder = ['E2E Function B', 'E2E Function C', 'E2E Function A'];
 
