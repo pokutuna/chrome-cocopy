@@ -104,7 +104,7 @@ export const javascriptCompletionSource =
   scopeCompletionSource(javascriptScope);
 
 const stringProperties = new Set(['title', 'url', 'content', 'selectingText']);
-const javascriptIdentifier = /^[a-zA-Z_$\xaa-\uffdc][\w$\xaa-\uffdc]*$/;
+const javascriptIdentifier = /^[\w$]+$/;
 
 type SyntaxNode = ReturnType<ReturnType<typeof syntaxTree>['resolveInner']>;
 
@@ -225,54 +225,23 @@ function isStringProperty(property: string): boolean {
   return stringProperties.has(property);
 }
 
-function stringCompletions(
-  path: readonly string[],
-  context: CompletionContext,
-): readonly Completion[] {
-  const scope =
-    path.length === 1
-      ? {[path[0]]: String.prototype}
-      : {[path[0]]: {[path[1]]: String.prototype}};
-  const result = scopeCompletionSource(scope)(context);
-  return result instanceof Promise ? [] : (result?.options ?? []);
-}
-
-function stringLiteralCompletions(): readonly Completion[] {
-  const options: Completion[] = [];
-  const seen = new Set<string>();
-  const original = String.prototype;
-  let object: object | null = original;
-
-  for (let depth = 0; object; depth++) {
-    for (const label of Object.getOwnPropertyNames(object)) {
-      if (!javascriptIdentifier.test(label) || seen.has(label)) continue;
-      seen.add(label);
-
-      let value: unknown;
-      try {
-        value = (original as unknown as Record<string, unknown>)[label];
-      } catch {
-        continue;
-      }
-
-      options.push({
-        label,
-        type:
-          typeof value === 'function'
-            ? /^[A-Z]/.test(label)
-              ? 'class'
-              : 'method'
-            : 'property',
-        boost: -depth,
-      });
-    }
-    object = Object.getPrototypeOf(object);
-  }
-
-  return options;
-}
-
-const stringLiteralCompletionOptions = stringLiteralCompletions();
+const stringCompletionOptions = Object.getOwnPropertyNames(String.prototype)
+  .filter(label => javascriptIdentifier.test(label))
+  .map(label => {
+    const value = Object.getOwnPropertyDescriptor(
+      String.prototype,
+      label,
+    )?.value;
+    return {
+      label,
+      type:
+        typeof value === 'function'
+          ? /^[A-Z]/.test(label)
+            ? 'class'
+            : 'method'
+          : 'property',
+    } satisfies Completion;
+  });
 
 function findStringLiteralMember(node: SyntaxNode): SyntaxNode | null {
   const member =
@@ -352,7 +321,7 @@ function optionsForPath(
     destructuredBinding &&
     isStringProperty(destructuredBinding.property)
   ) {
-    return stringCompletions(path, context);
+    return stringCompletionOptions;
   }
 
   if (path.length === 1 && isArgumentName(node, path[0], context)) {
@@ -361,7 +330,7 @@ function optionsForPath(
 
   if (path.length === 2 && isArgumentName(node, path[0], context)) {
     if (path[1] === 'modifier') return modifierCompletions;
-    if (isStringProperty(path[1])) return stringCompletions(path, context);
+    if (isStringProperty(path[1])) return stringCompletionOptions;
   }
 
   return null;
@@ -389,7 +358,7 @@ export function cocopyCompletionSource(
     const word = context.matchBefore(/[\w$]*/);
     return {
       from: word?.from ?? context.pos,
-      options: stringLiteralCompletionOptions,
+      options: stringCompletionOptions,
       validFor: /^[\w$]*$/,
     };
   }
