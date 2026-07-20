@@ -11,7 +11,14 @@ import {
   scopeCompletionSource,
 } from '@codemirror/lang-javascript';
 import {syntaxTree} from '@codemirror/language';
-import {Prec, keymap} from '@uiw/react-codemirror';
+import {Prec, keymap, type EditorView} from '@uiw/react-codemirror';
+
+function closeCompletionOrBlur(view: EditorView): boolean {
+  if (closeCompletion(view)) return true;
+
+  view.contentDOM.blur();
+  return true;
+}
 
 export const additionalCompletionKeymap = Prec.highest(
   keymap.of([
@@ -19,6 +26,7 @@ export const additionalCompletionKeymap = Prec.highest(
     {key: 'Ctrl-n', run: moveCompletionSelection(true)},
     {key: 'Ctrl-p', run: moveCompletionSelection(false)},
     {key: 'Ctrl-g', run: closeCompletion},
+    {key: 'Escape', run: closeCompletionOrBlur},
   ]),
 );
 

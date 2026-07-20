@@ -313,3 +313,31 @@ test('closes completions with Ctrl-G', async () => {
   expect(closeCompletion(view)).toBe(false);
   view.destroy();
 });
+
+test('blurs the editor with Escape when no completion is open', () => {
+  const view = new EditorView({
+    parent: document.body,
+    state: EditorState.create({
+      doc: '() => {}',
+      extensions: [
+        additionalCompletionKeymap,
+        javascript(),
+        javascriptLanguage.data.of({autocomplete: cocopyCompletionSource}),
+        javascriptLanguage.data.of({autocomplete: javascriptCompletionSource}),
+        autocompletion(),
+      ],
+    }),
+  });
+  const blur = vi.spyOn(view.contentDOM, 'blur');
+  view.focus();
+
+  expect(
+    runScopeHandlers(
+      view,
+      new KeyboardEvent('keydown', {key: 'Escape', code: 'Escape'}),
+      'editor',
+    ),
+  ).toBe(true);
+  expect(blur).toHaveBeenCalledOnce();
+  view.destroy();
+});
