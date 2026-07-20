@@ -180,6 +180,30 @@ test('shows destructured variables in the function body', async ({
   await expect(
     completion.locator('.cm-completionLabel', {hasText: 'title'}),
   ).toBeVisible();
+
+  await codeEditor.press('Escape');
+  await codeEditor.fill('({title}) => {\n  ');
+  await codeEditor.pressSequentially('title.', {delay: 50});
+  await expect(completion).toBeVisible();
+  await expect(
+    completion.locator('.cm-completionLabel', {hasText: 'toUpperCase'}),
+  ).toBeVisible();
+
+  await codeEditor.press('Escape');
+  await codeEditor.fill('() => "foo".');
+  await codeEditor.pressSequentially('toU', {delay: 50});
+  await expect(completion).toBeVisible();
+  await expect(
+    completion.locator('.cm-completionLabel', {hasText: 'toUpperCase'}),
+  ).toBeVisible();
+
+  await codeEditor.press('Escape');
+  await codeEditor.fill('() => Math.');
+  await codeEditor.pressSequentially('ma', {delay: 50});
+  await expect(completion).toBeVisible();
+  await expect(
+    completion.locator('.cm-completionLabel', {hasText: 'max'}),
+  ).toBeVisible();
 });
 
 test('disables saving when the function name is empty', async ({

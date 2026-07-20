@@ -7,7 +7,10 @@ import {
 import {javascript, javascriptLanguage} from '@codemirror/lang-javascript';
 import {EditorState, EditorView, Transaction} from '@uiw/react-codemirror';
 
-import {cocopyCompletionSource} from './completions';
+import {
+  cocopyCompletionSource,
+  javascriptCompletionSource,
+} from './completions';
 
 function complete(code: string, position = code.length, explicit = true) {
   const state = EditorState.create({
@@ -23,6 +26,23 @@ function labels(code: string, position = code.length, explicit = true) {
   return complete(code, position, explicit)?.options.map(
     option => option.label,
   );
+}
+
+function javascriptLabels(
+  code: string,
+  position = code.length,
+  explicit = true,
+) {
+  const state = EditorState.create({
+    doc: code,
+    extensions: [javascript()],
+  });
+  const result = javascriptCompletionSource(
+    new CompletionContext(state, position, explicit),
+  );
+  return result instanceof Promise || !result
+    ? undefined
+    : result.options.map(option => option.label);
 }
 
 test('completes properties on the function argument', () => {
@@ -42,6 +62,21 @@ test('completes modifier properties on the function argument', () => {
     'meta',
     'shift',
   ]);
+});
+
+test('completes string properties on the function argument', () => {
+  expect(labels('(input) => input.title.')).toContain('toUpperCase');
+  expect(labels('(input) => input.title.')).toContain('length');
+});
+
+test('completes properties on a string literal', () => {
+  expect(labels('() => "foo".')).toContain('toUpperCase');
+  expect(labels("() => 'foo'.toU")).toContain('toUpperCase');
+});
+
+test('completes common JavaScript globals', () => {
+  expect(javascriptLabels('() => Math.')).toContain('max');
+  expect(javascriptLabels('() => JSON.')).toContain('stringify');
 });
 
 test('completes properties in the argument destructuring pattern', () => {
@@ -73,6 +108,11 @@ test('completes destructured variables in the function body', () => {
   expect(labels(code, code.indexOf('ti') + 2)).toContain('title');
 });
 
+test('completes string properties on destructured variables', () => {
+  const code = '({title}) => {\n  title.\n}';
+  expect(labels(code, code.indexOf('.') + 1)).toContain('toUpperCase');
+});
+
 test('completes modifier properties in nested destructuring', () => {
   const code = '({modifier: {}}) => {}';
   const position = code.indexOf('{}') + 1;
@@ -93,6 +133,7 @@ test('registers destructuring completions with the editor', async () => {
       extensions: [
         javascript(),
         javascriptLanguage.data.of({autocomplete: cocopyCompletionSource}),
+        javascriptLanguage.data.of({autocomplete: javascriptCompletionSource}),
         autocompletion(),
       ],
     }),
@@ -116,6 +157,7 @@ test('activates destructuring completions while typing', async () => {
       extensions: [
         javascript(),
         javascriptLanguage.data.of({autocomplete: cocopyCompletionSource}),
+        javascriptLanguage.data.of({autocomplete: javascriptCompletionSource}),
         autocompletion(),
       ],
     }),

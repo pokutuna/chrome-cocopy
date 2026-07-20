@@ -3,7 +3,10 @@ import {
   type CompletionContext,
   type CompletionResult,
 } from '@codemirror/autocomplete';
-import {completionPath} from '@codemirror/lang-javascript';
+import {
+  completionPath,
+  scopeCompletionSource,
+} from '@codemirror/lang-javascript';
 import {syntaxTree} from '@codemirror/language';
 
 const pageCompletions: readonly Completion[] = [
@@ -74,6 +77,34 @@ const rootCompletions: readonly Completion[] = [
     info: 'Render a Mustache template with the given view.',
   },
 ];
+
+const javascriptScope = Object.assign(Object.create(null), {
+  Array,
+  Boolean,
+  Date,
+  Error,
+  JSON,
+  Map,
+  Math,
+  Number,
+  Object,
+  Promise,
+  RegExp,
+  Set,
+  String,
+  console,
+  decodeURIComponent,
+  encodeURIComponent,
+  isNaN,
+  parseFloat,
+  parseInt,
+});
+
+export const javascriptCompletionSource =
+  scopeCompletionSource(javascriptScope);
+
+const stringProperties = new Set(['title', 'url', 'content', 'selectingText']);
+const javascriptIdentifier = /^[a-zA-Z_$\xaa-\uffdc][\w$\xaa-\uffdc]*$/;
 
 type SyntaxNode = ReturnType<ReturnType<typeof syntaxTree>['resolveInner']>;
 
@@ -190,6 +221,69 @@ function findDestructuredBinding(
   );
 }
 
+function isStringProperty(property: string): boolean {
+  return stringProperties.has(property);
+}
+
+function stringCompletions(
+  path: readonly string[],
+  context: CompletionContext,
+): readonly Completion[] {
+  const scope =
+    path.length === 1
+      ? {[path[0]]: String.prototype}
+      : {[path[0]]: {[path[1]]: String.prototype}};
+  const result = scopeCompletionSource(scope)(context);
+  return result instanceof Promise ? [] : (result?.options ?? []);
+}
+
+function stringLiteralCompletions(): readonly Completion[] {
+  const options: Completion[] = [];
+  const seen = new Set<string>();
+  const original = String.prototype;
+  let object: object | null = original;
+
+  for (let depth = 0; object; depth++) {
+    for (const label of Object.getOwnPropertyNames(object)) {
+      if (!javascriptIdentifier.test(label) || seen.has(label)) continue;
+      seen.add(label);
+
+      let value: unknown;
+      try {
+        value = (original as unknown as Record<string, unknown>)[label];
+      } catch {
+        continue;
+      }
+
+      options.push({
+        label,
+        type:
+          typeof value === 'function'
+            ? /^[A-Z]/.test(label)
+              ? 'class'
+              : 'method'
+            : 'property',
+        boost: -depth,
+      });
+    }
+    object = Object.getPrototypeOf(object);
+  }
+
+  return options;
+}
+
+const stringLiteralCompletionOptions = stringLiteralCompletions();
+
+function findStringLiteralMember(node: SyntaxNode): SyntaxNode | null {
+  const member =
+    node.name === 'MemberExpression'
+      ? node
+      : node.parent?.name === 'MemberExpression'
+        ? node.parent
+        : null;
+  return member?.firstChild?.name === 'String' ? member : null;
+}
+
 function destructuredVariableCompletions(
   node: SyntaxNode,
   context: CompletionContext,
@@ -253,16 +347,21 @@ function optionsForPath(
     return modifierCompletions;
   }
 
+  if (
+    path.length === 1 &&
+    destructuredBinding &&
+    isStringProperty(destructuredBinding.property)
+  ) {
+    return stringCompletions(path, context);
+  }
+
   if (path.length === 1 && isArgumentName(node, path[0], context)) {
     return pageCompletions;
   }
 
-  if (
-    path.length === 2 &&
-    path[1] === 'modifier' &&
-    isArgumentName(node, path[0], context)
-  ) {
-    return modifierCompletions;
+  if (path.length === 2 && isArgumentName(node, path[0], context)) {
+    if (path[1] === 'modifier') return modifierCompletions;
+    if (isStringProperty(path[1])) return stringCompletions(path, context);
   }
 
   return null;
@@ -282,6 +381,15 @@ export function cocopyCompletionSource(
       options: isModifierPattern(pattern, context)
         ? modifierCompletions
         : pageCompletions,
+      validFor: /^[\w$]*$/,
+    };
+  }
+
+  if (findStringLiteralMember(node)) {
+    const word = context.matchBefore(/[\w$]*/);
+    return {
+      from: word?.from ?? context.pos,
+      options: stringLiteralCompletionOptions,
       validFor: /^[\w$]*$/,
     };
   }
