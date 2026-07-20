@@ -20,6 +20,8 @@ Object.assign(global, {
     storage: {
       sync: {
         get: vi.fn(),
+        set: vi.fn(),
+        setAccessLevel: vi.fn(),
       },
       onChanged: {
         addListener: vi.fn(),
@@ -28,6 +30,9 @@ Object.assign(global, {
     },
     runtime: {
       getManifest: vi.fn(),
+    },
+    scripting: {
+      executeScript: vi.fn(),
     },
   },
 });

@@ -3,19 +3,27 @@ import {CopyFunction, isCopyFunction} from './function';
 
 const storage: chrome.storage.StorageArea = chrome.storage.sync;
 
+// User-defined functions are not needed by content scripts. Restrict sync
+// storage to extension-owned contexts when the API is available (Chrome 102+)
+// while keeping the extension usable on older MV3 Chrome versions.
+const storageAccessReady =
+  typeof storage.setAccessLevel === 'function'
+    ? Promise.resolve(storage.setAccessLevel({accessLevel: 'TRUSTED_CONTEXTS'}))
+    : Promise.resolve();
+
 export async function getCopyFunctions(): Promise<CopyFunction[]> {
-  return new Promise(resolve => {
-    storage.get({functions: defaultFunctions}, (value: any) => {
-      Array.isArray(value.functions) ? resolve(value.functions) : resolve([]);
-    });
+  await storageAccessReady;
+  const value = await storage.get<{functions?: CopyFunction[]}>({
+    functions: defaultFunctions,
   });
+  return Array.isArray(value.functions) ? value.functions : [];
 }
 
 /**
- * Save functions to the straoge by chrome.storage.sync.
+ * Save functions to chrome.storage.sync.
  *
  * TODO feedback errors to reach the limitation.
- * https://developer.chrome.com/extensions/storage
+ * https://developer.chrome.com/docs/extensions/reference/api/storage
  *
  * @param functions
  */
@@ -26,15 +34,8 @@ export async function saveCopyFunctions(
     throw new Error('function validation failed when saving');
   }
 
-  return new Promise((resolve, reject) => {
-    storage.set({functions}, () => {
-      if (chrome.runtime.lastError) {
-        reject(chrome.runtime.lastError);
-        return;
-      }
-      resolve();
-    });
-  });
+  await storageAccessReady;
+  await storage.set({functions});
 }
 
 export async function addCopyFunctions(fn: CopyFunction): Promise<void> {

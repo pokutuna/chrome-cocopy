@@ -21,16 +21,8 @@ async function seedStorage(
   page: import('@playwright/test').Page,
   functions: unknown[],
 ) {
-  await page.evaluate(fns => {
-    return new Promise<void>((resolve, reject) => {
-      chrome.storage.sync.set({functions: fns}, () => {
-        if (chrome.runtime.lastError) {
-          reject(chrome.runtime.lastError);
-          return;
-        }
-        resolve();
-      });
-    });
+  await page.evaluate(async fns => {
+    await chrome.storage.sync.set({functions: fns});
   }, functions);
 }
 

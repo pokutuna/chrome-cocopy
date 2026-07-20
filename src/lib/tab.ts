@@ -17,16 +17,15 @@ async function executeInTab(
   tab: chrome.tabs.Tab,
   fn: () => string,
 ): Promise<string | undefined> {
-  const p = new Promise<string | undefined>(resolve => {
-    return chrome.scripting.executeScript(
-      {target: {tabId: tab.id!}, func: fn},
-      results => {
-        resolve(results?.[0].result);
-      },
-    );
-  });
+  if (tab.id === undefined) return undefined;
 
-  const result = await Promise.race([p, timeout(2000)]);
+  const result = await Promise.race([
+    chrome.scripting
+      .executeScript({target: {tabId: tab.id}, func: fn})
+      .then(results => results?.[0]?.result)
+      .catch(() => undefined),
+    timeout(2000).then(() => undefined),
+  ]);
   return typeof result === 'string' ? result : undefined;
 }
 

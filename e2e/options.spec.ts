@@ -10,40 +10,21 @@ async function getStoredFunctionNames(
 async function getStoredFunctions(
   page: import('@playwright/test').Page,
 ): Promise<Array<{name: string; code: string}>> {
-  return page.evaluate(() => {
-    return new Promise<Array<{name: string; code: string}>>(resolve => {
-      chrome.storage.sync.get({functions: []}, value => {
-        const fns = (value.functions || []) as Array<{
-          name: string;
-          code: string;
-        }>;
-        resolve(fns);
-      });
-    });
-  }) as Promise<Array<{name: string; code: string}>>;
+  return page.evaluate(async () => {
+    const value = await chrome.storage.sync.get({functions: []});
+    return (value.functions || []) as Array<{
+      name: string;
+      code: string;
+    }>;
+  });
 }
 
 async function seedStorage(
   page: import('@playwright/test').Page,
   functions: unknown[],
 ) {
-  await page.evaluate(fns => {
-    return new Promise<void>((resolve, reject) => {
-      chrome.storage.sync.set({functions: fns}, () => {
-        if (chrome.runtime.lastError) {
-          // chrome.runtime.lastError is a plain {message} object, not an
-          // Error; wrap it so page.evaluate's serialization keeps the message.
-          reject(
-            new Error(
-              chrome.runtime.lastError.message ??
-                'chrome.storage.sync.set failed',
-            ),
-          );
-          return;
-        }
-        resolve();
-      });
-    });
+  await page.evaluate(async fns => {
+    await chrome.storage.sync.set({functions: fns});
   }, functions);
 }
 
@@ -82,10 +63,8 @@ test('adding a function via the options UI persists to chrome.storage.sync', asy
 
   // Start from a clean slate so this test doesn't depend on (or get
   // confused by) the built-in default functions.
-  await options.evaluate(() => {
-    return new Promise<void>(resolve => {
-      chrome.storage.sync.set({functions: []}, () => resolve());
-    });
+  await options.evaluate(async () => {
+    await chrome.storage.sync.set({functions: []});
   });
   await options.reload();
 

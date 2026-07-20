@@ -35,7 +35,7 @@ Install from [Chrome Web Store](https://chrome.google.com/webstore/detail/cocopy
 | `selectingText` | `string` | Text currently selected on the page. <br>Same as `window.getSelection().toString()`. |
 | `modifier` | `object` | Flags of modifier key being pressed when a function executed. <br>The keys are `alt`, `ctrl`, `meta` and `shift` |
 
-- The code runs safely under the [sandbox](https://developer.chrome.com/apps/sandboxingEval), not under the page.
+- The code runs safely under the [sandbox](https://developer.chrome.com/docs/extensions/how-to/security/sandboxing-eval), not under the page.
 
 ![edit a function](./sozai/img/edit.gif)
 
@@ -65,11 +65,12 @@ In options page & open console
 
 ```js
 // export to clipboard
-chrome.storage.sync.get('functions', copy)
+const {functions} = await chrome.storage.sync.get({functions: []});
+copy(functions);
 
 // import
 const obj = /* paste here */;
-chrome.storage.sync.set(obj)
+await chrome.storage.sync.set(obj);
 ```
 
 ## Release

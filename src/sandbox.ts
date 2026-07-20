@@ -1,6 +1,6 @@
 /**
  * Sandbox is for to eval user codes in Chrome Extensions.
- * {@link https://developer.chrome.com/apps/sandboxingEval}
+ * {@link https://developer.chrome.com/docs/extensions/how-to/security/sandboxing-eval}
  *
  * @packageDocumentation
  */

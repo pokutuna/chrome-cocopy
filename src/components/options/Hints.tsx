@@ -42,7 +42,7 @@ export const Hint = memo(() => {
         </li>
         <li>
           The code runs safely under the{' '}
-          <ExternalLink href="https://developer.chrome.com/apps/sandboxingEval">
+          <ExternalLink href="https://developer.chrome.com/docs/extensions/how-to/security/sandboxing-eval">
             sandbox
           </ExternalLink>
           , not under the page.

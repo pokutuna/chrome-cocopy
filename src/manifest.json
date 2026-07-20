@@ -1,8 +1,10 @@
 {
   "manifest_version": 3,
+  "minimum_chrome_version": "95",
   "name": "cocopy",
   "version": "<from package.json>",
   "version_name": "<from git tag & revision>",
+  "short_name": "cocopy",
 
   "description": "a chrome extension to copy text by your code.",
   "icons": {
@@ -12,13 +14,22 @@
   },
 
   "action": {
-    "default_icon": "img/icon/32.png",
+    "default_icon": {
+      "16": "img/icon/16.png",
+      "32": "img/icon/32.png",
+      "48": "img/icon/48.png",
+      "128": "img/icon/128.png"
+    },
     "default_title": "COCOPY",
     "default_popup": "popup.html"
   },
   "options_page": "options.html",
   "sandbox": {
     "pages": ["sandbox.html"]
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self';",
+    "sandbox": "sandbox allow-scripts; script-src 'self' 'unsafe-eval'; object-src 'self';"
   },
 
   "permissions": [

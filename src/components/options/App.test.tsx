@@ -11,9 +11,9 @@ test('render options', async () => {
   vi.mocked(chrome.tabs.query).mockImplementation(
     async () => [{url: 'https://example.test/page'}] as chrome.tabs.Tab[],
   );
-  vi.mocked(chrome.storage.sync.get).mockImplementation((_, cb) =>
-    cb({functions: defaultFunctions}),
-  );
+  vi.mocked(chrome.storage.sync.get).mockImplementation(async () => ({
+    functions: defaultFunctions,
+  }));
   vi.mocked(chrome.runtime.getManifest).mockImplementation(
     () => ({version_name: 'Build v0.0.0'}) as chrome.runtime.Manifest,
   );
