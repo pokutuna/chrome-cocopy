@@ -1,3 +1,7 @@
-.editor-additional-styles {
+.cm-editor {
+  width: 100%;
+}
+
+.cm-content {
   word-break: break-all !important;
 }

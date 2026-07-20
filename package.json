@@ -33,19 +33,21 @@
     }
   },
   "dependencies": {
+    "@codemirror/autocomplete": "6.20.3",
+    "@codemirror/lang-javascript": "6.2.5",
+    "@codemirror/language": "6.12.4",
     "@dnd-kit/react": "0.5.0",
     "@fortawesome/fontawesome-svg-core": "7.3.1",
     "@fortawesome/free-solid-svg-icons": "7.3.1",
     "@fortawesome/react-fontawesome": "3.4.0",
+    "@uiw/react-codemirror": "4.25.11",
     "chroma-js": "3.2.0",
     "jsx-runtime": "1.2.0",
     "lodash.debounce": "4.0.8",
     "mustache": "4.2.0",
-    "prismjs": "1.30.0",
     "react": "19.2.7",
     "react-dom": "19.2.7",
     "react-router-dom": "7.18.1",
-    "react-simple-code-editor": "0.14.1",
     "valibot": "1.4.2"
   },
   "devDependencies": {
