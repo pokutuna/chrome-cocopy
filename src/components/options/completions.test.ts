@@ -1,13 +1,22 @@
 import {
   autocompletion,
+  closeCompletion,
   CompletionContext,
   currentCompletions,
+  selectedCompletionIndex,
   startCompletion,
 } from '@codemirror/autocomplete';
 import {javascript, javascriptLanguage} from '@codemirror/lang-javascript';
-import {EditorState, EditorView, Transaction} from '@uiw/react-codemirror';
+import {
+  EditorState,
+  EditorView,
+  keymap,
+  runScopeHandlers,
+  Transaction,
+} from '@uiw/react-codemirror';
 
 import {
+  additionalCompletionKeymap,
   cocopyCompletionSource,
   javascriptCompletionSource,
 } from './completions';
@@ -135,6 +144,7 @@ test('registers destructuring completions with the editor', async () => {
       doc: code,
       selection: {anchor: code.indexOf('ti') + 2},
       extensions: [
+        additionalCompletionKeymap,
         javascript(),
         javascriptLanguage.data.of({autocomplete: cocopyCompletionSource}),
         javascriptLanguage.data.of({autocomplete: javascriptCompletionSource}),
@@ -144,11 +154,17 @@ test('registers destructuring completions with the editor', async () => {
   });
 
   startCompletion(view);
-  await new Promise(resolve => setTimeout(resolve, 100));
+  await new Promise(resolve => setTimeout(resolve, 200));
 
   expect(currentCompletions(view.state).map(option => option.label)).toContain(
     'title',
   );
+  expect(
+    view.state
+      .facet(keymap)
+      .flat()
+      .map(binding => binding.key),
+  ).toContain('Tab');
   view.destroy();
 });
 
@@ -159,6 +175,7 @@ test('activates destructuring completions while typing', async () => {
       doc: '({',
       selection: {anchor: 2},
       extensions: [
+        additionalCompletionKeymap,
         javascript(),
         javascriptLanguage.data.of({autocomplete: cocopyCompletionSource}),
         javascriptLanguage.data.of({autocomplete: javascriptCompletionSource}),
@@ -177,5 +194,122 @@ test('activates destructuring completions while typing', async () => {
   expect(currentCompletions(view.state).map(option => option.label)).toContain(
     'title',
   );
+  view.destroy();
+});
+
+test('accepts the selected completion with Tab', async () => {
+  const code = '({ti';
+  const view = new EditorView({
+    parent: document.body,
+    state: EditorState.create({
+      doc: code,
+      selection: {anchor: code.length},
+      extensions: [
+        additionalCompletionKeymap,
+        javascript(),
+        javascriptLanguage.data.of({autocomplete: cocopyCompletionSource}),
+        javascriptLanguage.data.of({autocomplete: javascriptCompletionSource}),
+        autocompletion(),
+      ],
+    }),
+  });
+
+  startCompletion(view);
+  await new Promise(resolve => setTimeout(resolve, 200));
+  expect(currentCompletions(view.state).map(option => option.label)).toContain(
+    'title',
+  );
+  expect(
+    runScopeHandlers(
+      view,
+      new KeyboardEvent('keydown', {key: 'Tab', code: 'Tab'}),
+      'editor',
+    ),
+  ).toBe(true);
+
+  expect(view.state.doc.toString()).toBe('({title');
+  view.destroy();
+});
+
+test('uses Ctrl-N and Ctrl-P to move through completions', async () => {
+  const code = '({}) => {}';
+  const view = new EditorView({
+    parent: document.body,
+    state: EditorState.create({
+      doc: code,
+      selection: {anchor: code.indexOf('}')},
+      extensions: [
+        additionalCompletionKeymap,
+        javascript(),
+        javascriptLanguage.data.of({autocomplete: cocopyCompletionSource}),
+        javascriptLanguage.data.of({autocomplete: javascriptCompletionSource}),
+        autocompletion(),
+      ],
+    }),
+  });
+
+  startCompletion(view);
+  await new Promise(resolve => setTimeout(resolve, 200));
+
+  expect(currentCompletions(view.state).length).toBeGreaterThan(1);
+  expect(selectedCompletionIndex(view.state)).toBe(0);
+  runScopeHandlers(
+    view,
+    new KeyboardEvent('keydown', {
+      key: 'n',
+      code: 'KeyN',
+      ctrlKey: true,
+    }),
+    'editor',
+  );
+  expect(selectedCompletionIndex(view.state)).toBe(1);
+
+  runScopeHandlers(
+    view,
+    new KeyboardEvent('keydown', {
+      key: 'p',
+      code: 'KeyP',
+      ctrlKey: true,
+    }),
+    'editor',
+  );
+  expect(selectedCompletionIndex(view.state)).toBe(0);
+  view.destroy();
+});
+
+test('closes completions with Ctrl-G', async () => {
+  const code = '({}) => {}';
+  const view = new EditorView({
+    parent: document.body,
+    state: EditorState.create({
+      doc: code,
+      selection: {anchor: code.indexOf('}')},
+      extensions: [
+        additionalCompletionKeymap,
+        javascript(),
+        javascriptLanguage.data.of({autocomplete: cocopyCompletionSource}),
+        javascriptLanguage.data.of({autocomplete: javascriptCompletionSource}),
+        autocompletion(),
+      ],
+    }),
+  });
+
+  startCompletion(view);
+  await new Promise(resolve => setTimeout(resolve, 200));
+  expect(currentCompletions(view.state).length).toBeGreaterThan(1);
+
+  expect(
+    runScopeHandlers(
+      view,
+      new KeyboardEvent('keydown', {
+        key: 'g',
+        code: 'KeyG',
+        ctrlKey: true,
+      }),
+      'editor',
+    ),
+  ).toBe(true);
+  expect(currentCompletions(view.state)).toEqual([]);
+  expect(closeCompletion(view)).toBe(false);
   view.destroy();
 });

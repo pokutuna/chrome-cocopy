@@ -4,6 +4,7 @@ import {useCallback} from 'react';
 
 import {theme} from '../common/Theme';
 import {
+  additionalCompletionKeymap,
   cocopyCompletionSource,
   javascriptCompletionSource,
 } from './completions';
@@ -14,6 +15,7 @@ import './code.css';
 const editorId = 'code';
 
 const editorExtensions = [
+  additionalCompletionKeymap,
   javascript(),
   javascriptLanguage.data.of({autocomplete: cocopyCompletionSource}),
   javascriptLanguage.data.of({
