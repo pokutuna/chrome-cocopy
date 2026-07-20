@@ -19,7 +19,7 @@
     "typecheck": "tsc --noEmit",
     "update-gallery": "tsx ./gallery/generate.ts",
     "watch": "vite build --watch",
-    "zip": "pnpm run build && zip -r build-$(cat build/manifest.json | jq -r '.version').zip ./build"
+    "zip": "pnpm run build && cd build && ZIP=../build-$(jq -r '.version' manifest.json).zip && rm -f \"$ZIP\" && zip -r \"$ZIP\" ."
   },
   "lint-staged": {
     "**/*.{ts,tsx}": [
