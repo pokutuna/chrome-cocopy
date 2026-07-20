@@ -39,7 +39,7 @@ arbitrary tags or prerelease tags.
 ## 3. Check the GitHub Actions run
 
 The `release` workflow in
-`.github/workflows/release.yml` performs the following steps:
+`.github/workflows/release.yaml` performs the following steps:
 
 1. Checks out the tagged commit.
 2. Installs the locked dependencies with `pnpm install --frozen-lockfile`.
