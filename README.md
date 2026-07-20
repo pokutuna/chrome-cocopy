@@ -71,3 +71,7 @@ chrome.storage.sync.get('functions', copy)
 const obj = /* paste here */;
 chrome.storage.sync.set(obj)
 ```
+
+## Release
+
+See the [release procedure](./docs/release.md).
