@@ -5,17 +5,24 @@ Chrome Web Store upload is intentionally performed manually.
 
 ## 1. Prepare the version
 
-Update `version` in `package.json` and commit the change. The version must be a
-Chrome extension version using three numeric components, for example `0.4.1`.
-
-Run the local checks before creating the tag:
+Run the local checks before bumping the version:
 
 ```sh
 pnpm test
 pnpm run build
 ```
 
-The tag and `package.json` versions must match exactly. For example:
+Use `pnpm version` to update `version` in `package.json`, create the version
+commit, and create the git tag in one step. The version must be a Chrome
+extension version using three numeric components, for example `0.4.1`.
+
+```sh
+pnpm version patch   # or: minor / major
+```
+
+This updates `package.json`, commits with message `0.4.1`, and creates tag
+`v0.4.1`. The tag and `package.json` versions always match exactly since both
+come from the same command. For example:
 
 | File or ref | Version |
 | --- | --- |
@@ -24,12 +31,9 @@ The tag and `package.json` versions must match exactly. For example:
 
 ## 2. Push the release tag
 
-Create a tag on the version commit and push the branch and tag:
+Push the branch and tag:
 
 ```sh
-git add package.json
-git commit -m 'chore: bump version to 0.4.1'
-git tag v0.4.1
 git push origin master v0.4.1
 ```
 
