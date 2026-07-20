@@ -54,6 +54,20 @@ function javascriptLabels(
     : result.options.map(option => option.label);
 }
 
+const testAutocompletion = autocompletion({
+  activateOnTypingDelay: 0,
+  interactionDelay: 0,
+});
+
+async function waitForCompletions(view: EditorView, min = 1) {
+  await vi.waitFor(
+    () => {
+      expect(currentCompletions(view.state).length).toBeGreaterThanOrEqual(min);
+    },
+    {timeout: 1000, interval: 10},
+  );
+}
+
 test('completes properties on the function argument', () => {
   expect(labels('(input) => input.')).toEqual([
     'title',
@@ -148,13 +162,13 @@ test('registers destructuring completions with the editor', async () => {
         javascript(),
         javascriptLanguage.data.of({autocomplete: cocopyCompletionSource}),
         javascriptLanguage.data.of({autocomplete: javascriptCompletionSource}),
-        autocompletion(),
+        testAutocompletion,
       ],
     }),
   });
 
   startCompletion(view);
-  await new Promise(resolve => setTimeout(resolve, 200));
+  await waitForCompletions(view);
 
   expect(currentCompletions(view.state).map(option => option.label)).toContain(
     'title',
@@ -179,7 +193,7 @@ test('activates destructuring completions while typing', async () => {
         javascript(),
         javascriptLanguage.data.of({autocomplete: cocopyCompletionSource}),
         javascriptLanguage.data.of({autocomplete: javascriptCompletionSource}),
-        autocompletion(),
+        testAutocompletion,
       ],
     }),
   });
@@ -189,7 +203,7 @@ test('activates destructuring completions while typing', async () => {
     selection: {anchor: 3},
     annotations: Transaction.userEvent.of('input.type'),
   });
-  await new Promise(resolve => setTimeout(resolve, 150));
+  await waitForCompletions(view);
 
   expect(currentCompletions(view.state).map(option => option.label)).toContain(
     'title',
@@ -209,13 +223,13 @@ test('accepts the selected completion with Tab', async () => {
         javascript(),
         javascriptLanguage.data.of({autocomplete: cocopyCompletionSource}),
         javascriptLanguage.data.of({autocomplete: javascriptCompletionSource}),
-        autocompletion(),
+        testAutocompletion,
       ],
     }),
   });
 
   startCompletion(view);
-  await new Promise(resolve => setTimeout(resolve, 200));
+  await waitForCompletions(view);
   expect(currentCompletions(view.state).map(option => option.label)).toContain(
     'title',
   );
@@ -243,13 +257,13 @@ test('uses Ctrl-N and Ctrl-P to move through completions', async () => {
         javascript(),
         javascriptLanguage.data.of({autocomplete: cocopyCompletionSource}),
         javascriptLanguage.data.of({autocomplete: javascriptCompletionSource}),
-        autocompletion(),
+        testAutocompletion,
       ],
     }),
   });
 
   startCompletion(view);
-  await new Promise(resolve => setTimeout(resolve, 200));
+  await waitForCompletions(view, 2);
 
   expect(currentCompletions(view.state).length).toBeGreaterThan(1);
   expect(selectedCompletionIndex(view.state)).toBe(0);
@@ -289,13 +303,13 @@ test('closes completions with Ctrl-G', async () => {
         javascript(),
         javascriptLanguage.data.of({autocomplete: cocopyCompletionSource}),
         javascriptLanguage.data.of({autocomplete: javascriptCompletionSource}),
-        autocompletion(),
+        testAutocompletion,
       ],
     }),
   });
 
   startCompletion(view);
-  await new Promise(resolve => setTimeout(resolve, 200));
+  await waitForCompletions(view, 2);
   expect(currentCompletions(view.state).length).toBeGreaterThan(1);
 
   expect(
@@ -324,7 +338,7 @@ test('blurs the editor with Escape when no completion is open', () => {
         javascript(),
         javascriptLanguage.data.of({autocomplete: cocopyCompletionSource}),
         javascriptLanguage.data.of({autocomplete: javascriptCompletionSource}),
-        autocompletion(),
+        testAutocompletion,
       ],
     }),
   });
