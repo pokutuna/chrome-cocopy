@@ -103,6 +103,10 @@ test('completes an incomplete destructuring pattern implicitly', () => {
   expect(labels('({ti', undefined, false)).toContain('title');
 });
 
+test('does not complete page properties in default value expressions', () => {
+  expect(labels('({title = ti') ?? []).not.toContain('title');
+});
+
 test('completes destructured variables in the function body', () => {
   const code = '({title}) => {\n  ti\n}';
   expect(labels(code, code.indexOf('ti') + 2)).toContain('title');

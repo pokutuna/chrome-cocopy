@@ -155,6 +155,12 @@ function isFunctionParameterPattern(node: SyntaxNode): boolean {
   return false;
 }
 
+function isInDefaultValue(node: SyntaxNode, position: number): boolean {
+  const property = findAncestor(node, 'PatternProperty');
+  const equals = property?.getChild('Equals');
+  return equals !== null && equals !== undefined && position >= equals.to;
+}
+
 function findParameterObjectPattern(node: SyntaxNode): SyntaxNode | null {
   for (
     let current: SyntaxNode | null = node;
@@ -340,6 +346,8 @@ export function cocopyCompletionSource(
   context: CompletionContext,
 ): CompletionResult | null {
   const node = syntaxTree(context.state).resolveInner(context.pos, -1);
+  if (isInDefaultValue(node, context.pos)) return null;
+
   const pattern = findParameterObjectPattern(node);
   if (pattern) {
     const word = context.matchBefore(/[\w$]*/);
