@@ -18,4 +18,6 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm test
       - run: pnpm run build
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm run e2e
       - run: pnpm run update-gallery
