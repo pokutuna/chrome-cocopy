@@ -1,20 +1,20 @@
 import {useEffect} from 'react';
 
-import {CopyFunction} from '../../lib/function';
+import {FunctionRepository} from '../../lib/function-store/repository';
 
+/**
+ * Re-runs `refresh` whenever the repository publishes a new active snapshot,
+ * so a change made in another options window or in the popup shows up here.
+ *
+ * The listener carries no payload by design: subscribers re-read from the
+ * repository rather than trusting the change event
+ * (docs/function-storage.md, "Storage Port").
+ */
 export function useSubscribeFunctions(
-  update: (functions: CopyFunction[]) => void,
+  repository: FunctionRepository,
+  refresh: () => void,
 ) {
   useEffect(() => {
-    const onChange = (changes: {
-      [key: string]: chrome.storage.StorageChange;
-    }) => {
-      if ('functions' in changes) {
-        const functions = changes['functions'].newValue;
-        if (Array.isArray(functions)) update(functions as CopyFunction[]);
-      }
-    };
-    chrome.storage.onChanged.addListener(onChange);
-    return () => chrome.storage.onChanged.removeListener(onChange);
-  }, [update]);
+    return repository.subscribe(refresh);
+  }, [repository, refresh]);
 }

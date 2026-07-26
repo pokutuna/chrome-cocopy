@@ -555,6 +555,9 @@ Mitigations:
 - Catalog と document の ID および ref の内容の一致を検証する。
 - ユーザーコードは sandbox だけで実行し、popup と options では評価しない。
 
+ref の一致検証が保証するのは「一覧で見た関数と実行する document が同じ実体である」ことまでで、document 内の code の書き換えは検出しない。
+storage へ書き込める主体は既に拡張と同等の権限を持つため、code の完全性検証 (hash 等) は脅威モデルに含めず、sandbox 実行を最終防衛線とする。
+
 ### content script から関数コードが読まれる
 
 Scenario: sync storage を既定の access level のままにすると、任意のページで動く content script が関数コードとURL patternを読める。

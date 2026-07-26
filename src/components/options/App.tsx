@@ -3,12 +3,14 @@ import {Routes, Route} from 'react-router-dom';
 import {FunctionList} from './FunctionList';
 import {Hint, DebuggingHint} from './Hints';
 import {InstallFunction} from './InstallFunction';
+import {LegacyBackup} from './LegacyBackup';
 import {Links} from './Links';
 import {MainColumn, Title, VersionLabel} from './Parts';
 
 const PageRoot = () => (
   <>
     <FunctionList />
+    <LegacyBackup />
     <Hint />
     <DebuggingHint />
     <Links />

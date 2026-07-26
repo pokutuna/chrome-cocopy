@@ -1,7 +1,7 @@
 import {useCallback, useMemo} from 'react';
 
 import {EvalError} from '../../lib/eval';
-import {CopyFunction} from '../../lib/function';
+import {CopyFunctionRef} from '../../lib/function-store/types';
 import {indexToKey} from '../../lib/util';
 import {
   Shortcut,
@@ -21,11 +21,11 @@ function wrapKeyDown(cb: () => void) {
 }
 
 type FunctionItemProps = {
-  fn: CopyFunction;
+  fn: CopyFunctionRef;
   index: number;
   running: boolean;
   error?: EvalError;
-  onClick: (fn: CopyFunction) => void;
+  onClick: (fn: CopyFunctionRef) => void;
 };
 
 export function FunctionItem(props: FunctionItemProps) {

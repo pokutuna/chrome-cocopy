@@ -1,36 +1,24 @@
 import {test, expect} from './fixtures';
+import {
+  readStoredFunctionNames,
+  readStoredFunctions,
+  seedFunctionStore,
+  type SeedFunction,
+} from './function-store';
 
-async function getStoredFunctionNames(
-  page: import('@playwright/test').Page,
-): Promise<string[]> {
-  const functions = await getStoredFunctions(page);
-  return functions.map(f => f.name);
-}
+const getStoredFunctionNames = readStoredFunctionNames;
 
 async function getStoredFunctions(
   page: import('@playwright/test').Page,
-): Promise<Array<{name: string; code: string}>> {
-  return page.evaluate(async () => {
-    const value = await chrome.storage.sync.get({functions: []});
-    return (value.functions || []) as Array<{
-      name: string;
-      code: string;
-    }>;
-  });
+): Promise<SeedFunction[]> {
+  return ((await readStoredFunctions(page)) ?? []) as SeedFunction[];
 }
 
-async function seedStorage(
-  page: import('@playwright/test').Page,
-  functions: unknown[],
-) {
-  await page.evaluate(async fns => {
-    await chrome.storage.sync.set({functions: fns});
-  }, functions);
-}
+const seedStorage = seedFunctionStore;
 
 // Minimal CopyFunction fixtures matching src/lib/function.ts's CopyFunction
 // shape / src/lib/function.schema.ts. `pattern` is intentionally omitted.
-const threeFunctions = [
+const threeFunctions: SeedFunction[] = [
   {
     id: 'e2e-fn-a',
     name: 'E2E Function A',
@@ -62,10 +50,11 @@ test('adding a function via the options UI persists to chrome.storage.sync', asy
   await options.goto(`chrome-extension://${extensionId}/options.html`);
 
   // Start from a clean slate so this test doesn't depend on (or get
-  // confused by) the built-in default functions.
-  await options.evaluate(async () => {
-    await chrome.storage.sync.set({functions: []});
-  });
+  // confused by) the built-in default functions. Seeding an empty
+  // FunctionStore (rather than clearing storage) also writes an Active
+  // Pointer, which keeps the repository from running migration and seeding
+  // the defaults on reload.
+  await seedStorage(options, []);
   await options.reload();
 
   const newFunctionName = 'E2E Added Function';

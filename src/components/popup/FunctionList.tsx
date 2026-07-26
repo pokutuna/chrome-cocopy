@@ -1,11 +1,11 @@
 import {useState, useEffect, useCallback} from 'react';
 
-import {getCopyFunctions} from '../../lib/config';
 import {EvalResult, EvalError, isRichContent} from '../../lib/eval';
-import {CopyFunction, filterFunctions} from '../../lib/function';
+import {CopyFunctionRef} from '../../lib/function-store/types';
 import {createPageTargetFromTab} from '../../lib/page';
 import {getActiveTab} from '../../lib/tab';
 import {codeToIndex} from '../../lib/util';
+import {useFunctionRepository} from '../common/FunctionStoreContext';
 import {useEvaluate} from '../common/Sandbox';
 import {FunctionItem} from './Function';
 import {useModifier} from './hooks';
@@ -14,12 +14,6 @@ type FunctionError = {
   id: string;
   error: EvalError;
 } | null;
-
-async function availableFunctions(): Promise<CopyFunction[]> {
-  const [tab, fs] = await Promise.all([getActiveTab(), getCopyFunctions()]);
-  const url = tab.url || tab.pendingUrl || '';
-  return filterFunctions(url, fs);
-}
 
 function writeResultToClipboard(res: EvalResult) {
   if (res.result) {
@@ -36,38 +30,82 @@ function writeResultToClipboard(res: EvalResult) {
   }
 }
 
+/** Shown when `repository.get` returns undefined (document gone) or throws
+ * (e.g. CorruptionError): the function itself could not be loaded, as
+ * opposed to an EvalError raised while running its code. Wrapped in
+ * `{error}` so it matches the shape `evaluate()` rejects with. */
+function loadError(cause?: unknown): {error: EvalError} {
+  return {
+    error: {
+      type: 'ExecutionError',
+      name: cause instanceof Error ? cause.name : 'Error',
+      message:
+        cause instanceof Error
+          ? cause.message
+          : 'This function could not be loaded. It may have been deleted.',
+    },
+  };
+}
+
+function isEvalRejection(r: unknown): r is {error: EvalError} {
+  return (
+    typeof r === 'object' &&
+    r !== null &&
+    'error' in r &&
+    typeof (r as {error?: unknown}).error === 'object'
+  );
+}
+
 export const FunctionList = () => {
   const evaluate = useEvaluate();
-  const [functions, setFunctions] = useState<CopyFunction[]>([]);
+  const repository = useFunctionRepository();
+  const [functions, setFunctions] = useState<CopyFunctionRef[]>([]);
   const [running, setRunning] = useState<string | null>(null);
   const [fnError, setFnError] = useState<FunctionError>(null);
   const modifier = useModifier();
 
   useEffect(() => {
-    availableFunctions().then(setFunctions);
-  }, [setFunctions]);
+    const run = async () => {
+      const tab = await getActiveTab();
+      const url = tab.url || tab.pendingUrl || '';
+      return repository.listForUrl(url);
+    };
+    run()
+      .then(setFunctions)
+      .catch(e => console.error(e));
+  }, [repository]);
 
   const onClick = useCallback(
-    (c: CopyFunction) => {
-      setRunning(c.id);
+    (ref: CopyFunctionRef) => {
+      setRunning(ref.id);
       setTimeout(() => setRunning(null), 300);
 
       const run = async () => {
         const tab = await getActiveTab();
-        evaluate({
+        const fn = await repository.get(ref).catch(e => {
+          throw loadError(e);
+        });
+        if (!fn) throw loadError();
+
+        return evaluate({
           command: 'eval',
-          code: c.code + `\n//# sourceURL=${encodeURI(c.name)}.js`,
+          code: fn.code + `\n//# sourceURL=${encodeURI(fn.name)}.js`,
           arg: {
             ...(await createPageTargetFromTab(tab)),
             modifier,
           },
-        })
-          .then(writeResultToClipboard)
-          .catch(r => setFnError({id: c.id, error: r.error}));
+        });
       };
-      run().catch(e => console.error(e));
+      run()
+        .then(writeResultToClipboard)
+        .catch((r: unknown) =>
+          setFnError({
+            id: ref.id,
+            error: isEvalRejection(r) ? r.error : loadError(r).error,
+          }),
+        );
     },
-    [evaluate, modifier],
+    [evaluate, modifier, repository],
   );
 
   // Kyeboard Shortcut

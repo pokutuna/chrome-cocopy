@@ -1,6 +1,5 @@
 import React, {useCallback} from 'react';
 
-import {CopyFunction} from '../../lib/function';
 import {PatternIcon} from './Icon';
 
 import styles from './FunctionParts.module.css';
@@ -77,9 +76,26 @@ export const RigthIconBox = (props: {
   </div>
 );
 
+/**
+ * The subset a row needs to render. It accepts both a `CopyFunction` (an open
+ * editor draft) and a `CopyFunctionRef` (a catalog entry, which carries no
+ * code), so the list can be drawn without reading Function Documents.
+ * `CopyFunction.pattern` is `string | undefined` and `CopyFunctionRef.pattern`
+ * is `string | null`; only its truthiness matters here.
+ */
+export type FunctionDisplay = {
+  id: string;
+  name: string;
+  pattern?: string | null;
+  theme: {
+    textColor: string;
+    backgroundColor: string;
+  };
+};
+
 type FunctionItemProps = {
-  fn: CopyFunction;
-  onClick?: (fn: CopyFunction) => void;
+  fn: FunctionDisplay;
+  onClick?: (fn: FunctionDisplay) => void;
 };
 
 export function FunctionItem(props: FunctionItemProps) {

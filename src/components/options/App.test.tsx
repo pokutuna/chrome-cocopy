@@ -1,28 +1,24 @@
 import {render, screen, waitFor} from '@testing-library/react';
 import '@testing-library/jest-dom';
-import {MemoryRouter} from 'react-router-dom';
 import {vi} from 'vitest';
 
 import {defaultFunctions} from '../../lib/builtin';
 import {encodeSharable} from '../../lib/share';
 import {App} from './App';
+import {createTestStore, renderWithStore, seedStore} from './test-helpers';
 
 test('render options', async () => {
   vi.mocked(chrome.tabs.query).mockImplementation(
     async () => [{url: 'https://example.test/page'}] as chrome.tabs.Tab[],
   );
-  vi.mocked(chrome.storage.sync.get).mockImplementation(async () => ({
-    functions: defaultFunctions,
-  }));
   vi.mocked(chrome.runtime.getManifest).mockImplementation(
     () => ({version_name: 'Build v0.0.0'}) as chrome.runtime.Manifest,
   );
 
-  render(
-    <MemoryRouter initialEntries={['/']}>
-      <App />
-    </MemoryRouter>,
-  );
+  const store = createTestStore();
+  await seedStore(store, defaultFunctions);
+
+  render(renderWithStore(store, <App />));
 
   await waitFor(() =>
     expect(screen.getByText(defaultFunctions[0].name)).toBeInTheDocument(),
@@ -57,11 +53,8 @@ test('render install page', async () => {
   const fn = defaultFunctions[0];
   const path = `/install?f=${encodeURIComponent(encodeSharable(fn))}`;
 
-  render(
-    <MemoryRouter initialEntries={[path]}>
-      <App />
-    </MemoryRouter>,
-  );
+  const store = createTestStore();
+  render(renderWithStore(store, <App />, [path]));
 
   await waitFor(() => {
     expect(screen.getByText('Install Function')).toBeInTheDocument();

@@ -1,6 +1,6 @@
 import * as v from 'valibot';
 
-const hexColorSchema = v.pipe(
+export const hexColorSchema = v.pipe(
   v.string(),
   v.regex(/^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/),
 );

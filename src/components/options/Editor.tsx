@@ -2,7 +2,7 @@ import {faShareSquare} from '@fortawesome/free-solid-svg-icons/faShareSquare';
 import {faTrash} from '@fortawesome/free-solid-svg-icons/faTrash';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import debounce from 'lodash.debounce';
-import {useReducer, useMemo, useCallback} from 'react';
+import {useReducer, useMemo, useCallback, useRef} from 'react';
 
 import {EvalPayload, EvalResult} from '../../lib/eval';
 import {CopyFunction} from '../../lib/function';
@@ -11,29 +11,49 @@ import {useSandbox} from '../common/Sandbox';
 import {Button, ButtonIcon} from './Button';
 import {CodeEditor} from './CodeEditor';
 import {ColorInput} from './ColorInput';
-import {reducer, init, stateToFn} from './EditorReducer';
-import {DispatchType as FnDispatchType} from './FunctionsReducer';
+import {reducer, init, stateToFn, EditorCallbacks} from './EditorReducer';
 import {TextInput} from './Input';
 import {Box, Row, Item, DividerV} from './Parts';
 
+import styles from './Editor.module.css';
+
 type EditorProps = {
   function: CopyFunction;
-  dispatch: FnDispatchType;
+  onEdit: (fn: Omit<CopyFunction, 'id'>) => void;
+  onSave: () => void;
+  onCancel?: () => void;
+  onDelete?: () => void;
+  /** A mutation is in flight; Save/Delete stay disabled until it settles. */
+  saving?: boolean;
+  /** The last mutation resolved, so the change is really persisted. */
+  saved?: boolean;
+  /** Message from a failed mutation; the draft above it is kept for a retry. */
+  error?: string;
   install?: boolean;
 };
 
 export function Editor(props: EditorProps) {
-  // TODO refactor messaging between reducers
-  // stop warning "Cannot update a component while rendering a differencet component"
-  // see https://github.com/facebook/react/issues/18178
-  const fnDispatchLater = useCallback<FnDispatchType>(
-    action => setTimeout(() => props.dispatch(action), 1),
-    [props.dispatch],
+  // The reducer captures its callbacks once, so route them through a ref that
+  // always points at the current props (the previous code had the same shape
+  // with a dispatch function).
+  const propsRef = useRef(props);
+  propsRef.current = props;
+
+  const callbacks = useMemo<EditorCallbacks>(
+    () => ({
+      // Deferred: the owner's state must not be updated while this component
+      // renders. See https://github.com/facebook/react/issues/18178
+      onEdit: fn => setTimeout(() => propsRef.current.onEdit(fn), 1),
+      onSave: () => setTimeout(() => propsRef.current.onSave(), 1),
+      onCancel: () => setTimeout(() => propsRef.current.onCancel?.(), 1),
+      onDelete: () => setTimeout(() => propsRef.current.onDelete?.(), 1),
+    }),
+    [],
   );
 
   const [state, dispatch] = useReducer(
     reducer,
-    init(props.function, fnDispatchLater),
+    init(props.function, callbacks),
   );
 
   const onEdit = useCallback(
@@ -66,6 +86,15 @@ export function Editor(props: EditorProps) {
     const encoded = encodeSharable({id: '', ...fn}); // XXX filled dummy id
     window.open(`/options.html#/install?f=${encodeURIComponent(encoded)}`);
   }, [state]);
+
+  const saving = props.saving ?? false;
+  const saveLabel = props.install
+    ? 'Install'
+    : saving
+      ? 'Saving...'
+      : props.saved
+        ? 'Saved'
+        : 'Save';
 
   return (
     <form>
@@ -113,21 +142,24 @@ export function Editor(props: EditorProps) {
             error={state.errors.code}
           />
         </Row>
+        {props.error && (
+          <Row>
+            <div className={styles.error} role="alert">
+              {props.error}
+            </div>
+          </Row>
+        )}
         <Row>
           <Item>
-            {props.install ? (
-              <Button onClick={onClickSave} disabled={!state.canSave}>
-                Install
-              </Button>
-            ) : (
-              <Button onClick={onClickSave} disabled={!state.canSave}>
-                {state.hasSaved ? 'Saved' : 'Save'}
-              </Button>
-            )}
+            <Button onClick={onClickSave} disabled={!state.canSave || saving}>
+              {saveLabel}
+            </Button>
           </Item>
           {!props.install && (
             <Item>
-              <Button onClick={onClickCancel}>Cancel</Button>
+              <Button onClick={onClickCancel} disabled={saving}>
+                Cancel
+              </Button>
             </Item>
           )}
           <Item>
@@ -143,7 +175,7 @@ export function Editor(props: EditorProps) {
           </Item>
           {!props.install && (
             <Item style={{marginLeft: 'auto'}}>
-              <Button onClick={onClickDelete} mode="danger">
+              <Button onClick={onClickDelete} mode="danger" disabled={saving}>
                 <ButtonIcon>
                   <FontAwesomeIcon icon={faTrash} />
                 </ButtonIcon>

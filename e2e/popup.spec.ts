@@ -1,10 +1,11 @@
 import {test, expect, EXTENSION_ID} from './fixtures';
+import {seedFunctionStore, type SeedFunction} from './function-store';
 
 // Minimal CopyFunction fixtures matching src/lib/function.ts's CopyFunction
 // shape / src/lib/function.schema.ts. `pattern` is intentionally omitted
 // so the function is shown regardless of the active tab's URL
 // (see filterFunctions in src/lib/function.ts).
-const seedFunctions = [
+const seedFunctions: SeedFunction[] = [
   {
     id: 'e2e-title-url',
     name: 'E2E: title and url',
@@ -17,14 +18,7 @@ const seedFunctions = [
   },
 ];
 
-async function seedStorage(
-  page: import('@playwright/test').Page,
-  functions: unknown[],
-) {
-  await page.evaluate(async fns => {
-    await chrome.storage.sync.set({functions: fns});
-  }, functions);
-}
+const seedStorage = seedFunctionStore;
 
 test('popup lists seeded functions and copies via the sandbox', async ({
   context,
