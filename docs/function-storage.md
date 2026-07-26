@@ -60,9 +60,10 @@ ChromeとFirefoxの間では同期しない。
 
 1. popup がアクティブタブの URL を取得する。
 2. repository が現在の Catalog を読み、順序を保ったまま URL pattern に一致する entry を抽出する。
-3. repository が一致した entry の Function Document だけを一括取得する。
-4. repository が各 document を検証し、`CopyFunction[]` を返す。
-5. popup は Catalog の順序で関数を表示し、ユーザーが選んだ関数を sandbox に渡す。
+3. repository が一致した entry を `FunctionSummary[]` として返す。
+4. popup は Catalog の順序で関数を表示する。
+5. ユーザーが関数を選ぶと、repository がその関数の Function Document を読んで検証する。
+6. popup は検証済みの code を sandbox に渡す。
 
 ```mermaid
 sequenceDiagram
@@ -81,24 +82,26 @@ sequenceDiagram
   Repo->>Storage: get(Catalog Root + Shards)
   Storage-->>Repo: entries
   Repo->>Repo: URL pattern に一致する entry を抽出
-  Repo->>Storage: get(一致した documentId のみ / 1 回)
-  Storage-->>Repo: Function Documents
-  Repo->>Repo: schema と summary 一致を検証
-  Repo-->>Popup: CopyFunction[]
+  Repo-->>Popup: FunctionSummary[]
   Popup-->>User: Catalog 順で一覧表示
 
   User->>Popup: 関数を選択
+  Popup->>Repo: get(id)
+  Repo->>Storage: get(選ばれた 1 件の Function Document)
+  Storage-->>Repo: document
+  Repo->>Repo: schema と summary 一致を検証
+  Repo-->>Popup: CopyFunction
   Popup->>Sandbox: postMessage(eval, code, page)
   Sandbox->>Sandbox: ユーザーコードを評価
   Sandbox-->>Popup: CopyResult
   Popup-->>User: clipboard へ書き込み
 ```
 
-一致しない関数の code は読まない。
-複数 document は 1 回の `get` にまとめ、N+1 read を避ける。
+一覧に何件並んでいても、popup が読む Function Document は実行する 1 件だけである。
 
 不正な URL pattern は保存時に拒否する。
-読み取り時に不正な entry や document を発見した場合、その関数を実行対象から外し、他の正常な関数は利用可能な状態を保つ。
+読み取り時に不正な entry を発見した場合、その関数を一覧から外し、他の正常な関数は利用可能な状態を保つ。
+document の破損は実行時に検出されるため、実行を中止してエラーを表示し、他の関数は選択可能な状態を保つ。
 
 ### options で関数を編集する
 
@@ -194,7 +197,7 @@ domain と application 層から `chrome.*` / `browser.*` を参照しない。
 ### Domain
 
 - `CopyFunction`: 実行可能な完全な関数。
-- `FunctionSummary`: `id`, `name`, `pattern`, `theme`, `version` からなる一覧・検索用 projection。
+- `FunctionSummary`: `id`, `name`, `pattern`, `theme`, `version` からなる一覧・検索用 projection。popup と options の一覧はこれだけで描画できる。
 - Valibot schema: Function Document、Catalog、Active Pointer を永続化境界で検証する。
 
 `FunctionSummary` は Catalog に複製するが、commit 対象の `CopyFunction` から repository が生成する。
@@ -208,7 +211,7 @@ repository は、UI に次の契約を提供する。
 ```ts
 interface FunctionRepository {
   listSummaries(): Promise<FunctionSummary[]>;
-  listForUrl(url: string): Promise<CopyFunction[]>;
+  listForUrl(url: string): Promise<FunctionSummary[]>;
   get(id: string): Promise<CopyFunction | undefined>;
   create(fn: CopyFunction): Promise<void>;
   update(fn: CopyFunction): Promise<void>;
