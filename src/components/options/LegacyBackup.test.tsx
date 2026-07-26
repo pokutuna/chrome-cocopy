@@ -10,7 +10,7 @@ import {
   MigrationResult,
 } from '../../lib/function-store/migration';
 import {decodeSharable} from '../../lib/share';
-import {LegacyBackup} from './LegacyBackup';
+import {LegacyBackup, LegacyBackupBanner} from './LegacyBackup';
 import {
   createTestStore,
   renderWithStore,
@@ -326,6 +326,95 @@ test('a failed migration shows the error and can still export', async () => {
   ).toEqual(legacy);
 
   vi.unstubAllGlobals();
+});
+
+test('banner renders nothing on a fresh install', async () => {
+  const store = createTestStore();
+  const {container} = render(renderWithStore(store, <LegacyBackupBanner />));
+
+  await act(async () => {
+    await new Promise(resolve => setTimeout(resolve, 0));
+  });
+  expect(container).toBeEmptyDOMElement();
+});
+
+test('banner links to the legacy page without rendering the full section', async () => {
+  const store = createTestStore();
+  const legacy = [fn('a')];
+  await seedStore(store, legacy);
+  await seedLegacy(store, {
+    legacy,
+    backup: legacy,
+    result: result({migratedCount: 1}),
+  });
+
+  render(renderWithStore(store, <LegacyBackupBanner />));
+
+  const link = await screen.findByRole('link', {
+    name: 'Legacy storage backup',
+  });
+  expect(link.getAttribute('href')).toBe('/legacy');
+  // The banner explains why legacy data exists before pointing at it, and
+  // warns that the backup is temporary.
+  expect(
+    screen.getByText(
+      'Since version 0.6, cocopy stores functions in a new format',
+      {exact: false},
+    ),
+  ).toBeInTheDocument();
+  expect(
+    screen.getByText('Your previous functions were migrated automatically.', {
+      exact: false,
+    }),
+  ).toBeInTheDocument();
+  expect(
+    screen.getByText('The original data will be removed in a future update.'),
+  ).toBeInTheDocument();
+
+  // The inspection UI stays on the legacy page.
+  expect(
+    screen.queryByRole('button', {name: 'Export original JSON'}),
+  ).not.toBeInTheDocument();
+});
+
+test('banner reports functions the migration left behind', async () => {
+  const store = createTestStore();
+  const legacy = [fn('a'), fn('b')];
+  await seedLegacy(store, {
+    legacy,
+    backup: legacy,
+    result: result({
+      migratedCount: 1,
+      skipped: [{id: 'b', name: 'name-b', reason: 'size'}],
+    }),
+  });
+
+  render(renderWithStore(store, <LegacyBackupBanner />));
+
+  await screen.findByRole('link', {name: 'Legacy storage backup'});
+  expect(
+    screen.getByText('1 function(s) could not be carried over.', {
+      exact: false,
+    }),
+  ).toBeInTheDocument();
+});
+
+test('banner reports a failed migration', async () => {
+  const store = createTestStore();
+  await seedLegacy(store, {
+    legacy: {not: 'an array'},
+    result: result({outcome: 'failed', error: 'broken'}),
+  });
+
+  render(renderWithStore(store, <LegacyBackupBanner />));
+
+  await screen.findByRole('link', {name: 'Legacy storage backup'});
+  expect(
+    screen.getByText(
+      'The automatic migration failed. Your original data is kept untouched',
+      {exact: false},
+    ),
+  ).toBeInTheDocument();
 });
 
 test('a renamed id counts as already migrated', async () => {

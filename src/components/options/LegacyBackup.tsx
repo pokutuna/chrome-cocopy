@@ -26,6 +26,13 @@ import styles from './LegacyBackup.module.css';
 
 const EXPORT_FILENAME = 'cocopy-legacy-functions.json';
 
+/**
+ * Why the legacy backup exists at all — shown wherever the backup surfaces so
+ * users are not confronted with "legacy data" out of nowhere.
+ */
+const MIGRATION_INTRO =
+  'Since version 0.6, cocopy stores functions in a new format to handle extension storage size limits.';
+
 /** UTF-8 byte length of the raw JSON, matching what storage accounts for. */
 function byteLength(raw: string): number {
   return new TextEncoder().encode(raw).length;
@@ -82,6 +89,23 @@ function outcomeText(result: MigrationResult): string {
 function formatTimestamp(iso: string): string {
   const date = new Date(iso);
   return Number.isNaN(date.getTime()) ? iso : date.toLocaleString();
+}
+
+/**
+ * Whether there is anything to show about the legacy storage. False on a
+ * fresh install: nothing was ever stored in the legacy format. This also
+ * covers a completed migration that only seeded the default functions
+ * (legacyExisted false) — there is nothing to inspect or recover then. A
+ * failed migration still counts even without legacy data, so its error and
+ * export stay reachable.
+ */
+export function hasLegacyBackupContent(status: LegacyBackupStatus): boolean {
+  const {legacyRaw, backupRaw, result} = status;
+  if (legacyRaw !== undefined || backupRaw !== undefined) return true;
+  return (
+    result !== undefined &&
+    !(result.outcome === 'completed' && !result.legacyExisted)
+  );
 }
 
 type EntryState =
@@ -324,22 +348,9 @@ export function LegacyBackup() {
     if (raw !== undefined) downloadJson(raw);
   }, [raw]);
 
-  if (!status) return null;
+  if (!status || !hasLegacyBackupContent(status)) return null;
 
-  // Fresh install: nothing was ever stored in the legacy format. This also
-  // covers a completed migration that only seeded the default functions
-  // (legacyExisted false) — there is nothing to inspect or recover then. A
-  // failed migration still renders even without legacy data, so its error and
-  // export stay reachable.
   const {legacyRaw, backupRaw, result} = status;
-  if (
-    legacyRaw === undefined &&
-    backupRaw === undefined &&
-    (result === undefined ||
-      (result.outcome === 'completed' && !result.legacyExisted))
-  ) {
-    return null;
-  }
 
   const imported = new Set(importedIds);
 
@@ -352,9 +363,13 @@ export function LegacyBackup() {
 
       <TextList>
         <li>
+          {MIGRATION_INTRO} Your previous functions were migrated to it
+          automatically.
+        </li>
+        <li>
           This is the read-only original captured when cocopy migrated to its
           new storage format, not a backup of your current functions. Nothing
-          here changes when you edit or delete functions above.
+          here changes when you edit or delete your functions.
         </li>
         <li>
           Importing a function copies it into your functions under a new id. The
@@ -417,5 +432,65 @@ export function LegacyBackup() {
         </div>
       )}
     </Section>
+  );
+}
+
+/**
+ * Compact pointer to the /legacy page, shown on the main page only when there
+ * is legacy data worth reviewing. The full inspection UI lives in
+ * LegacyBackup on that page.
+ */
+export function LegacyBackupBanner() {
+  const legacyBackup = useLegacyBackupRepository();
+  const [status, setStatus] = useState<LegacyBackupStatus | undefined>(
+    undefined,
+  );
+
+  useEffect(() => {
+    let cancelled = false;
+    legacyBackup
+      .status()
+      .then(next => {
+        if (!cancelled) setStatus(next);
+      })
+      .catch(() => {
+        // The banner is only a pointer; with an unreadable status there is
+        // nothing to point at.
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [legacyBackup]);
+
+  if (!status || !hasLegacyBackupContent(status)) return null;
+
+  const failed = status.result?.outcome === 'failed';
+  const skippedCount = status.result?.skipped.length ?? 0;
+  const detail = failed ? (
+    <>
+      The automatic migration failed. Your original data is kept untouched
+      &mdash; recover it from the{' '}
+      <Link to="/legacy">Legacy storage backup</Link>.
+    </>
+  ) : skippedCount > 0 ? (
+    <>
+      Your previous functions were migrated automatically, but {skippedCount}{' '}
+      function(s) could not be carried over. Review and import them from the{' '}
+      <Link to="/legacy">Legacy storage backup</Link>.
+    </>
+  ) : (
+    <>
+      Your previous functions were migrated automatically. If anything is
+      missing, review and recover the original data from the{' '}
+      <Link to="/legacy">Legacy storage backup</Link>.
+    </>
+  );
+
+  return (
+    <div className={failed ? styles.bannerProblem : styles.banner}>
+      <p>{MIGRATION_INTRO}</p>
+      <p>{detail}</p>
+      <p>The original data will be removed in a future update.</p>
+    </div>
   );
 }

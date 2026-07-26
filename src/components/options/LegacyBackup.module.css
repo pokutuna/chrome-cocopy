@@ -1,3 +1,29 @@
+.banner {
+  border: 1px solid var(--color-lightgray);
+  color: var(--color-gray);
+  padding: var(--space-2);
+  margin-bottom: var(--space-4);
+  font-size: var(--size-sm);
+}
+
+.bannerProblem {
+  border: 1px solid var(--color-error);
+  color: var(--color-error);
+  padding: var(--space-2);
+  margin-bottom: var(--space-4);
+  font-size: var(--size-sm);
+}
+
+.banner p,
+.bannerProblem p {
+  margin: 0;
+}
+
+.banner p + p,
+.bannerProblem p + p {
+  margin-top: var(--space-1);
+}
+
 .notice {
   border: 1px solid var(--color-warning);
   color: var(--color-warning);

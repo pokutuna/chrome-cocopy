@@ -3,6 +3,10 @@ import '@testing-library/jest-dom';
 import {vi} from 'vitest';
 
 import {defaultFunctions} from '../../lib/builtin';
+import {
+  LEGACY_BACKUP_KEY,
+  MIGRATION_RESULT_KEY,
+} from '../../lib/function-store/migration';
 import {encodeSharable} from '../../lib/share';
 import {App} from './App';
 import {createTestStore, renderWithStore, seedStore} from './test-helpers';
@@ -84,4 +88,39 @@ test('render install page', async () => {
     .map(line => line.textContent ?? '')
     .join('\n');
   expect(code).toBe(fn.code);
+});
+
+test('render legacy page', async () => {
+  vi.mocked(chrome.runtime.getManifest).mockImplementation(
+    () => ({version_name: 'Build v0.0.0'}) as chrome.runtime.Manifest,
+  );
+
+  const store = createTestStore();
+  const legacy = [defaultFunctions[0]];
+  await seedStore(store, legacy);
+  await store.local.set({
+    [LEGACY_BACKUP_KEY]: JSON.stringify(legacy),
+    [MIGRATION_RESULT_KEY]: {
+      formatVersion: 1,
+      migratedAt: '2026-01-02T03:04:05.000Z',
+      outcome: 'completed',
+      legacyExisted: true,
+      migratedCount: 1,
+      skipped: [],
+      renamedIds: [],
+    },
+  });
+
+  render(renderWithStore(store, <App />, ['/legacy']));
+
+  await waitFor(() =>
+    expect(screen.getByText('Legacy storage backup')).toBeInTheDocument(),
+  );
+
+  // The full inspection UI renders on its own page, not the function list.
+  expect(
+    screen.getByRole('button', {name: 'Export original JSON'}),
+  ).toBeInTheDocument();
+  expect(screen.queryByText('Create New Function')).not.toBeInTheDocument();
+  expect(screen.getByText('Links')).toBeInTheDocument();
 });
