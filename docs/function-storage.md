@@ -60,7 +60,7 @@ ChromeとFirefoxの間では同期しない。
 
 1. popup がアクティブタブの URL を取得する。
 2. repository が現在の Catalog を読み、順序を保ったまま URL pattern に一致する entry を抽出する。
-3. repository が一致した entry を `FunctionSummary[]` として返す。
+3. repository が一致した entry を `FunctionRef[]` として返す。
 4. popup は Catalog の順序で関数を表示する。
 5. ユーザーが関数を選ぶと、repository がその関数の Function Document を読んで検証する。
 6. popup は検証済みの code を sandbox に渡す。
@@ -82,14 +82,14 @@ sequenceDiagram
   Repo->>Storage: get(Catalog Root + Shards)
   Storage-->>Repo: entries
   Repo->>Repo: URL pattern に一致する entry を抽出
-  Repo-->>Popup: FunctionSummary[]
+  Repo-->>Popup: FunctionRef[]
   Popup-->>User: Catalog 順で一覧表示
 
   User->>Popup: 関数を選択
   Popup->>Repo: get(id)
   Repo->>Storage: get(選ばれた 1 件の Function Document)
   Storage-->>Repo: document
-  Repo->>Repo: schema と summary 一致を検証
+  Repo->>Repo: schema と ref 一致を検証
   Repo-->>Popup: CopyFunction
   Popup->>Sandbox: postMessage(eval, code, page)
   Sandbox->>Sandbox: ユーザーコードを評価
@@ -108,7 +108,7 @@ document の破損は実行時に検出されるため、実行を中止して�
 1. options が Catalog から関数名、テーマ、URL pattern、順序を読み、コードを読まずに一覧を表示する。
 2. ユーザーが関数を開くと、repository が対応する Function Document を読む。
 3. ユーザーが保存すると、repository が schema と portable size limit を検証する。
-4. repository が新しい Function Document と Catalog を準備し、読み戻して検証する。
+4. repository が新しい Function Document と Catalog を準備し、読み戻して欠損がないことを確認する。
 5. repository が Active Pointer を新しい Catalog へ切り替える。
 6. options は永続化の完了後にだけ「保存済み」と表示する。
 
@@ -121,12 +121,12 @@ sequenceDiagram
   participant Storage as storage
 
   Note over Options,Storage: 一覧表示: code は読まない
-  Options->>Repo: listSummaries()
+  Options->>Repo: list()
   Repo->>Storage: get(Active Pointer)
   Storage-->>Repo: catalogId
   Repo->>Storage: get(Catalog Root + Shards)
   Storage-->>Repo: entries
-  Repo-->>Options: FunctionSummary[]
+  Repo-->>Options: FunctionRef[]
   Options-->>User: 名前・テーマ・pattern を一覧表示
 
   Note over Options,Storage: 編集: 開いた関数の code だけ読む
@@ -137,7 +137,7 @@ sequenceDiagram
   Repo-->>Options: CopyFunction
   Options-->>User: editor を表示
 
-  Note over Options,Storage: 保存: Pointer の切り替えが commit 点
+  Note over Options,Storage: 保存: Document と Catalog を書いてから Active Pointer を更新する
   User->>Options: Save
   Options->>Options: Save/Delete/Reorder を無効化
   Options->>Repo: update(fn)
@@ -145,7 +145,7 @@ sequenceDiagram
   Repo->>Storage: set(新 Document + 新 Shard + 新 Root)
   Repo->>Storage: get(書いた item を読み戻す)
   Storage-->>Repo: 読み戻し結果
-  Repo->>Repo: schema・参照・summary・容量を検証
+  Repo->>Repo: 参照する全 document が揃っているか確認
   Repo->>Storage: get(Active Pointer)
   Storage-->>Repo: 現在の catalogId
   Repo->>Repo: 開始時の catalogId と一致するか確認
@@ -197,11 +197,11 @@ domain と application 層から `chrome.*` / `browser.*` を参照しない。
 ### Domain
 
 - `CopyFunction`: 実行可能な完全な関数。
-- `FunctionSummary`: `id`, `documentId`, `name`, `pattern`, `theme`, `version` からなる一覧・検索用 projection。popup と options の一覧はこれだけで描画できる。
+- `FunctionRef`: `id`, `documentId`, `name`, `pattern`, `theme`, `version` からなる、実体への参照と一覧表示に必要な情報。popup と options の一覧はこれだけで描画でき、実行時に `documentId` から実体を引く。
 - Valibot schema: Function Document、Catalog、Active Pointer を永続化境界で検証する。
 
-`FunctionSummary` は Catalog に複製するが、commit 対象の `CopyFunction` から repository が生成する。
-UI が summary と document を別々に組み立ててはならない。
+`FunctionRef` は Catalog に複製するが、commit 対象の `CopyFunction` から repository が生成する。
+UI が ref と document を別々に組み立ててはならない。
 
 ### Application Repository
 
@@ -210,9 +210,9 @@ repository は、UI に次の契約を提供する。
 
 ```ts
 interface FunctionRepository {
-  listSummaries(): Promise<FunctionSummary[]>;
-  listForUrl(url: string): Promise<FunctionSummary[]>;
-  get(summary: FunctionSummary): Promise<CopyFunction | undefined>;
+  list(): Promise<FunctionRef[]>;
+  listForUrl(url: string): Promise<FunctionRef[]>;
+  get(ref: FunctionRef): Promise<CopyFunction | undefined>;
   create(fn: CopyFunction): Promise<void>;
   update(fn: CopyFunction): Promise<void>;
   delete(id: string): Promise<void>;
@@ -227,7 +227,7 @@ interface FunctionRepository {
 - `subscribe` は「active snapshot が変わった」ことを通知し、受信側は repository からデータを再読込する。
 - repository は内部に mutation queue を持ち、同一 context からの mutation を直列化する。UI の操作無効化は体験のためであり、正しさは repository が担保する。
 
-`get` は summary が持つ `documentId` の document を直接読み、一覧で見た snapshot と実行する code の世代を一致させる。
+`get` は ref が持つ `documentId` の document を直接読み、一覧で見た snapshot と実行する code の世代を一致させる。
 論理 ID から Catalog を引き直すと、その間に別 context が commit した場合に別世代の code を実行しうる。
 document が既に GC されていた場合は `undefined` を返し、UI は再読込を促す。
 
@@ -291,7 +291,7 @@ Key: `cocopy:function-store:active`
 
 - すべての読み取りは Active Pointer から開始する。
 - Pointer が指す Catalog だけが commit 済みの正本である。
-- Pointer の切り替えを、複数 item にまたがる mutation のコミット点とする。
+- 保存は、新しい Document と Catalog を別のキーへ書いてから、最後に Active Pointer をそこへ向け替える。Pointer を書き換えるまで、途中の状態は誰からも見えない。
 
 Pointerのキーだけは、他のキーと異なりstorage format versionを含めない。
 Pointerはformat versionを跨いで単一であり、どのversionのCatalogを指しているかは値の`formatVersion`で判別する。
@@ -383,7 +383,7 @@ Key: `cocopy:function-store:v1:function:<documentId>`
 - key長とvalueを含むserialized sizeが1 itemのquotaを超える関数は、保存を拒否する。
 - document は不変とし、編集時は同じキーを上書きせず新しい `documentId` を作る。
 - Catalog entry は document から導出する。
-- 読み取り時に ID や summary が一致しなければ corruption として扱い、そのコードを実行しない。
+- 読み取り時に ID や ref の内容が document と一致しなければ corruption として扱い、そのコードを実行しない。
 
 ## Commit Protocol
 
@@ -393,13 +393,18 @@ FunctionStore は copy-on-write と Active Pointer により、旧 snapshot ま�
 1. mutation 開始時の `catalogId` を記録する。
 2. 新規または変更された Function Document を新しいキーへ書く。
 3. mutation後の全entryを持つ新しいCatalog ShardとCatalog Rootを書く。
-4. 新しいdocument、Shard、Rootを読み戻し、schema、参照、summary、容量を検証する。
+4. 新しいRootとShardを読み戻し、参照する全documentが揃っていることを確認する。
 5. Active Pointer を再読込し、手順1の `catalogId` と異なる場合は `ConflictError` としてcommitを中止する。
 6. Active Pointer を新しい `catalogId` へ切り替える。
 7. Pointer を読み戻して commit 結果を確認する。
 
 手順2〜5で失敗した場合、Pointerは旧Catalogを指したままなので、従来のsnapshotを読み続けられる。
 途中まで作られたitemはorphanとして後で回収する。
+
+手順4で読み戻すのは、公開する直前のsnapshotに欠損がないことだけを確かめるためである。
+容量は手順2の前にCommit Preconditionsで判定済みであり、書いた後に測り直さない。
+refとdocumentの内容一致は、自分が今生成した値どうしの比較なのでunit testの範囲とする。
+他deviceやDevTools由来の破損は、書き込み時ではなく読み取り時の検証で捕捉する。
 
 別端末ではPointer、Root、Shard、Documentが異なる順序で同期されうる。
 新Pointerの参照先が揃うまではlocal cacheの旧snapshotを利用し、欠損をcorruptionとして確定しない。
@@ -506,9 +511,9 @@ GCが書き込み回数quotaを不要に消費しないようにする。
 
 - storage から得た `unknown` はすべて Valibot schema で検証し、型 assertion だけで通さない。
 - Catalog 内の論理 ID と document ID は一意でなければならない。
-- Catalog summary は参照先 document から再計算した値と一致しなければならない。
+- Catalog の ref は参照先 document から再計算した値と一致しなければならない。
 - URL pattern は保存時に `RegExp` として構築可能か検証する。
-- 欠損 document、schema 不一致、summary 不一致は `CorruptionError` とする。
+- 欠損 document、schema 不一致、ref 不一致は `CorruptionError` とする。
 - popup は破損した関数を実行せず、正常な関数を表示する。
 - options は正常な関数と診断情報を表示し、JSON export を可能にする。
 - mutation 中は同じ UI からの Save、Delete、Reorder の競合操作を無効化する。
@@ -525,7 +530,7 @@ Scenario: storage は DevTools、拡張機能の不具合、旧バージョン�
 Mitigations:
 
 - Pointer、Catalog、Function Document の全境界を schema 検証する。
-- Catalog と document の ID および summary の一致を検証する。
+- Catalog と document の ID および ref の内容の一致を検証する。
 - ユーザーコードは sandbox だけで実行し、popup と options では評価しない。
 
 ### content script から関数コードが読まれる
@@ -567,9 +572,9 @@ domain repository test は特定の browser mock library に結合しない。
 - quota error を呼び出し元へ返す。
 - 実効上限を超えるpeak usageのmutationを開始しない。
 - 関数数の上限を超える`create`を拒否する。
-- Catalogを複数Shardへ分割しても、順序とsummaryを維持する。
+- Catalogを複数Shardへ分割しても、順序とrefの内容を維持する。
 - orphan GC が active snapshot と他機能のキーを削除しない。
-- schema 不正、欠損 document、重複 ID、summary mismatch を検出する。
+- schema 不正、欠損 document、重複 ID、ref mismatch を検出する。
 - 同じ snapshot を基点にした 2 writer の commit で、後発が `ConflictError` になる。
 - Pointerだけが先に同期された場合、完全な新snapshotが揃うまでlocal cacheを返す。
 
