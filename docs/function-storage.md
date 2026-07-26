@@ -665,7 +665,7 @@ storage.sync
 
 - legacy storage の `storage.sync["functions"]` は移行処理から変更・削除しない。
 - FunctionStore の Active Pointer が存在する場合は、legacy storage を自動で再移行しない。
-- FunctionStore の初期化が完了するまでは、検証済みの legacy data を読み取り専用で利用できる。
+- 移行後も legacy data を読み取り専用で参照でき、関数を1件ずつ手動で取り込める。
 - 旧バージョンへrollbackした場合も、旧バージョンが読むlegacy dataを残す。
 - legacy itemもsync quotaを消費するため、保持中はその使用量をFunctionStoreの容量計算に含める。
 
@@ -703,16 +703,36 @@ popupとoptionsはActive Pointerの有無を意識せず、常に`FunctionReposi
 1. `storage.sync["cocopy:function-store:active"]` を読む。
 2. Active Pointer がなければ、`storage.sync["functions"]` をデフォルト値なしで読む。
 3. legacy key 自体がなければ、組み込みの `defaultFunctions` を初期データとする。
-4. 配列、各関数、ID の一意性、URL pattern を検証する。
+4. 配列として読めることを確認する。配列でなければ移行を中止する。
 5. legacy dataの生JSONを`storage.local["cocopy:legacy-backup:sync-functions"]`へ保存し、読み戻して一致を確認する。
-6. 各Function Document、Catalog Shard、Catalog Rootを`storage.sync`に書く。
-7. 書いたデータを読み戻し、件数、順序、内容が移行元と一致することを確認する。
-8. 最後にActive Pointerを`storage.sync`へ書いてFunctionStoreを有効化する。
-9. 移行結果を`storage.local["cocopy:migration:sync-functions-to-function-store-v1"]`に記録する。
+6. 関数を1件ずつ検証し、移行できるものとできないものに分ける。
+7. 移行できる関数のFunction Document、Catalog Shard、Catalog Rootを`storage.sync`に書く。
+8. 書いたデータを読み戻し、件数、順序、内容が移行元と一致することを確認する。
+9. 最後にActive Pointerを`storage.sync`へ書いてFunctionStoreを有効化する。
+10. 移行結果を`storage.local["cocopy:migration:sync-functions-to-function-store-v1"]`に記録する。
 
 legacy は単一 item であり、その時点で 8 KiB 以下であることが保証されている。
 移行後の合計サイズもこれとほぼ変わらず、実効上限の 92,160 bytes に対して十分小さい。
 このため移行時に peak usage を見積もらない。
+
+### Partial Migration
+
+関数10個のうち1個が検証を通らない場合、残る9個を移行してFunctionStoreを有効化する。
+1個のために全体を止めると、ユーザーは正常な9個も使えなくなる。
+
+step 6 の検証は関数ごとに独立して行う。次のいずれかに該当する関数を移行対象から外す。
+
+- schema 検証に失敗する。
+- URL pattern が `RegExp` として構築できない。
+- 単体で 1 item のquotaを超える。
+
+ID の重複は、2件目以降を新しい ID へ採番し直して移行する。除外しない。
+
+移行できなかった関数は件数と名前を step 10 の移行結果に記録し、options に表示する。
+除外した関数のデータは legacy backup にそのまま残っており、失われない。
+
+移行を中止するのは、legacy dataが配列として読めない場合だけとする。
+この場合はActive Pointerを作らず、Migration Failureとして扱う。
 
 ```mermaid
 sequenceDiagram
@@ -733,21 +753,23 @@ sequenceDiagram
   Coord->>Sync: get("functions") ※デフォルト値なし
   Sync-->>Coord: legacy data / キーなし
   Note over Coord: キーなし → defaultFunctions を初期データにする<br/>空配列 → 全削除済みの有効な状態として移行
-  Coord->>Coord: 配列・各関数・ID 一意性・URL pattern を検証
+  Coord->>Coord: 配列として読めるか確認
 
   Coord->>Local: set(legacy raw JSON をバックアップ)
   Coord->>Local: get(バックアップ)
   Local-->>Coord: 読み戻して一致を確認
 
+  Coord->>Coord: 関数を1件ずつ検証し、移行できるものだけ選ぶ
   Coord->>Sync: set(Function Documents + Shards + Root)
   Coord->>Sync: get(書いた item を読み戻す)
   Sync-->>Coord: 件数・順序・内容が移行元と一致するか確認
 
   Coord->>Sync: set(Active Pointer) ※ここで FunctionStore が有効化される
-  Coord->>Local: set(移行結果を記録)
+  Coord->>Local: set(移行結果と、移行できなかった関数を記録)
   Coord-->>Repo: 完了
   Repo-->>UI: 移行後の snapshot を返す
   UI-->>User: 関数を表示
+  UI-->>User: 移行できなかった関数があればその件数を表示
 
   Note over Coord,Sync: legacy の "functions" は変更も削除もしない
 ```
@@ -757,12 +779,11 @@ Active Pointer を最後に書くため、途中で失敗しても不完全な F
 前回のitemはorphanとしてGCする。
 
 空配列は「legacy keyなし」と区別し、ユーザーが全関数を削除した有効な状態として移行する。
-不正なlegacy dataは自動で一部を捨てず、Active Pointerを作らない。
 
 legacy の ID はミリ秒timestampだけから作られており、同一ミリ秒内に作られた関数どうしで重複しうる。
-FunctionStore は重複 ID を `CorruptionError` として扱うため、移行が止まらないよう、
-step 4 で重複を検出した場合は 2 件目以降に新しい ID を採番し直してから移行する。
-採番し直した ID は step 9 の移行結果に記録する。
+FunctionStore は重複 ID を `CorruptionError` として扱うため、
+step 6 で重複を検出した場合は 2 件目以降に新しい ID を採番し直してから移行する。
+採番し直した ID は step 10 の移行結果に記録する。
 
 popupとoptionsを同時に開くと、両方が移行を実行しうる。
 両者は同じlegacy dataから同じ内容を書き、Active Pointerはlast-write-winsでどちらか一方に決まる。
@@ -771,7 +792,10 @@ popupとoptionsを同時に開くと、両方が移行を実行しうる。
 
 ### Migration Failure
 
-移行が失敗した場合、Active Pointerは書かれず、legacy dataも変更されていない。
+ここでいう失敗は、legacy dataが配列として読めない場合と、書き込み自体が失敗した場合を指す。
+個々の関数が検証を通らない場合は Partial Migration として扱い、失敗にはしない。
+
+失敗した場合、Active Pointerは書かれず、legacy dataも変更されていない。
 このとき`FunctionRepository`は関数を返さず、移行失敗をUIへ伝える。
 
 - popupは関数一覧の代わりにエラーと、optionsを開くための導線を表示する。
@@ -784,18 +808,26 @@ popupとoptionsを同時に開くと、両方が移行を実行しうる。
 ### Legacy Storage Backup UI
 
 options に一時的な「Legacy storage backup」セクションを追加する。
-今回のスコープは status 表示と export に限定する。
 
 - sync上のlegacy keyとlocal backupの有無、JSON byte数、件数、検証結果を表示する。
-- migrationが完了しているか、失敗しているかを表示する。
+- migrationが完了しているか、一部の関数を移行できなかったか、失敗しているかを表示する。
+- legacy dataの関数を1件ずつ一覧表示する。移行できたものとできなかったものを区別し、できなかったものには理由を添える。
+- 各関数を個別にFunctionStoreへ取り込めるようにする。取り込みは通常の`create`と同じ検証を通す。
+- 検証を通らない関数は、そのままでは取り込めない。editorへ内容を渡し、ユーザーが修正して保存できるようにする。
 - 原本をJSONファイルとしてexportできるようにする。
 - exportしてもlocal backupを変更・削除しない。
 
+取り込みはlegacy dataを消費しない。同じ関数を二重に取り込むと、別のIDを持つ関数が2つできる。
+既に取り込み済みの関数はその旨を表示し、誤って重複させないようにする。
+
+このセクションは移行のための一時的なものであり、数か月後のリリースで削除する予定であることをUI上に明記する。
+削除前にexportしておくよう促す。
+
 このUIでは、legacy dataが現在のバックアップではなく「移行時点の読み取り専用原本」であることと、FunctionStoreの有効化日時を明示する。
 
-UIからの復旧操作は実装しない。
-復旧が必要な場合はexportしたJSONから手動で関数を再作成する。
-migration failureが実際に観測された場合に、preview付きの復旧操作を追加するか判断する。
+復旧操作は関数単位の取り込みに限定する。
+legacy snapshot全体でFunctionStoreを上書きする操作は用意しない。
+全体復元は、取り込み後に加えた編集を黙って捨てることになるためである。
 
 ### Implementation Sequence
 
@@ -818,8 +850,14 @@ legacy形式のseedは、migrationを検証する専用のspecにだけ残す。
 - 正常なlegacy dataの内容と順序を変えずに移行する。
 - 不正なlegacy dataではActive Pointerを作らない。
 - legacy raw backupの検証が終わるまでFunctionStoreを書き始めない。
+- 10件中1件が検証を通らない場合、残る9件を移行してActive Pointerを作る。
+- 移行できなかった関数の件数と理由が移行結果に記録され、optionsに表示される。
+- legacy dataが配列として読めない場合はActive Pointerを作らない。
 - 各書き込み地点で失敗してもlegacy dataが変化せず、次に開いたときに再試行できる。
 - 移行が失敗したとき、UIがエラーを表示し、legacy dataをexportできる。
+- 移行できなかった関数をUIから個別に取り込める。
+- 検証を通らない関数の取り込みがeditorへ遷移し、修正して保存できる。
+- 取り込んでもlegacy dataが変化しない。
 - FunctionStoreが有効化済みならlegacy dataを再移行しない。
 - popupとoptionsが同時に移行しても、公開されるsnapshotが1つに収束する。
 - Legacy Storage Backup UIからstatusを確認し、raw JSONをexportできる。
