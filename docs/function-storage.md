@@ -46,13 +46,12 @@ ChromeとFirefoxの間では同期しない。
 
 ## Non-Goals
 
-- 複数端末で同時編集したデータのマージは扱わない。
-- ユーザー関数の sandbox 実行方式は変更しない。
-- 大規模データベース向けの全文検索やページネーションは導入しない。
+- 複数端末での同時編集は、Commit Protocolで競合として検出するだけとし、データのマージは行わない。
 - ブラウザごとの最大容量までデータを保存することは保証しない。実効上限はquotaより小さく設定する。
-- `storage.sync` の全体quotaを超える関数を端末ローカルだけに暗黙保存しない。
+- ChromeとFirefoxの正本は`storage.sync`だけとする。全体quotaを超えた分を`storage.local`へ暗黙に退避するなど、正本を複数のstorage areaへ分割する構成は扱わない。
 - SafariではWebExtensions標準APIだけで端末間同期を保証しない。
 - ChromeとFirefoxの間を横断して関数を同期しない。
+- IndexedDBや独自のsync backendは導入しない (Alternatives Considered参照)。
 
 ## Scenarios
 
@@ -60,9 +59,9 @@ ChromeとFirefoxの間では同期しない。
 
 1. popup がアクティブタブの URL を取得する。
 2. repository が現在の Catalog を読み、順序を保ったまま URL pattern に一致する entry を抽出する。
-3. repository が一致した entry を `FunctionRef[]` として返す。
+3. repository が一致した entry を `CopyFunctionRef[]` として返す。
 4. popup は Catalog の順序で関数を表示する。
-5. ユーザーが関数を選ぶと、repository がその関数の Function Document を読んで検証する。
+5. ユーザーが関数を選ぶと、repository がその関数の Function Document を読み、schema と ref の一致を検証する。他 device や DevTools 由来の破損は書き込み時に捕捉できないため、実行するコードは読み取り時に必ず検証する。
 6. popup は検証済みの code を sandbox に渡す。
 
 ```mermaid
@@ -72,9 +71,9 @@ sequenceDiagram
   participant Popup as popup
   participant Repo as FunctionRepository
   participant Storage as storage
-  participant Sandbox as sandbox iframe
+  participant Sandbox as sandbox
 
-  User->>Popup: 拡張アイコンを開く
+  User->>Popup: popup を開く
   Popup->>Popup: アクティブタブの URL を取得
   Popup->>Repo: listForUrl(url)
   Repo->>Storage: get(Active Pointer)
@@ -82,7 +81,7 @@ sequenceDiagram
   Repo->>Storage: get(Catalog Root + Shards)
   Storage-->>Repo: entries
   Repo->>Repo: URL pattern に一致する entry を抽出
-  Repo-->>Popup: FunctionRef[]
+  Repo-->>Popup: CopyFunctionRef[]
   Popup-->>User: Catalog 順で一覧表示
 
   User->>Popup: 関数を選択
@@ -126,7 +125,7 @@ sequenceDiagram
   Storage-->>Repo: catalogId
   Repo->>Storage: get(Catalog Root + Shards)
   Storage-->>Repo: entries
-  Repo-->>Options: FunctionRef[]
+  Repo-->>Options: CopyFunctionRef[]
   Options-->>User: 名前・テーマ・pattern を一覧表示
 
   Note over Options,Storage: 編集: 開いた関数の code だけ読む
@@ -172,22 +171,28 @@ Active Pointer を切り替える前に失敗した場合、Pointer は旧 Catal
 - 削除は対象への参照を除いた Catalog へ切り替え、削除した document は garbage collection まで残す。
 - 並べ替えは Function Document を変更せず、entry の順序が異なる Catalog へ切り替える。
 
+追加・削除・並べ替えも編集と同じ Commit Protocol に従う。
+たとえば追加の途中で別 window の commit が先行していた場合、Active Pointer の一致確認で `ConflictError` になり、UI は再読込後に改めて保存する。編集中の入力は保持される。
+
 ## Architecture
 
 ```mermaid
 flowchart LR
   Popup[popup] --> Repository[FunctionRepository]
   Options[options] --> Repository
-  Repository -- init 時に1度 --> Migration[MigrationCoordinator]
-  Migration --> Store[FunctionStorage]
+  Repository -- 初期化時に1度 --> Migration[MigrationCoordinator]
+  Migration --> Store[KeyValueStorage]
   Repository --> Store
-  Store --> Adapter[WebExtension storage adapter]
-  Adapter --> Sync[(storage.sync<br/>Chrome / Firefox)]
-  Adapter --> SafariLocal[(storage.local<br/>Safari fallback)]
-  Store --> Cache[(storage.local<br/>validated snapshot cache)]
+  Store --> Sync[(storage.sync<br/>Chrome / Firefox adapter)]
+  Store --> SafariLocal[(storage.local<br/>Safari adapter)]
+  Repository --> Cache[(storage.local<br/>validated snapshot cache)]
 ```
 
+repositoryの初期化は、popupまたはoptionsを開いてデータを最初に読む前に行われる (Migration Trigger参照)。
 MigrationCoordinatorは移行期間だけ存在する。
+
+repositoryは`KeyValueStorage`契約 (Storage Port) だけに依存する。
+ブラウザ差はこの契約を実装するadapterのバリエーションとして閉じ込め、repositoryとadapterの間に中間層を置かない。
 
 図のソースはこの文書内の Mermaid ブロックとする。
 
@@ -197,10 +202,10 @@ domain と application 層から `chrome.*` / `browser.*` を参照しない。
 ### Domain
 
 - `CopyFunction`: 実行可能な完全な関数。
-- `FunctionRef`: `id`, `documentId`, `name`, `pattern`, `theme`, `version` からなる、実体への参照と一覧表示に必要な情報。popup と options の一覧はこれだけで描画でき、実行時に `documentId` から実体を引く。
+- `CopyFunctionRef`: `id`, `documentId`, `name`, `pattern`, `theme`, `version` からなる、実体への参照と一覧表示に必要な情報。popup と options の一覧はこれだけで描画でき、実行時に `documentId` から実体を引く。名称は既存の `CopyFunction` と接頭辞を揃える。
 - Valibot schema: Function Document、Catalog、Active Pointer を永続化境界で検証する。
 
-`FunctionRef` は Catalog に複製するが、commit 対象の `CopyFunction` から repository が生成する。
+`CopyFunctionRef` は Catalog に複製するが、commit 対象の `CopyFunction` から repository が生成する。
 UI が ref と document を別々に組み立ててはならない。
 
 ### Application Repository
@@ -210,9 +215,9 @@ repository は、UI に次の契約を提供する。
 
 ```ts
 interface FunctionRepository {
-  list(): Promise<FunctionRef[]>;
-  listForUrl(url: string): Promise<FunctionRef[]>;
-  get(ref: FunctionRef): Promise<CopyFunction | undefined>;
+  list(): Promise<CopyFunctionRef[]>;
+  listForUrl(url: string): Promise<CopyFunctionRef[]>;
+  get(ref: CopyFunctionRef): Promise<CopyFunction | undefined>;
   create(fn: CopyFunction): Promise<void>;
   update(fn: CopyFunction): Promise<void>;
   delete(id: string): Promise<void>;
@@ -246,6 +251,11 @@ interface KeyValueStorage {
 Chrome adapter は `chrome.storage.sync`、Firefox adapter は `browser.storage.sync` を包む。
 Safari adapter は同じkey/value契約を `browser.storage.local` で実装する。
 callback / Promise、namespace、同期可否の差はadapter内に閉じ込める。
+
+`subscribe`は`storage.onChanged`をadapterが正規化して実装する。
+`onChanged`はpopupとoptionsを含む拡張ページで受信でき、別contextからの`set`も通知される。
+ページを閉じている間の変更は通知されないため、popupとoptionsは開くたびにrepositoryから読み直す。
+Firefoxは変更のないキーも含めて通知することがあるため、通知内容を差分として信頼せず、受信側はrepositoryから再読込する。
 
 ChromeとFirefoxでは、最後に検証できたsnapshotを `storage.local` にcacheする。
 sync itemは端末間で到着順が保証されないため、新しいPointerだけが先に届いて参照先がまだ欠けている場合、repositoryは不完全なsnapshotを公開せずcache済みの旧snapshotを返す。
@@ -401,7 +411,9 @@ FunctionStore は copy-on-write と Active Pointer により、旧 snapshot ま�
 手順2〜5で失敗した場合、Pointerは旧Catalogを指したままなので、従来のsnapshotを読み続けられる。
 途中まで作られたitemはorphanとして後で回収する。
 
-手順4で読み戻すのは、公開する直前のsnapshotに欠損がないことだけを確かめるためである。
+手順4と7で読み戻すのは、公開する直前のsnapshotに欠損がないことを確かめるためである。
+WebExtensions storageは、`set`のresolve後に`get`が書いた値を返すこと (read-your-writes) や、複数itemにまたがる書き込みの原子性を公式には保証していない。
+Active Pointerの切り替えはsnapshotの公開であり、読み戻しはその直前に完全性を確認できる最後の機会である。コストは1 mutationあたり`get`数回で済む。
 容量は手順2の前にCommit Preconditionsで判定済みであり、書いた後に測り直さない。
 refとdocumentの内容一致は、自分が今生成した値どうしの比較なのでunit testの範囲とする。
 他deviceやDevTools由来の破損は、書き込み時ではなく読み取り時の検証で捕捉する。
@@ -420,14 +432,20 @@ Active Pointer の更新自体は last-write-wins であり、storage API だけ
 repository は commit 直前に Active Pointer を読み直し、mutation の基点にした `catalogId` と一致するか確認する。
 一致しなければ `ConflictError` とし、自動マージせず UI に再読込を要求する。
 
+1関数だけの編集であっても、commitは全entryを持つ新しいCatalogへの切り替えである。
+基点が古いままcommitすると、自分が変更していない関数まで基点時点の内容へ巻き戻す。
+「対象の関数だけを書き換える」部分更新としては扱えないため、基点のずれを`ConflictError`とする。
+
 ## Capacity Model
 
 ChromeとFirefoxの`storage.sync` quotaを共通profileとする。
+FirefoxはChromeと同じ値・同じ計測方法 (key長 + JSON value長) をFirefox 79以降でenforceしている。
+Safariの正本は`storage.local` (既定5 MB) であり、このprofileに収まるデータは余裕を持って保存できる。
 
 - 1物理itemは、key長とJSON valueを合わせて8,192 bytes未満とする。
 - 全sync itemは、key長とJSON valueを合わせて102,400 bytes未満とする。
 - item数は512未満とする。
-- 書き込み回数は1分120回、1時間1,800回のquota内に収め、1 mutationのitemを可能な範囲で1回の`set`にまとめる。
+- 書き込み回数は1分120回、1時間1,800回のquota内に収め、1 mutationのitemを可能な範囲で1回の`set`にまとめる。書き込み回数quotaはChrome固有で、Firefoxに相当する制限は確認されていない。Chromeのquota内に収めれば全ブラウザで安全である。
 
 ### Effective Limits
 
@@ -444,7 +462,7 @@ quotaいっぱいまで使うとcopy-on-writeの一時領域を確保できな�
 
 使用量は`getBytesInUse`ではなく、key長とJSON valueのbyte長から自前で計算した値を正とする。
 
-- `getBytesInUse`はブラウザ間で可用性が揃わない。Firefoxは`storage.local`について144以降でのみ対応し、Safariでの対応は確認できていない。
+- `getBytesInUse`はブラウザ間で可用性が揃わない。Firefoxは`storage.local`について144以降でのみ対応する (Safariは14以降で対応済み)。
 - 自前計算なら全ブラウザで同じ判定になり、in-memory fakeでもテストできる。
 - adapterが`getBytesInUse`を提供できる場合、実測値との乖離を検出する診断用途には利用してよい。判定には使わない。
 
@@ -452,6 +470,10 @@ quotaいっぱいまで使うとcopy-on-writeの一時領域を確保できな�
 使用量は `getAll` が返す全itemの合計とし、FunctionStore以外のitem (legacy item を含む) も同じ式で数える。
 sync storageに何が入っているかを問わず、実際に残っている空きから判断する。
 ブラウザ実装との誤差は90% headroomで吸収する。
+
+容量計算を行うのはmutation開始時 (Commit Preconditions) の1度だけとする。
+対象データは全体でも102,400 bytes以下であり、`getAll`と自前計算のコストは保存操作の頻度に対して無視できる。
+popupとoptionsの読み取り経路では容量計算を行わない。
 
 ### Commit Preconditions
 
@@ -542,7 +564,8 @@ Mitigations:
 
 - Chrome adapter は最初の storage 操作の前に `setAccessLevel({accessLevel: 'TRUSTED_CONTEXTS'})` を呼ぶ。
 - この呼び出しは1回だけ行い、以降の全操作をその完了後に直列化する。
-- `setAccessLevel` を持たない古いbrowserでは、この呼び出しを省略して動作を継続する。
+- `setAccessLevel` を利用できないbrowserでは、この呼び出しを省略して動作を継続する。Firefoxは未対応、Safariは`storage.session`のみ対応で、`local` / `sync` に対しては呼べない。
+- cocopy自身はcontent scriptを持たないため、`setAccessLevel`が効かないbrowserでも自拡張のcontent script経由で読まれる経路はなく、これは多層防御として扱う。
 
 ### GC が他の設定を削除する
 
