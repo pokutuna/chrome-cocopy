@@ -64,6 +64,39 @@ ChromeとFirefoxの間では同期しない。
 4. repository が各 document を検証し、`CopyFunction[]` を返す。
 5. popup は Catalog の順序で関数を表示し、ユーザーが選んだ関数を sandbox に渡す。
 
+```mermaid
+sequenceDiagram
+  autonumber
+  actor User
+  participant Popup as popup
+  participant Repo as FunctionRepository
+  participant Storage as storage
+  participant Sandbox as sandbox iframe
+
+  User->>Popup: 拡張アイコンを開く
+  Popup->>Popup: アクティブタブの URL を取得
+  Popup->>Repo: listForUrl(url)
+  Repo->>Storage: get(Active Pointer)
+  Storage-->>Repo: catalogId
+  Repo->>Storage: get(Catalog Root + Shards)
+  Storage-->>Repo: entries
+  Repo->>Repo: URL pattern に一致する entry を抽出
+  Repo->>Storage: get(一致した documentId のみ / 1 回)
+  Storage-->>Repo: Function Documents
+  Repo->>Repo: schema と summary 一致を検証
+  Repo-->>Popup: CopyFunction[]
+  Popup-->>User: Catalog 順で一覧表示
+
+  User->>Popup: 関数を選択
+  Popup->>Sandbox: postMessage(eval, code, page)
+  Sandbox->>Sandbox: ユーザーコードを評価
+  Sandbox-->>Popup: CopyResult
+  Popup-->>User: clipboard へ書き込み
+```
+
+一致しない関数の code は読まない。
+複数 document は 1 回の `get` にまとめ、N+1 read を避ける。
+
 不正な URL pattern は保存時に拒否する。
 読み取り時に不正な entry や document を発見した場合、その関数を実行対象から外し、他の正常な関数は利用可能な状態を保つ。
 
@@ -75,6 +108,58 @@ ChromeとFirefoxの間では同期しない。
 4. repository が新しい Function Document と Catalog を準備し、読み戻して検証する。
 5. repository が Active Pointer を新しい Catalog へ切り替える。
 6. options は永続化の完了後にだけ「保存済み」と表示する。
+
+```mermaid
+sequenceDiagram
+  autonumber
+  actor User
+  participant Options as options
+  participant Repo as FunctionRepository
+  participant Storage as storage
+
+  Note over Options,Storage: 一覧表示: code は読まない
+  Options->>Repo: listSummaries()
+  Repo->>Storage: get(Active Pointer)
+  Storage-->>Repo: catalogId
+  Repo->>Storage: get(Catalog Root + Shards)
+  Storage-->>Repo: entries
+  Repo-->>Options: FunctionSummary[]
+  Options-->>User: 名前・テーマ・pattern を一覧表示
+
+  Note over Options,Storage: 編集: 開いた関数の code だけ読む
+  User->>Options: 関数を開く
+  Options->>Repo: get(id)
+  Repo->>Storage: get(Function Document)
+  Storage-->>Repo: document
+  Repo-->>Options: CopyFunction
+  Options-->>User: editor を表示
+
+  Note over Options,Storage: 保存: Pointer の切り替えが commit 点
+  User->>Options: Save
+  Options->>Options: Save/Delete/Reorder を無効化
+  Options->>Repo: update(fn)
+  Repo->>Repo: schema と size limit を検証、開始時の catalogId を記録
+  Repo->>Storage: set(新 Document + 新 Shard + 新 Root)
+  Repo->>Storage: get(書いた item を読み戻す)
+  Storage-->>Repo: 読み戻し結果
+  Repo->>Repo: schema・参照・summary・容量を検証
+  Repo->>Storage: get(Active Pointer)
+  Storage-->>Repo: 現在の catalogId
+  Repo->>Repo: 開始時の catalogId と一致するか確認
+  Repo->>Storage: set(Active Pointer → 新 catalogId)
+  Repo->>Storage: get(Active Pointer)
+  Storage-->>Repo: commit 結果を確認
+  Repo-->>Options: resolve
+  Options->>Repo: 再読込して active snapshot を反映
+  Options-->>User: 「保存済み」を表示
+  Repo-)Storage: remove(orphan) を非同期で実行
+```
+
+mutation は永続化が完了するまで resolve しない。
+options は resolve 後にだけ「保存済み」と表示し、手元の state を正本とせず repository から読み直す。
+
+Active Pointer を切り替える前に失敗した場合、Pointer は旧 Catalog を指したままなので、従来の snapshot を読み続けられる。
+開始時と異なる `catalogId` を検出した場合は `ConflictError` として commit を中止し、自動マージせず UI に再読込を要求する。
 
 保存に失敗した場合、options は入力内容を保持し、再試行または JSON export を可能にする。
 
@@ -563,6 +648,39 @@ legacy形式へ書き戻すことはない。
 8. 書いたデータを読み戻し、件数、順序、内容が移行元と一致することを確認する。
 9. 最後にActive Pointerを`storage.sync`へ書いてFunctionStoreを有効化する。
 10. 移行結果を`storage.local["cocopy:migration:sync-functions-to-function-store-v1"]`に記録する。
+
+```mermaid
+sequenceDiagram
+  autonumber
+  participant SW as service worker<br/>onInstalled
+  participant Coord as MigrationCoordinator
+  participant Sync as storage.sync
+  participant Local as storage.local
+
+  SW->>Coord: migrate()
+  Coord->>Sync: get("cocopy:function-store:active")
+  Sync-->>Coord: なし（未移行）
+
+  Coord->>Sync: get("functions") ※デフォルト値なし
+  Sync-->>Coord: legacy data / キーなし
+  Note over Coord: キーなし → defaultFunctions を初期データにする<br/>空配列 → 全削除済みの有効な状態として移行
+  Coord->>Coord: 配列・各関数・ID 一意性・URL pattern を検証
+
+  Coord->>Local: set(legacy raw JSON をバックアップ)
+  Coord->>Local: get(バックアップ)
+  Local-->>Coord: 読み戻して一致を確認
+
+  Coord->>Coord: legacy item を含む peak usage が quota 内か確認
+
+  Coord->>Sync: set(Function Documents + Shards + Root)
+  Coord->>Sync: get(書いた item を読み戻す)
+  Sync-->>Coord: 件数・順序・内容が移行元と一致するか確認
+
+  Coord->>Sync: set(Active Pointer) ※ここで FunctionStore が有効化される
+  Coord->>Local: set(移行結果を記録)
+
+  Note over Coord,Sync: legacy の "functions" は変更も削除もしない
+```
 
 Active Pointer を最後に書くため、途中で失敗しても不完全な FunctionStore は公開されない。
 次回起動時は同じlegacy dataから新しいsnapshotを作り直す。
