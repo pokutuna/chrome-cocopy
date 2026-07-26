@@ -178,7 +178,7 @@ Active Pointer を切り替える前に失敗した場合、Pointer は旧 Catal
 flowchart LR
   Popup[popup] --> Repository[FunctionRepository]
   Options[options] --> Repository
-  SW[service worker<br/>onInstalled] --> Migration[MigrationCoordinator]
+  Repository -- init 時に1度 --> Migration[MigrationCoordinator]
   Migration --> Store[FunctionStorage]
   Repository --> Store
   Store --> Adapter[WebExtension storage adapter]
@@ -187,7 +187,7 @@ flowchart LR
   Store --> Cache[(storage.local<br/>validated snapshot cache)]
 ```
 
-service workerとMigrationCoordinatorは移行期間だけ存在する。
+MigrationCoordinatorは移行期間だけ存在する。
 
 図のソースはこの文書内の Mermaid ブロックとする。
 
@@ -671,50 +671,64 @@ storage.sync
 
 ### Migration Trigger
 
-移行はservice workerの`onInstalled`で実行する。
-cocopyはこれまでservice workerを持たないが、`background.service_worker`はmanifestのエントリであり追加のpermissionを必要としない。
-このservice workerは移行専用とし、legacy supportの終了時にservice workerごと削除する。
+移行は`FunctionRepository`の初期化時に実行する。
+Active Pointerを読み、存在しなければその場でlegacy dataから移行してからデータを返す。
 
-service workerは30秒程度でidle停止するため、移行が完了しないまま中断されうる。
-Active Pointerを最後に書く設計により中断は安全だが、「移行されないまま残る」状態は起こりうる。
-このため`FunctionRepository`は、Active Pointerが存在しない場合に検証済みのlegacy dataを読み取り専用でfallbackとして読む。
-
-このfallbackはrepositoryの内部に置く。
 popupとoptionsはActive Pointerの有無を意識せず、常に`FunctionRepository`だけを使う。
-service workerが動作しなかった場合でも、popupは関数を表示して実行できる。
+読み取りより先に移行が完了するため、「移行されないまま関数を読む」状態が存在しない。
+移行完了フラグは持たない。Active Pointerの有無がそのまま移行済みかどうかを表す。
 
-fallback中のmutationは、先に移行を完了させてからcommitする。
-legacy形式へ書き戻すことはない。
+移行元は単一itemであり、`get`1回で全体を読める。
+移行先も数itemに収まるため、初回起動に追加されるのは実質2往復であり、体感できる遅延にはならない。
+
+移行専用のservice workerは持たない。
+`onInstalled`は無効化→有効化で発火せず、更新の適用自体がidle待ちでブラウザ再起動まで遅延しうるため、
+「ユーザー操作より前に移行を終える」ことを保証できない。
+保証できない経路のために、その経路が動かなかった場合のfallbackを併存させると、
+両者の同時実行を防ぐlockとその失効処理が必要になる。
+移行の起点をrepositoryの初期化1箇所に定めることで、これらをすべて不要にする。
+
+参照:
+
+- [The Chrome Extension update lifecycle](https://developer.chrome.com/docs/extensions/develop/concepts/extensions-update-lifecycle) — 更新はidle時にのみ適用され、idleにならない場合はブラウザ再起動まで遅延する。
+- [The extension service worker lifecycle](https://developer.chrome.com/docs/extensions/develop/concepts/service-workers/lifecycle)
 
 ### Migration Coordinator
 
 移行処理そのものを `MigrationCoordinator`、legacy data の参照を read-only な `LegacyBackupRepository` に分ける。
-`FunctionRepository` が持つ legacy 分岐は、上記の読み取り専用 fallback に限定する。
+`FunctionRepository` は初期化時に `MigrationCoordinator` を呼ぶだけで、legacy 形式を直接解釈しない。
 
-初回移行は次の順序で行う。
+移行は次の順序で行う。
 
 1. `storage.sync["cocopy:function-store:active"]` を読む。
 2. Active Pointer がなければ、`storage.sync["functions"]` をデフォルト値なしで読む。
 3. legacy key 自体がなければ、組み込みの `defaultFunctions` を初期データとする。
 4. 配列、各関数、ID の一意性、URL pattern を検証する。
 5. legacy dataの生JSONを`storage.local["cocopy:legacy-backup:sync-functions"]`へ保存し、読み戻して一致を確認する。
-6. legacy item、新しいFunctionStore、copy-on-writeの一時itemを含むpeak usageがsync quota内か確認する。
-7. 各Function Document、Catalog Shard、Catalog Rootを`storage.sync`に書く。
-8. 書いたデータを読み戻し、件数、順序、内容が移行元と一致することを確認する。
-9. 最後にActive Pointerを`storage.sync`へ書いてFunctionStoreを有効化する。
-10. 移行結果を`storage.local["cocopy:migration:sync-functions-to-function-store-v1"]`に記録する。
+6. 各Function Document、Catalog Shard、Catalog Rootを`storage.sync`に書く。
+7. 書いたデータを読み戻し、件数、順序、内容が移行元と一致することを確認する。
+8. 最後にActive Pointerを`storage.sync`へ書いてFunctionStoreを有効化する。
+9. 移行結果を`storage.local["cocopy:migration:sync-functions-to-function-store-v1"]`に記録する。
+
+legacy は単一 item であり、その時点で 8 KiB 以下であることが保証されている。
+移行後の合計サイズもこれとほぼ変わらず、実効上限の 92,160 bytes に対して十分小さい。
+このため移行時に peak usage を見積もらない。
 
 ```mermaid
 sequenceDiagram
   autonumber
-  participant SW as service worker<br/>onInstalled
+  actor User
+  participant UI as popup / options
+  participant Repo as FunctionRepository
   participant Coord as MigrationCoordinator
   participant Sync as storage.sync
   participant Local as storage.local
 
-  SW->>Coord: migrate()
-  Coord->>Sync: get("cocopy:function-store:active")
-  Sync-->>Coord: なし（未移行）
+  User->>UI: popup または options を開く
+  UI->>Repo: init()
+  Repo->>Sync: get("cocopy:function-store:active")
+  Sync-->>Repo: なし（未移行）
+  Repo->>Coord: migrate()
 
   Coord->>Sync: get("functions") ※デフォルト値なし
   Sync-->>Coord: legacy data / キーなし
@@ -725,14 +739,15 @@ sequenceDiagram
   Coord->>Local: get(バックアップ)
   Local-->>Coord: 読み戻して一致を確認
 
-  Coord->>Coord: legacy item を含む peak usage が quota 内か確認
-
   Coord->>Sync: set(Function Documents + Shards + Root)
   Coord->>Sync: get(書いた item を読み戻す)
   Sync-->>Coord: 件数・順序・内容が移行元と一致するか確認
 
   Coord->>Sync: set(Active Pointer) ※ここで FunctionStore が有効化される
   Coord->>Local: set(移行結果を記録)
+  Coord-->>Repo: 完了
+  Repo-->>UI: 移行後の snapshot を返す
+  UI-->>User: 関数を表示
 
   Note over Coord,Sync: legacy の "functions" は変更も削除もしない
 ```
@@ -747,14 +762,24 @@ Active Pointer を最後に書くため、途中で失敗しても不完全な F
 legacy の ID はミリ秒timestampだけから作られており、同一ミリ秒内に作られた関数どうしで重複しうる。
 FunctionStore は重複 ID を `CorruptionError` として扱うため、移行が止まらないよう、
 step 4 で重複を検出した場合は 2 件目以降に新しい ID を採番し直してから移行する。
-採番し直した ID は step 10 の移行結果に記録する。
+採番し直した ID は step 9 の移行結果に記録する。
 
-service workerの`onInstalled`とrepositoryのfallback移行は同時に走りうる。
-両者とも移行前に`storage.local["cocopy:migration:lock"]`へ開始時刻を書き、
-有効なlockがあれば自分の移行を中止して相手の完了を待つ。
-lockは10分で失効させ、service workerがidle停止して残したlockが恒久的に移行を止めないようにする。
-両者が同時に移行を完了させてしまった場合も、Active Pointerがどちらか一方を指し、
-もう一方はorphanとしてGCされるため、公開されるsnapshotは常に1つである。
+popupとoptionsを同時に開くと、両方が移行を実行しうる。
+両者は同じlegacy dataから同じ内容を書き、Active Pointerはlast-write-winsでどちらか一方に決まる。
+負けた側のitemはorphanとしてGCされるため、公開されるsnapshotは常に1つである。
+これはcommit protocolが既に扱う競合と同じであり、移行のためのlockを設けない。
+
+### Migration Failure
+
+移行が失敗した場合、Active Pointerは書かれず、legacy dataも変更されていない。
+このとき`FunctionRepository`は関数を返さず、移行失敗をUIへ伝える。
+
+- popupは関数一覧の代わりにエラーと、optionsを開くための導線を表示する。
+- optionsはエラーと失敗理由を表示し、Legacy Storage Backup UIからのexportを案内する。
+- 再試行はpopupまたはoptionsを開き直すことで行う。専用の操作を設けない。
+
+失敗を握りつぶしてdefault functionsを表示すると、ユーザーは自分の関数が消えたと受け取る。
+移行できなかったことを明示し、legacy dataが無傷であることを伝える。
 
 ### Legacy Storage Backup UI
 
@@ -775,7 +800,7 @@ migration failureが実際に観測された場合に、preview付きの復旧�
 ### Implementation Sequence
 
 1. schema、repository interface、in-memory fake、FunctionStore repositoryをUIから独立して実装する。
-2. Migration Coordinator、Legacy Backup Repository、移行用service workerを実装し、障害注入テストを通す。
+2. Migration Coordinator と Legacy Backup Repository を実装し、repository の初期化に接続して障害注入テストを通す。
 3. optionsにmigration statusとLegacy Storage Backup UIを追加する。
 4. optionsの一覧、editor、mutationをFunctionRepositoryへ切り替える。
 5. popupを`listForUrl`へ切り替える。
@@ -793,12 +818,13 @@ legacy形式のseedは、migrationを検証する専用のspecにだけ残す。
 - 正常なlegacy dataの内容と順序を変えずに移行する。
 - 不正なlegacy dataではActive Pointerを作らない。
 - legacy raw backupの検証が終わるまでFunctionStoreを書き始めない。
-- legacy itemを含むpeak usageがquotaを超える場合、安全に移行を中止する。
-- 各書き込み地点で失敗してもlegacy dataが変化せず、次回再試行できる。
+- 各書き込み地点で失敗してもlegacy dataが変化せず、次に開いたときに再試行できる。
+- 移行が失敗したとき、UIがエラーを表示し、legacy dataをexportできる。
 - FunctionStoreが有効化済みならlegacy dataを再移行しない。
-- Active Pointerがない状態でrepositoryがlegacy dataをfallbackとして読む。
-- fallback中のmutationが、先に移行を完了させてからcommitする。
+- popupとoptionsが同時に移行しても、公開されるsnapshotが1つに収束する。
 - Legacy Storage Backup UIからstatusを確認し、raw JSONをexportできる。
+
+移行はpopupまたはoptionsを開くことだけで起動するため、legacy dataをseedしてUIを開くE2Eで経路全体を再現できる。
 
 ### Removal Criteria
 
@@ -806,10 +832,10 @@ legacy形式のseedは、migrationを検証する専用のspecにだけ残す。
 
 - popupとoptionsがFunctionRepositoryだけを使用している。
 - legacy形式へ書き込むコードが存在しない。
-- 開発者自身の環境でmigrationとfallbackの動作を確認している。
+- 開発者自身の環境でmigrationの動作を確認している。
 - legacy dataを保持したリリースを1回以上出し、その後一定期間migration failureの報告が届いていない。
 - legacy supportを終了するリリース方針が決定している。
-- Legacy Storage Backup UI、Migration Coordinator、Legacy Backup Repository、移行用service workerを削除してよい状態になっている。
+- Legacy Storage Backup UI、Migration Coordinator、Legacy Backup Repositoryを削除してよい状態になっている。
 
 cocopyはtelemetryを持たないため、migration failureの有無はissue報告の不在によって判断する。
 「failureが発生していない」ことを積極的に証明する手段はない。
