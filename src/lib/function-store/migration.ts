@@ -278,28 +278,35 @@ export function createMigrationCoordinator(
     // Step 7: write the Function Documents, Catalog Shards, and Catalog Root
     // to sync in one `set`.
     const catalogId = newId();
-    const shards = splitIntoShards(entries, {
-      catalogId,
-      createdAt,
-      newShardId: newId,
-    });
-    const root: CatalogRoot = {
-      formatVersion: 1,
-      catalogId,
-      createdAt,
-      shardIds: shards.map(shard => shard.shardId),
-    };
-
-    const items: Record<string, unknown> = {};
-    for (const document of documents) {
-      items[functionDocumentKey(document.documentId)] = document;
-    }
-    for (const shard of shards) {
-      items[catalogShardKey(shard.shardId)] = shard;
-    }
-    items[catalogRootKey(catalogId)] = root;
 
     try {
+      // Inside the try: splitIntoShards throws QuotaError when a single
+      // catalog entry cannot fit a Shard on its own. That is hard to reach
+      // (an entry carries no code, so it needs a multi-kilobyte name or
+      // pattern that still passed the document check above), but if it does
+      // happen it must be recorded as a failed migration like any other
+      // write problem, not thrown out of migrate() with no result at all.
+      const shards = splitIntoShards(entries, {
+        catalogId,
+        createdAt,
+        newShardId: newId,
+      });
+      const root: CatalogRoot = {
+        formatVersion: 1,
+        catalogId,
+        createdAt,
+        shardIds: shards.map(shard => shard.shardId),
+      };
+
+      const items: Record<string, unknown> = {};
+      for (const document of documents) {
+        items[functionDocumentKey(document.documentId)] = document;
+      }
+      for (const shard of shards) {
+        items[catalogShardKey(shard.shardId)] = shard;
+      }
+      items[catalogRootKey(catalogId)] = root;
+
       await sync.set(items);
 
       // Step 8: read back what was written and confirm count, order, and
@@ -325,8 +332,9 @@ export function createMigrationCoordinator(
       // Step 9: activate the FunctionStore.
       await sync.set({[ACTIVE_POINTER_KEY]: {formatVersion: 1, catalogId}});
     } catch (cause) {
-      // Storage-error failure (step 7/9): the write itself failed or did not
-      // round-trip. legacy data is untouched and the Pointer was never
+      // Storage-error failure (step 7/9): the snapshot could not be built, or
+      // the write failed or did not round-trip. legacy data is untouched and
+      // the Pointer was never
       // written, so the next migrate() call retries from scratch. Any
       // partial items left behind are orphans for the repository's GC to
       // collect; this coordinator does not clean them up itself. Recording
@@ -448,11 +456,17 @@ export function createLegacyBackupRepository(options: {
         if (match >= 0) other.splice(match, 1);
       }
 
-      if (backup) {
-        await local.set({[LEGACY_BACKUP_KEY]: JSON.stringify(backup)});
-      }
+      // sync before backup, deliberately. The two writes are not atomic, so
+      // order decides what a failure between them leaves behind. Writing sync
+      // first fails towards "still visible in the backup the UI reads, already
+      // gone from sync" — the user retries and it works. The reverse order
+      // fails towards "gone from the backup, still in sync", which hides a
+      // secret this page exists to delete and puts it out of reach.
       if (legacy) {
         await sync.set({[LEGACY_FUNCTIONS_KEY]: legacy});
+      }
+      if (backup) {
+        await local.set({[LEGACY_BACKUP_KEY]: JSON.stringify(backup)});
       }
     },
   };

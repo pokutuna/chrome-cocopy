@@ -135,6 +135,10 @@ export function useFunctionListStore(repository: FunctionRepository) {
   const runMutation = useCallback(
     async (mutate: () => Promise<void>, onSuccess?: () => void) => {
       if (stateRef.current.saving) return;
+      // The draft as submitted. `mutation-succeeded` compares it with the draft
+      // at resolution time so typing during the write is not mistaken for
+      // saved content.
+      const submitted = stateRef.current.editing;
       dispatch({t: 'mutation-start'});
       try {
         await mutate();
@@ -146,7 +150,7 @@ export function useFunctionListStore(repository: FunctionRepository) {
         return;
       }
       await refresh();
-      dispatch({t: 'mutation-succeeded'});
+      dispatch({t: 'mutation-succeeded', submitted});
       onSuccess?.();
     },
     [refresh],

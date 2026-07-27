@@ -109,6 +109,46 @@ test('a successful save persists and reloads the list from the repository', asyn
   });
 });
 
+test('editing while a save is in flight keeps the new draft unsaved', async () => {
+  const store = createTestStore();
+  await seedStore(store, [fn('a')]);
+
+  const {result} = renderStore(store);
+  await waitFor(() => expect(result.current.state.refs).toHaveLength(1));
+
+  await act(async () => {
+    await result.current.openFunction(result.current.state.refs[0]);
+  });
+  act(() => {
+    result.current.dispatch({t: 'edit', function: {name: 'submitted'}});
+  });
+
+  // Type again before the repository promise resolves. Only 'submitted' is
+  // persisted, so the later draft must not be treated as saved content.
+  await act(async () => {
+    result.current.saveFunction();
+    result.current.dispatch({t: 'edit', function: {name: 'typed during save'}});
+  });
+
+  await waitFor(() => expect(result.current.state.saving).toBe(false));
+  expect(result.current.state.error).toBeUndefined();
+
+  // What actually reached storage is the draft as submitted.
+  const stored = await store.repository.list();
+  expect(stored[0].name).toBe('submitted');
+
+  // The editor still holds the newer draft and reports it as unsaved...
+  expect(result.current.state.editing?.name).toBe('typed during save');
+  expect(result.current.state.saved).toBe(false);
+
+  // ...so closing prompts instead of silently discarding it.
+  const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(false);
+  act(() => result.current.dispatch({t: 'cancel'}));
+  expect(confirmSpy).toHaveBeenCalled();
+  expect(result.current.state.editing?.name).toBe('typed during save');
+  confirmSpy.mockRestore();
+});
+
 test('closing after a successful save does not prompt to discard', async () => {
   const store = createTestStore();
   await seedStore(store, [fn('a')]);

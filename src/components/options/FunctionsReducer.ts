@@ -36,7 +36,7 @@ export type Action =
   | {t: 'cancel'}
   // Async mutation lifecycle, driven by useFunctionListStore.
   | {t: 'mutation-start'}
-  | {t: 'mutation-succeeded'}
+  | {t: 'mutation-succeeded'; submitted?: CopyFunction}
   | {t: 'mutation-failed'; message: string}
   | {t: 'error'; message: string | undefined}
   // Drag & Drop
@@ -154,16 +154,24 @@ function reduce(state: State, action: Action): State {
     }
     case 'mutation-start':
       return {...state, saving: true, saved: false, error: undefined};
-    case 'mutation-succeeded':
+    case 'mutation-succeeded': {
+      // `submitted` is the draft as it was when the mutation started, which is
+      // what actually got persisted. Using it rather than the current draft
+      // matters when the user keeps typing while the write is in flight:
+      // adopting the newer draft as `original` would mark unsaved edits as
+      // saved and let them be discarded without a prompt.
+      const stored = action.submitted ?? state.editing ?? state.original;
+      const next = {...state, original: stored};
       return {
-        ...state,
+        ...next,
         saving: false,
-        saved: true,
+        // Edits typed during the write were not persisted, so the editor must
+        // not claim they were: it stays dirty and re-saveable, and closing it
+        // still prompts.
+        saved: !hasEdited(next),
         error: undefined,
-        // The draft is now what is stored, so closing the editor no longer
-        // prompts about discarding changes.
-        original: state.editing ?? state.original,
       };
+    }
     case 'mutation-failed':
       // The draft is deliberately kept so the user can retry.
       return {...state, saving: false, saved: false, error: action.message};

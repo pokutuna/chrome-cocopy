@@ -57,13 +57,23 @@ async function openOptionsWithLegacy(
 }
 
 /**
- * The "Legacy storage backup" section. `LegacyBackup` reads the recorded
- * migration result concurrently with the migration that writes it, so on the
- * very first load the status can still say "not recorded". Callers that assert
- * on the recorded outcome reload first.
+ * Opens the "Legacy storage backup" page and returns its section. The backup
+ * lives on its own `/legacy` route, so the options root only carries a banner
+ * linking to it; asserting on the root page finds the banner text but none of
+ * the controls.
+ *
+ * `LegacyBackup` reads the recorded migration result concurrently with the
+ * migration that writes it, so on the very first load the status can still say
+ * "not recorded". Callers that assert on the recorded outcome reload first.
  */
-function legacySection(page: import('@playwright/test').Page) {
-  return page.locator('div').filter({hasText: 'Legacy storage backup'}).last();
+async function openLegacySection(page: import('@playwright/test').Page) {
+  await page.goto(`${page.url().split('#')[0]}#/legacy`);
+  const section = page
+    .locator('div')
+    .filter({has: page.getByRole('heading', {name: 'Legacy storage backup'})})
+    .last();
+  await expect(section).toBeVisible();
+  return section;
 }
 
 test('opening options migrates legacy data, preserving content and order', async ({
@@ -112,8 +122,8 @@ test('opening options migrates legacy data, preserving content and order', async
 
   // The Legacy storage backup section reports the completed migration.
   await options.reload();
-  const section = legacySection(options);
-  await expect(section.getByText('Completed', {exact: true})).toBeVisible();
+  const section = await openLegacySection(options);
+  await expect(section.getByText('migrated', {exact: false})).toBeVisible();
   await expect(
     section.getByRole('button', {name: 'Export original JSON'}),
   ).toBeEnabled();
@@ -155,13 +165,16 @@ test('partially migrates legacy data, offering the rejected function in the back
     {id: 'legacy-bad', name: 'Legacy Broken Pattern', reason: 'pattern'},
   ]);
 
-  // The section reports the partial outcome and explains why the function
-  // was left behind, with a route into the editor to repair it.
+  // The section explains why the function was left behind, with a route into
+  // the editor to repair it. The count of left-behind functions is not
+  // rendered anywhere; the per-entry state below carries that information.
   await options.reload();
-  const section = legacySection(options);
-  await expect(
-    section.getByText('Completed with 1 function(s) left behind'),
-  ).toBeVisible();
+  const section = await openLegacySection(options);
+  await expect(section.getByText('migrated', {exact: false})).toBeVisible();
+
+  // Entries render collapsed; the state and its actions are in the expanded
+  // body, opened by clicking the row.
+  await section.getByText('Legacy Broken Pattern').click();
   await expect(
     section.getByText(
       'Cannot be imported: its URL pattern is not a valid regular expression',
@@ -205,7 +218,9 @@ test('imports a function the migration left behind, without touching the legacy 
     .poll(() => readStoredFunctionNames(options))
     .toEqual(['Legacy Function A', 'Legacy Function C']);
 
-  const section = legacySection(options);
+  const section = await openLegacySection(options);
+  // Expand the deleted function's row to reach its Import action.
+  await section.getByText('Legacy Function B').click();
   const importButton = section.getByRole('button', {name: 'Import'});
   await expect(importButton).toBeVisible();
   await importButton.click();
@@ -252,8 +267,10 @@ test('does not create an Active Pointer when the legacy value is not an array', 
   // Reloaded first: on the load that ran the migration, the section had
   // already read storage.local before the result was recorded.
   await options.reload();
-  const section = legacySection(options);
-  await expect(section.getByText('Failed', {exact: true})).toBeVisible();
+  const section = await openLegacySection(options);
+  await expect(
+    section.getByText('migration failed', {exact: false}),
+  ).toBeVisible();
   await expect(
     section.getByRole('button', {name: 'Export original JSON'}),
   ).toBeEnabled();

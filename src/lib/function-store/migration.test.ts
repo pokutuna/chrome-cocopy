@@ -442,6 +442,39 @@ test('deleteEntry removes the entry from both the backup and the legacy sync val
   expect(legacy.map(fn => fn.id)).toEqual(['a', 'c']);
 });
 
+test('deleteEntry leaves the entry visible when the backup write fails', async () => {
+  // The two writes are not atomic. If the second one fails the entry must be
+  // left in the copy the UI reads (the backup) rather than only in sync, or a
+  // secret this page exists to delete becomes invisible and unreachable.
+  const sync = new InMemoryKeyValueStorage();
+  const local = new InMemoryKeyValueStorage();
+  const fns = [makeFunction('a'), makeFunction('b')];
+  await sync.set({[LEGACY_FUNCTIONS_KEY]: fns});
+  await local.set({[LEGACY_BACKUP_KEY]: JSON.stringify(fns)});
+
+  const failing = Object.create(local) as InMemoryKeyValueStorage;
+  failing.set = () => Promise.reject(new Error('local write failed'));
+  const legacyBackupRepo = createLegacyBackupRepository({sync, local: failing});
+
+  const error = await catchAsync(() => legacyBackupRepo.deleteEntry(0));
+  expect((error as Error).message).toMatch(/local write failed/);
+
+  // sync was written first, so the entry is already gone there...
+  const legacy = (await sync.get([LEGACY_FUNCTIONS_KEY]))[
+    LEGACY_FUNCTIONS_KEY
+  ] as CopyFunction[];
+  expect(legacy.map(fn => fn.id)).toEqual(['b']);
+
+  // ...and it still shows in the backup, so a retry can finish the job.
+  const backupRaw = (await local.get([LEGACY_BACKUP_KEY]))[
+    LEGACY_BACKUP_KEY
+  ] as string;
+  expect((JSON.parse(backupRaw) as CopyFunction[]).map(fn => fn.id)).toEqual([
+    'a',
+    'b',
+  ]);
+});
+
 test('deleteEntry works when only the legacy sync value exists', async () => {
   const sync = new InMemoryKeyValueStorage();
   const local = new InMemoryKeyValueStorage();
