@@ -496,9 +496,7 @@ peak usageは「現在の全item使用量 + このmutationが新しく書くitem
 - options初期表示ではCatalogだけを読み、codeはeditorを開くまで読まない。
 - reorderはCatalogだけを新しく作り、Function Documentを複製しない。
 
-drag and dropの並べ替えは、操作が落ち着いてから500ms後に1回だけcommitする。
-中間状態をそのままcommitすると、1回の並べ替えで書き込みquotaを不必要に消費する。
-表示はcommit前でも即座に更新し、待ち時間をユーザーへ見せない。
+drag and dropの表示はcommit前でも即座に更新し、待ち時間をユーザーへ見せない。
 
 ## Garbage Collection
 
@@ -667,23 +665,23 @@ quota超過時だけ暗黙にlocalへfallbackする案も、端末ごとに異�
 
 ## AsIs（移行完了後に削除）
 
-現在の `src/lib/config.ts` は、すべての `CopyFunction` を配列にし、`chrome.storage.sync` の単一キー `functions` に保存する。
+legacy storageは、すべての `CopyFunction` を配列にし、`chrome.storage.sync` の単一キー `functions` に保存する形式である。
 
 ```text
 storage.sync
 └── functions: CopyFunction[]
 ```
 
-この構造には次の制約がある。
+この構造には次の制約があった。
 
 - 全関数が1 itemなので、合計が8 KiBを超えると保存できない。
 - 1関数の編集や並べ替えでも全配列を読み書きする。
 - popup は一致しない関数のcodeも読み、その後メモリ上で絞り込む。
-- `FunctionsReducer` は保存 Promise を待たず、永続化失敗時にも画面上のstateを更新する。
-- `config.ts`、React component、`chrome.storage` が直接結合している。
-- `useSubscribeFunctions` は `storage.onChanged` の `functions` キーを直接監視する。
+- 保存 Promise を待たず、永続化失敗時にも画面上のstateを更新していた。
+- 永続化処理、React component、`chrome.storage` が直接結合していた。
+- `storage.onChanged` の `functions` キーを直接監視していた。
 
-既存データ形式を、以降「legacy storage」と呼ぶ。
+この形式を書き込むコードは削除済みで、既存ユーザーのstorageに残るデータを読むだけである。
 
 ## Migration Plan（移行完了後に削除）
 
@@ -826,12 +824,11 @@ popupとoptionsを同時に開くと、両方が移行を実行しうる。
 失敗した場合、Active Pointerは書かれず、legacy dataも変更されていない。
 このとき`FunctionRepository`は関数を返さず、移行失敗をUIへ伝える。
 
-- popupは関数一覧の代わりにエラーと、optionsを開くための導線を表示する。
 - optionsはエラーと失敗理由を表示し、Legacy Storage Backup UIからのexportを案内する。
 - 再試行はpopupまたはoptionsを開き直すことで行う。専用の操作を設けない。
 
 失敗を握りつぶしてdefault functionsを表示すると、ユーザーは自分の関数が消えたと受け取る。
-移行できなかったことを明示し、legacy dataが無傷であることを伝える。
+optionsでは移行できなかったことを明示し、legacy dataが無傷であることを伝える。
 
 ### Legacy Storage Backup UI
 

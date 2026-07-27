@@ -12,9 +12,9 @@ export class ChromeKeyValueStorage implements KeyValueStorage {
 
   // User-defined functions are not needed by content scripts. Restrict sync
   // storage to extension-owned contexts before the first operation
-  // (docs/function-storage.md#content-script から関数コードが読まれる), mirroring
-  // src/lib/config.ts. All operations serialize after this resolves; browsers
-  // without setAccessLevel (Firefox, Safari) skip it and continue.
+  // (docs/function-storage.md#content-script から関数コードが読まれる).
+  // All operations serialize after this resolves; browsers without
+  // setAccessLevel (Firefox, Safari) skip it and continue.
   private readonly accessReady: Promise<void>;
 
   constructor(area: chrome.storage.StorageArea, areaName: AreaName) {
