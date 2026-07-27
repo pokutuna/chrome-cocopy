@@ -48,6 +48,8 @@ export const TextInput = (props: {
   onInput?: (name: string, value: string) => void;
   subLabel?: React.ReactNode;
   error?: string;
+  /** Selectable and copyable, but not editable. */
+  readOnly?: boolean;
 }) => {
   const handleInput = useCallback(
     (event: InputEvent) =>
@@ -72,6 +74,7 @@ export const TextInput = (props: {
         name={props.name}
         placeholder={props.placeholder}
         pattern={props.pattern}
+        readOnly={props.readOnly}
         $error={!!props.error}
       />
       {props.error && <ErrorMessage>{props.error}</ErrorMessage>}

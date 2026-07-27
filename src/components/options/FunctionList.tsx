@@ -31,7 +31,7 @@ import {useSubscribeFunctions} from './Subscribe';
 
 import styles from './FunctionList.module.css';
 
-const Caret = (props: {active: boolean; onClick: () => void}) => {
+export const Caret = (props: {active: boolean; onClick: () => void}) => {
   const {active, onClick} = props;
   return (
     <div className={styles.itemButton} onClick={onClick}>

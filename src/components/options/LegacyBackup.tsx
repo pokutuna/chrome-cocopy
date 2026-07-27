@@ -3,7 +3,10 @@
 // their pre-FunctionStore data and recover anything it could not carry over.
 // Scheduled for removal a few releases from now.
 
-import {useCallback, useEffect, useMemo, useState} from 'react';
+import {faTrash} from '@fortawesome/free-solid-svg-icons/faTrash';
+import {faTriangleExclamation} from '@fortawesome/free-solid-svg-icons/faTriangleExclamation';
+import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {Link} from 'react-router-dom';
 
 import {CopyFunction, currentVersion, generateId} from '../../lib/function';
@@ -14,14 +17,18 @@ import {
   MigrationSkip,
 } from '../../lib/function-store/migration';
 import {encodeSharable} from '../../lib/share';
+import {FunctionItem} from '../common/FunctionParts';
 import {
   useFunctionRepository,
   useLegacyBackupRepository,
 } from '../common/FunctionStoreContext';
-import {Button} from './Button';
-import {messageForError} from './FunctionList';
-import {Section, TextList} from './Parts';
+import {Button, ButtonIcon} from './Button';
+import {CodeEditor} from './CodeEditor';
+import {Caret, EditorBox, messageForError} from './FunctionList';
+import {TextInput} from './Input';
+import {Box, Item, Row, Section} from './Parts';
 
+import listStyles from './FunctionList.module.css';
 import styles from './LegacyBackup.module.css';
 
 const EXPORT_FILENAME = 'cocopy-legacy-functions.json';
@@ -48,26 +55,6 @@ function parseArray(raw: string | undefined): unknown[] | undefined {
   }
 }
 
-function describeSource(
-  raw: string | undefined,
-): {present: false} | {present: true; bytes: number; count?: number} {
-  if (raw === undefined) return {present: false};
-  return {
-    present: true,
-    bytes: byteLength(raw),
-    count: parseArray(raw)?.length,
-  };
-}
-
-function formatSource(source: ReturnType<typeof describeSource>): string {
-  if (!source.present) return 'not present';
-  const count =
-    source.count === undefined
-      ? 'not readable as an array'
-      : `${source.count} function(s)`;
-  return `present, ${source.bytes} bytes, ${count}`;
-}
-
 function reasonText(reason: MigrationSkip['reason']): string {
   switch (reason) {
     case 'schema':
@@ -79,16 +66,25 @@ function reasonText(reason: MigrationSkip['reason']): string {
   }
 }
 
-function outcomeText(result: MigrationResult): string {
-  if (result.outcome === 'failed') return 'Failed';
-  return result.skipped.length > 0
-    ? `Completed with ${result.skipped.length} function(s) left behind`
-    : 'Completed';
-}
-
-function formatTimestamp(iso: string): string {
-  const date = new Date(iso);
-  return Number.isNaN(date.getTime()) ? iso : date.toLocaleString();
+/**
+ * One-line provenance for the footer, replacing the per-store status table:
+ * when the new format took over and how big the original is. The details that
+ * table carried (which store holds what, byte counts) only ever mattered for
+ * debugging, and the exported JSON answers them better.
+ */
+function summaryText(
+  raw: string | undefined,
+  result: MigrationResult | undefined,
+): string {
+  const size =
+    raw === undefined ? 'no data' : `${byteLength(raw)} bytes of original data`;
+  if (!result) return size;
+  const date = new Date(result.migratedAt);
+  const when = Number.isNaN(date.getTime())
+    ? result.migratedAt
+    : date.toLocaleDateString();
+  const outcome = result.outcome === 'failed' ? 'migration failed' : 'migrated';
+  return `${outcome} ${when} · ${size}`;
 }
 
 /**
@@ -110,13 +106,17 @@ export function hasLegacyBackupContent(status: LegacyBackupStatus): boolean {
 
 type EntryState =
   | {kind: 'migrated'}
-  | {kind: 'importable'; fn: CopyFunction; reason?: MigrationSkip['reason']}
+  | {kind: 'importable'; reason?: MigrationSkip['reason']}
   | {kind: 'invalid'; reason: MigrationSkip['reason']; sharable?: string};
 
 interface Entry {
   key: string;
+  /** The id recorded in the legacy data, used for skip and import matching. */
   id: string;
-  name: string;
+  /** Position in the rendered legacy array; what `deleteEntry` addresses. */
+  index: number;
+  /** What the row renders: the validated function, or a repaired stand-in. */
+  fn: CopyFunction;
   state: EntryState;
 }
 
@@ -132,13 +132,12 @@ function hexColorOr(value: unknown, fallback: string): string {
 }
 
 /**
- * Encodes a legacy entry for the install editor. The entry failed validation
- * by definition, and `encodeSharable` only accepts a well-formed
- * `CopyFunction`, so the invalid fields are replaced with editable defaults.
- * Whatever is salvageable (name, code, pattern, colors) is carried through so
+ * Rebuilds a well-formed `CopyFunction` from a legacy entry that failed
+ * validation: invalid fields are replaced with editable defaults, and
+ * whatever is salvageable (name, code, pattern, colors) is carried through so
  * the user repairs the function rather than retyping it.
  */
-function toSharable(item: unknown): string | undefined {
+function repairFunction(item: unknown): CopyFunction {
   const obj =
     typeof item === 'object' && item !== null
       ? (item as Record<string, unknown>)
@@ -148,7 +147,7 @@ function toSharable(item: unknown): string | undefined {
       ? (obj.theme as Record<string, unknown>)
       : {};
 
-  const repaired: CopyFunction = {
+  return {
     id: generateId(),
     name: stringOr(obj.name, 'function name'),
     code: stringOr(obj.code, ''),
@@ -159,9 +158,12 @@ function toSharable(item: unknown): string | undefined {
       backgroundColor: hexColorOr(theme.backgroundColor, '#9e9e9e'),
     },
   };
+}
 
+/** Encodes a repaired entry for the install editor's `?f=` parameter. */
+function toSharable(fn: CopyFunction): string | undefined {
   try {
-    return encodeSharable(repaired);
+    return encodeSharable(fn);
   } catch {
     return undefined;
   }
@@ -190,30 +192,32 @@ function buildEntries(
       typeof item === 'object' && item !== null && 'id' in item
         ? String((item as {id: unknown}).id)
         : '(unknown id)';
-    const name =
-      typeof item === 'object' && item !== null && 'name' in item
-        ? String((item as {name: unknown}).name)
-        : '(unknown name)';
 
     const skipIndex = skips.findIndex(skip => skip.id === id);
     const skip = skipIndex >= 0 ? skips.splice(skipIndex, 1)[0] : undefined;
 
-    let state: EntryState;
     if (!classified.ok) {
       // Cannot be created as-is; hand it to the editor instead so the user can
       // repair it and save.
-      state = {
-        kind: 'invalid',
-        reason: classified.reason,
-        sharable: toSharable(item),
+      const repaired = repairFunction(item);
+      return {
+        key: `${id}-${index}`,
+        id,
+        index,
+        fn: repaired,
+        state: {
+          kind: 'invalid' as const,
+          reason: classified.reason,
+          sharable: toSharable(repaired),
+        },
       };
-    } else if (storedIds.has(id) || renamedFrom.has(id)) {
-      state = {kind: 'migrated'};
-    } else {
-      state = {kind: 'importable', fn: classified.fn, reason: skip?.reason};
     }
 
-    return {key: `${id}-${index}`, id, name, state};
+    const state: EntryState =
+      storedIds.has(id) || renamedFrom.has(id)
+        ? {kind: 'migrated'}
+        : {kind: 'importable', reason: skip?.reason};
+    return {key: `${id}-${index}`, id, index, fn: classified.fn, state};
   });
 }
 
@@ -231,23 +235,28 @@ function downloadJson(raw: string): void {
   }
 }
 
-function EntryRow(props: {
+/** The status/action line at the bottom of an expanded entry. */
+function EntryActions(props: {
   entry: Entry;
   imported: boolean;
   busy: boolean;
   onImport: (fn: CopyFunction) => void;
+  onDelete: (entry: Entry) => void;
 }) {
   const {entry, imported, busy} = props;
   const {state} = entry;
 
-  return (
-    <li className={styles.entry}>
-      <span className={styles.entryName}>{entry.name}</span>
-      <span className={styles.entryId}>{entry.id}</span>
-      {imported || state.kind === 'migrated' ? (
+  let status: React.ReactNode;
+  if (imported || state.kind === 'migrated') {
+    status = (
+      <Item>
         <span className={styles.entryState}>Already in your functions</span>
-      ) : state.kind === 'importable' ? (
-        <>
+      </Item>
+    );
+  } else if (state.kind === 'importable') {
+    status = (
+      <>
+        <Item>
           <span
             className={state.reason ? styles.entryProblem : styles.entryState}
           >
@@ -255,23 +264,128 @@ function EntryRow(props: {
               ? `Not migrated: ${reasonText(state.reason)}`
               : 'Not migrated'}
           </span>
-          <Button disabled={busy} onClick={() => props.onImport(state.fn)}>
+        </Item>
+        <Item>
+          <Button disabled={busy} onClick={() => props.onImport(entry.fn)}>
             Import
           </Button>
-        </>
-      ) : (
-        <>
+        </Item>
+      </>
+    );
+  } else {
+    status = (
+      <>
+        <Item>
           <span className={styles.entryProblem}>
             {`Cannot be imported: ${reasonText(state.reason)}`}
           </span>
-          {state.sharable && (
+        </Item>
+        {state.sharable && (
+          <Item>
             <Link to={`/install?f=${encodeURIComponent(state.sharable)}`}>
               Fix in editor
             </Link>
+          </Item>
+        )}
+      </>
+    );
+  }
+
+  return (
+    <>
+      {status}
+      <Item style={{marginLeft: 'auto'}}>
+        <Button
+          mode="danger"
+          disabled={busy}
+          onClick={() => props.onDelete(entry)}
+        >
+          <ButtonIcon>
+            <FontAwesomeIcon icon={faTrash} />
+          </ButtonIcon>
+          Delete
+        </Button>
+      </Item>
+    </>
+  );
+}
+
+/**
+ * One legacy function, drawn like a row of the options function list: the
+ * colored function box expands into a read-only detail view. There is nothing
+ * to save or share here — recovery goes through Import or the install editor.
+ * The one mutation is Delete, which erases the entry from the legacy data so
+ * users can purge anything sensitive left behind.
+ */
+function EntryRow(props: {
+  entry: Entry;
+  imported: boolean;
+  busy: boolean;
+  onImport: (fn: CopyFunction) => void;
+  onDelete: (entry: Entry) => void;
+}) {
+  const {entry, imported} = props;
+  const [expanded, setExpanded] = useState(false);
+  const toggle = useCallback(() => setExpanded(value => !value), []);
+
+  const done = imported || entry.state.kind === 'migrated';
+
+  return (
+    <div>
+      <div className={listStyles.functionItemBox}>
+        <Caret active={expanded} onClick={toggle} />
+        <FunctionItem fn={entry.fn} onClick={toggle} />
+        <div
+          className={[listStyles.itemButton, styles.stateIconBox].join(' ')}
+          onClick={toggle}
+        >
+          {!done && (
+            <FontAwesomeIcon
+              icon={faTriangleExclamation}
+              title="Not in your functions"
+            />
           )}
-        </>
+        </div>
+      </div>
+      {expanded && (
+        <EditorBox>
+          <Box>
+            <Row>
+              <Item $grow={1}>
+                <TextInput
+                  label="Name"
+                  name={`legacy-name-${entry.key}`}
+                  value={entry.fn.name}
+                  readOnly
+                />
+              </Item>
+              <Item style={{width: '9rem'}}>
+                <TextInput
+                  label="Color"
+                  name={`legacy-color-${entry.key}`}
+                  value={entry.fn.theme.backgroundColor}
+                  readOnly
+                />
+              </Item>
+            </Row>
+            <Row>
+              <TextInput
+                label="URL Pattern"
+                name={`legacy-pattern-${entry.key}`}
+                value={entry.fn.pattern || ''}
+                readOnly
+              />
+            </Row>
+            <Row>
+              <CodeEditor code={entry.fn.code} readOnly />
+            </Row>
+            <Row>
+              <EntryActions {...props} />
+            </Row>
+          </Box>
+        </EditorBox>
       )}
-    </li>
+    </div>
   );
 }
 
@@ -287,30 +401,25 @@ export function LegacyBackup() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | undefined>(undefined);
 
+  const load = useCallback(async () => {
+    try {
+      const [next, refs] = await Promise.all([
+        legacyBackup.status(),
+        repository.list().catch(() => []),
+      ]);
+      setStatus(next);
+      setStoredIds(new Set(refs.map(ref => ref.id)));
+    } catch (e) {
+      setError(messageForError(e));
+    }
+  }, [legacyBackup, repository]);
+
   useEffect(() => {
-    let cancelled = false;
-    const load = async () => {
-      try {
-        const [next, refs] = await Promise.all([
-          legacyBackup.status(),
-          repository.list().catch(() => []),
-        ]);
-        if (cancelled) return;
-        setStatus(next);
-        setStoredIds(new Set(refs.map(ref => ref.id)));
-      } catch (e) {
-        if (!cancelled) setError(messageForError(e));
-      }
-    };
     void load();
     // Deleting a function in the list above must re-enable its Import here,
     // so re-read whenever the repository publishes a new snapshot.
-    const unsubscribe = repository.subscribe(() => void load());
-    return () => {
-      cancelled = true;
-      unsubscribe();
-    };
-  }, [legacyBackup, repository]);
+    return repository.subscribe(() => void load());
+  }, [load, repository]);
 
   // The backup is the read-only original captured at migration time; the
   // legacy sync value is only a fallback for a migration that never got as far
@@ -344,58 +453,45 @@ export function LegacyBackup() {
     [repository, busy],
   );
 
+  const onDelete = useCallback(
+    (entry: Entry) => {
+      if (busy) return;
+      const ok = window.confirm(
+        `Delete "${entry.fn.name}" from the legacy data? ` +
+          'It is removed from both the backup and the old sync value, and cannot be undone.',
+      );
+      if (!ok) return;
+      setBusy(true);
+      setError(undefined);
+      legacyBackup
+        .deleteEntry(entry.index)
+        .then(() => load())
+        .then(() => setBusy(false))
+        .catch(e => {
+          setError(messageForError(e));
+          setBusy(false);
+        });
+    },
+    [legacyBackup, busy, load],
+  );
+
   const onExport = useCallback(() => {
     if (raw !== undefined) downloadJson(raw);
   }, [raw]);
 
   if (!status || !hasLegacyBackupContent(status)) return null;
 
-  const {legacyRaw, backupRaw, result} = status;
-
+  const {result} = status;
+  const summary = summaryText(raw, result);
   const imported = new Set(importedIds);
 
   return (
     <Section title="Legacy storage backup">
-      <div className={styles.notice}>
-        This section is temporary and will be removed in a release a few months
-        from now. Export the original JSON before then if you want to keep it.
-      </div>
-
-      <TextList>
-        <li>
-          {MIGRATION_INTRO} Your previous functions were migrated to it
-          automatically.
-        </li>
-        <li>
-          This is the read-only original captured when cocopy migrated to its
-          new storage format, not a backup of your current functions. Nothing
-          here changes when you edit or delete your functions.
-        </li>
-        <li>
-          Importing a function copies it into your functions under a new id. The
-          original stays here, so importing the same function twice leaves you
-          with two copies.
-        </li>
-      </TextList>
-
-      <div className={styles.status}>
-        <dl>
-          <dt>Legacy data (sync)</dt>
-          <dd>{formatSource(describeSource(legacyRaw))}</dd>
-          <dt>Backup (local)</dt>
-          <dd>{formatSource(describeSource(backupRaw))}</dd>
-          <dt>Migration</dt>
-          <dd>{result ? outcomeText(result) : 'not recorded'}</dd>
-          {result && (
-            <>
-              <dt>New storage enabled</dt>
-              <dd>{formatTimestamp(result.migratedAt)}</dd>
-              <dt>Functions migrated</dt>
-              <dd>{result.migratedCount}</dd>
-            </>
-          )}
-        </dl>
-      </div>
+      <p className={styles.lead}>
+        {MIGRATION_INTRO} This is the original data from before that move, kept
+        so you can recover anything the automatic migration missed. It will be
+        removed in a future release &mdash; export it if you want to keep it.
+      </p>
 
       {result?.error && (
         <div className={styles.error} role="alert">
@@ -408,14 +504,8 @@ export function LegacyBackup() {
         </div>
       )}
 
-      <div className={styles.actions}>
-        <Button disabled={raw === undefined} onClick={onExport}>
-          Export original JSON
-        </Button>
-      </div>
-
       {entries.length > 0 ? (
-        <ul className={styles.entries}>
+        <div className={styles.entryList}>
           {entries.map(entry => (
             <EntryRow
               key={entry.key}
@@ -423,14 +513,22 @@ export function LegacyBackup() {
               imported={imported.has(entry.id)}
               busy={busy}
               onImport={onImport}
+              onDelete={onDelete}
             />
           ))}
-        </ul>
-      ) : (
-        <div className={styles.status}>
-          No functions could be read from the legacy data.
         </div>
+      ) : (
+        <p className={styles.lead}>
+          No functions could be read from the legacy data.
+        </p>
       )}
+
+      <div className={styles.footer}>
+        <Button disabled={raw === undefined} onClick={onExport}>
+          Export original JSON
+        </Button>
+        <span className={styles.summary}>{summary}</span>
+      </div>
     </Section>
   );
 }

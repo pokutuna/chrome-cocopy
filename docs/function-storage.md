@@ -691,7 +691,7 @@ storage.sync
 
 - legacy storage の `storage.sync["functions"]` は移行処理から変更・削除しない。
 - FunctionStore の Active Pointer が存在する場合は、legacy storage を自動で再移行しない。
-- 移行後も legacy data を読み取り専用で参照でき、関数を1件ずつ手動で取り込める。
+- 移行後も legacy data を参照でき、関数を1件ずつ手動で取り込める。移行処理は legacy data を変更しないが、ユーザーは関数単位で legacy data から削除できる(秘密情報が残っている場合に消すため)。
 - 旧バージョンへrollbackした場合も、旧バージョンが読むlegacy dataを残す。
 - legacy itemもsync quotaを消費するため、保持中はその使用量をFunctionStoreの容量計算に含める。
 
@@ -721,7 +721,8 @@ popupとoptionsはActive Pointerの有無を意識せず、常に`FunctionReposi
 
 ### Migration Coordinator
 
-移行処理そのものを `MigrationCoordinator`、legacy data の参照を read-only な `LegacyBackupRepository` に分ける。
+移行処理そのものを `MigrationCoordinator`、legacy data の参照を `LegacyBackupRepository` に分ける。
+`LegacyBackupRepository` の変更操作は関数単位の削除 (`deleteEntry`) のみに限定する。
 `FunctionRepository` は初期化時に `MigrationCoordinator` を呼ぶだけで、legacy 形式を直接解釈しない。
 
 移行は次の順序で行う。
@@ -834,23 +835,29 @@ popupとoptionsを同時に開くと、両方が移行を実行しうる。
 
 ### Legacy Storage Backup UI
 
-options に一時的な「Legacy storage backup」セクションを追加する。
+optionsの`/legacy`に一時的な「Legacy storage backup」ページを置き、rootにはそこへのbannerだけを出す。
 
-- sync上のlegacy keyとlocal backupの有無、JSON byte数、件数、検証結果を表示する。
-- migrationが完了しているか、一部の関数を移行できなかったか、失敗しているかを表示する。
-- legacy dataの各関数について、移行できたかどうかと、できなかった場合の理由を示す。
+主役はlegacy dataの関数一覧であり、それ以外の要素は最小限にする。
+ページは「導入文」「関数一覧」「exportと1行のsummary」の3つだけで構成する。
+
+- 導入文は1段落で、新形式へ移行したこと、これが移行前の原本であること、将来削除するのでexportを促すことを述べる。
+- 関数一覧はoptionsの関数一覧と同じ行で描画し、行を展開するとeditorと同じ項目(name, color, URL pattern, code)を読み取り専用で表示する。
+- 各関数について、移行できたかどうかと、できなかった場合の理由を展開時に示す。
 - 各関数を個別にFunctionStoreへ取り込めるようにする。取り込みは通常の`create`と同じ検証を通す。
 - 検証を通らない関数は、そのままでは取り込めない。editorへ内容を渡し、ユーザーが修正して保存できるようにする。
-- 原本をJSONファイルとしてexportできるようにする。
-- exportしてもlocal backupを変更・削除しない。
+- 各関数を個別にlegacy dataから削除できるようにする。秘密情報を含む関数がlegacy dataに残り続けるのを避けるためであり、削除は確認の上でlocal backupとsync上のlegacy keyの両方から行う。
+- 原本をJSONファイルとしてexportできるようにする。exportしてもlegacy dataを変更・削除しない。
+- summaryは移行日時と原本のbyte数のみを1行で示す。migrationが失敗した場合はその旨とエラーを表示する。
+
+store別の有無・byte数・件数を並べる表は持たない。
+それらはdebug用途にしか意味がなく、export したJSONの方が正確に答えるためである。
 
 取り込みはlegacy dataを消費しない。同じ関数を二重に取り込むと、別のIDを持つ関数が2つできる。
 既に取り込み済みの関数はその旨を表示し、誤って重複させないようにする。
 
-このセクションは移行のための一時的なものであり、数か月後のリリースで削除する予定であることをUI上に明記する。
-削除前にexportしておくよう促す。
-
-このUIでは、legacy dataが現在のバックアップではなく「移行時点の読み取り専用原本」であることと、FunctionStoreの有効化日時を明示する。
+このページは移行のための一時的なものであり、数か月後のリリースで削除する予定であることをUI上に明記する。
+legacy dataが現在のバックアップではなく「移行時点の原本」であることも明示する。
+編集・保存・共有はできず、変更操作は関数単位の削除のみとする。
 
 復旧操作は関数単位の取り込みに限定する。
 legacy snapshot全体でFunctionStoreを上書きする操作は用意しない。

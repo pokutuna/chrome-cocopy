@@ -114,6 +114,10 @@ test('deleting a migrated function re-enables its Import', async () => {
 
   render(renderWithStore(store, <LegacyBackup />));
   await screen.findByText('Legacy storage backup');
+
+  // Entries start collapsed; expand both to see their state.
+  fireEvent.click(screen.getByText('name-a'));
+  fireEvent.click(screen.getByText('name-b'));
   expect(screen.getAllByText('Already in your functions')).toHaveLength(2);
 
   await act(async () => {
@@ -126,7 +130,49 @@ test('deleting a migrated function re-enables its Import', async () => {
   expect(screen.getAllByText('Already in your functions')).toHaveLength(1);
 });
 
-test('shows status, timestamp, byte size, count and per-function state', async () => {
+test('expanding an entry shows its pattern and code without any way to save', async () => {
+  const store = createTestStore();
+  const legacy = [fn('a', {pattern: 'https://example\\.test/.*'})];
+  await seedStore(store, legacy);
+  await seedLegacy(store, {
+    legacy,
+    backup: legacy,
+    result: result({migratedCount: 1}),
+  });
+
+  render(renderWithStore(store, <LegacyBackup />));
+  await screen.findByText('Legacy storage backup');
+
+  fireEvent.click(screen.getByText('name-a'));
+
+  // The editor's fields, filled in and copyable but read-only.
+  const name = screen.getByDisplayValue('name-a');
+  expect(name).toHaveAttribute('readonly');
+  expect(screen.getByDisplayValue('#ffffff')).toBeInTheDocument(); // Color
+  expect(
+    screen.getByDisplayValue('https://example\\.test/.*'),
+  ).toBeInTheDocument();
+
+  // The code renders in a read-only CodeMirror surface.
+  const code = [...document.querySelectorAll('.cm-line')]
+    .map(line => line.textContent ?? '')
+    .join('\n');
+  expect(code).toBe('return "a";');
+  expect(
+    document.querySelector('.cm-content')?.getAttribute('contenteditable'),
+  ).toBe('false');
+
+  // Viewing only: no way to save or share. Delete is the one mutation offered.
+  expect(screen.queryByRole('button', {name: 'Save'})).not.toBeInTheDocument();
+  expect(screen.queryByRole('button', {name: 'Share'})).not.toBeInTheDocument();
+  expect(screen.getByRole('button', {name: 'Delete'})).toBeInTheDocument();
+
+  // Collapses back on a second click.
+  fireEvent.click(screen.getByText('name-a'));
+  expect(screen.queryByDisplayValue('name-a')).not.toBeInTheDocument();
+});
+
+test('shows the entry list with a one-line summary and per-function state', async () => {
   const store = createTestStore();
   const legacy = [fn('a'), fn('b')];
   await seedStore(store, legacy);
@@ -140,18 +186,18 @@ test('shows status, timestamp, byte size, count and per-function state', async (
 
   await screen.findByText('Legacy storage backup');
 
+  // Provenance is one line under the export button, not a per-store table.
   const bytes = new TextEncoder().encode(JSON.stringify(legacy)).length;
+  const when = new Date('2026-01-02T03:04:05.000Z').toLocaleDateString();
   expect(
-    screen.getAllByText(`present, ${bytes} bytes, 2 function(s)`),
-  ).toHaveLength(2); // legacy (sync) and backup (local)
-  expect(screen.getByText('Completed')).toBeInTheDocument();
-  expect(screen.getByText('New storage enabled')).toBeInTheDocument();
-  expect(
-    screen.getByText(new Date('2026-01-02T03:04:05.000Z').toLocaleString()),
+    screen.getByText(`migrated ${when} · ${bytes} bytes of original data`),
   ).toBeInTheDocument();
 
   expect(screen.getByText('name-a')).toBeInTheDocument();
   expect(screen.getByText('name-b')).toBeInTheDocument();
+
+  fireEvent.click(screen.getByText('name-a'));
+  fireEvent.click(screen.getByText('name-b'));
   expect(screen.getAllByText('Already in your functions')).toHaveLength(2);
   expect(
     screen.queryByRole('button', {name: 'Import'}),
@@ -185,6 +231,7 @@ test('a skipped function shows its reason and can be imported without touching t
   render(renderWithStore(store, <LegacyBackup />));
   await screen.findByText('Legacy storage backup');
 
+  fireEvent.click(screen.getByText('name-b'));
   expect(
     screen.getByText('Not migrated: it is too large to store'),
   ).toBeInTheDocument();
@@ -205,9 +252,9 @@ test('a skipped function shows its reason and can be imported without touching t
   // The import mints a fresh id rather than reusing the legacy one.
   expect(ids[1]).not.toBe('b');
 
-  // Both rows now read as imported: 'a' was migrated, 'b' just came in.
+  // The expanded row 'b' now reads as imported ('a' stays collapsed).
   await waitFor(() =>
-    expect(screen.getAllByText('Already in your functions')).toHaveLength(2),
+    expect(screen.getAllByText('Already in your functions')).toHaveLength(1),
   );
 
   // Neither the backup nor the legacy sync value is consumed by an import.
@@ -239,6 +286,7 @@ test('a function that fails validation cannot be imported and links to the edito
   render(renderWithStore(store, <LegacyBackup />));
   await screen.findByText('Legacy storage backup');
 
+  fireEvent.click(screen.getByText('name-b'));
   expect(
     screen.queryByRole('button', {name: 'Import'}),
   ).not.toBeInTheDocument();
@@ -268,6 +316,7 @@ test('a function with a broken shape still gets an editor link carrying what is 
   render(renderWithStore(store, <LegacyBackup />));
   await screen.findByText('Legacy storage backup');
 
+  fireEvent.click(screen.getByText('kept name'));
   expect(
     screen.getByText('Cannot be imported: does not match the function format'),
   ).toBeInTheDocument();
@@ -281,6 +330,74 @@ test('a function with a broken shape still gets an editor link carrying what is 
   const decoded = decodeSharable(encoded ?? '');
   expect(decoded?.name).toBe('kept name');
   expect(decoded?.code).toBe('return "kept";');
+});
+
+test('deleting an entry removes it from both the backup and the legacy sync value', async () => {
+  const store = createTestStore();
+  const legacy = [fn('a'), fn('b')];
+  await seedStore(store, legacy);
+  await seedLegacy(store, {
+    legacy,
+    backup: legacy,
+    result: result({migratedCount: 2}),
+  });
+
+  const confirm = vi.spyOn(window, 'confirm').mockReturnValue(true);
+
+  render(renderWithStore(store, <LegacyBackup />));
+  await screen.findByText('Legacy storage backup');
+
+  fireEvent.click(screen.getByText('name-a'));
+  fireEvent.click(screen.getByRole('button', {name: 'Delete'}));
+
+  expect(confirm).toHaveBeenCalledTimes(1);
+  expect(confirm.mock.calls[0][0]).toContain('name-a');
+
+  await waitFor(() =>
+    expect(screen.queryByText('name-a')).not.toBeInTheDocument(),
+  );
+  expect(screen.getByText('name-b')).toBeInTheDocument();
+
+  // The entry is purged from both copies of the legacy data.
+  const backupRaw = (await store.local.get([LEGACY_BACKUP_KEY]))[
+    LEGACY_BACKUP_KEY
+  ] as string;
+  expect(JSON.parse(backupRaw)).toEqual([fn('b')]);
+  expect(
+    (await store.sync.get([LEGACY_FUNCTIONS_KEY]))[LEGACY_FUNCTIONS_KEY],
+  ).toEqual([fn('b')]);
+
+  // Deleting from the legacy data never touches the current functions.
+  expect(await storedIds(store)).toEqual(['a', 'b']);
+});
+
+test('cancelling the delete confirmation leaves the legacy data intact', async () => {
+  const store = createTestStore();
+  const legacy = [fn('a')];
+  await seedStore(store, legacy);
+  await seedLegacy(store, {
+    legacy,
+    backup: legacy,
+    result: result({migratedCount: 1}),
+  });
+
+  vi.spyOn(window, 'confirm').mockReturnValue(false);
+
+  render(renderWithStore(store, <LegacyBackup />));
+  await screen.findByText('Legacy storage backup');
+
+  fireEvent.click(screen.getByText('name-a'));
+  fireEvent.click(screen.getByRole('button', {name: 'Delete'}));
+
+  expect(screen.getByText('name-a')).toBeInTheDocument();
+  expect(
+    (await store.sync.get([LEGACY_FUNCTIONS_KEY]))[LEGACY_FUNCTIONS_KEY],
+  ).toEqual(legacy);
+  expect(
+    JSON.parse(
+      (await store.local.get([LEGACY_BACKUP_KEY]))[LEGACY_BACKUP_KEY] as string,
+    ),
+  ).toEqual(legacy);
 });
 
 test('a failed migration shows the error and can still export', async () => {
@@ -301,7 +418,9 @@ test('a failed migration shows the error and can still export', async () => {
   render(renderWithStore(store, <LegacyBackup />));
   await screen.findByText('Legacy storage backup');
 
-  expect(screen.getByText('Failed')).toBeInTheDocument();
+  expect(
+    screen.getByText('migration failed', {exact: false}),
+  ).toBeInTheDocument();
   expect(
     screen.getByText(
       'Legacy function data is not an array; migration cannot proceed.',
@@ -433,5 +552,7 @@ test('a renamed id counts as already migrated', async () => {
   render(renderWithStore(store, <LegacyBackup />));
   await screen.findByText('Legacy storage backup');
 
+  fireEvent.click(screen.getByText('name-dup'));
+  fireEvent.click(screen.getByText('name-dup2'));
   expect(screen.getAllByText('Already in your functions')).toHaveLength(2);
 });

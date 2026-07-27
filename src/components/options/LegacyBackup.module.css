@@ -24,29 +24,11 @@
   margin-top: var(--space-1);
 }
 
-.notice {
-  border: 1px solid var(--color-warning);
-  color: var(--color-warning);
-  padding: var(--space-2);
-  margin-bottom: var(--space-4);
-  font-size: var(--size-sm);
-}
-
-.status {
-  font-size: var(--size-sm);
-  margin-bottom: var(--space-4);
-}
-.status dl {
-  display: grid;
-  grid-template-columns: max-content 1fr;
-  gap: var(--space-1) var(--space-4);
-  margin: 0;
-}
-.status dt {
+/* The single explanatory paragraph at the top of the page. */
+.lead {
   color: var(--color-gray);
-}
-.status dd {
-  margin: 0;
+  font-size: var(--size-sm);
+  margin: 0 0 var(--space-4);
 }
 
 .error {
@@ -58,44 +40,37 @@
   font-size: var(--size-sm);
 }
 
-.actions {
-  display: flex;
-  flex-flow: row wrap;
-  gap: var(--space-2);
-  margin-bottom: var(--space-4);
-}
-
-.entries {
-  list-style: none;
-  padding: 0;
-  margin: 0 0 var(--space-4);
-  font-size: var(--size-sm);
-}
-
-.entry {
+/* Export button and the one-line provenance summary, below the entry list. */
+.footer {
   display: flex;
   flex-flow: row wrap;
   align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-2) 0;
-  border-top: 1px solid var(--color-lightgray);
+  gap: var(--space-2) var(--space-4);
 }
 
-.entryName {
-  font-weight: var(--font-semibold);
-}
-
-.entryId {
-  font-family: var(--font-monospace);
-  font-size: var(--size-xs);
+.summary {
   color: var(--color-gray);
+  font-size: var(--size-sm);
+}
+
+.entryList {
+  margin-bottom: var(--space-4);
+}
+
+/* Occupies the drag-knob slot of the function list layout, showing a warning
+   for entries that are not in the current functions. */
+.stateIconBox {
+  color: var(--color-warning);
 }
 
 .entryState {
-  flex-grow: 1;
   color: var(--color-gray);
+  font-size: var(--size-sm);
+  align-self: center;
 }
 
 .entryProblem {
   color: var(--color-error);
+  font-size: var(--size-sm);
+  align-self: center;
 }

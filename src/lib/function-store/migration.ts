@@ -370,12 +370,30 @@ export interface LegacyBackupStatus {
 
 export interface LegacyBackupRepository {
   status(): Promise<LegacyBackupStatus>;
+  /**
+   * Deletes one function from the legacy data. `index` is the position in
+   * the array the UI renders (the backup when present, otherwise the legacy
+   * sync value). The matching entry is removed from the other copy as well:
+   * data deleted for containing a secret must be gone from both stores.
+   */
+  deleteEntry(index: number): Promise<void>;
+}
+
+function parseBackupArray(raw: unknown): unknown[] | undefined {
+  if (typeof raw !== 'string') return undefined;
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : undefined;
+  } catch {
+    return undefined;
+  }
 }
 
 /**
- * Read-only view over the legacy sync value, the local backup, and the
- * recorded migration result, for the Legacy Storage Backup UI
- * (docs/function-storage.md, "Legacy Storage Backup UI").
+ * View over the legacy sync value, the local backup, and the recorded
+ * migration result, for the Legacy Storage Backup UI
+ * (docs/function-storage.md, "Legacy Storage Backup UI"). Mutation is limited
+ * to deleting individual entries.
  */
 export function createLegacyBackupRepository(options: {
   sync: KeyValueStorage;
@@ -402,6 +420,40 @@ export function createLegacyBackupRepository(options: {
         | undefined;
 
       return {legacyRaw, backupRaw, result};
+    },
+
+    async deleteEntry(index: number): Promise<void> {
+      const legacyValue = (await sync.get([LEGACY_FUNCTIONS_KEY]))[
+        LEGACY_FUNCTIONS_KEY
+      ];
+      const legacy = Array.isArray(legacyValue) ? legacyValue : undefined;
+      const backup = parseBackupArray(
+        (await local.get([LEGACY_BACKUP_KEY]))[LEGACY_BACKUP_KEY],
+      );
+
+      const source = backup ?? legacy;
+      if (!source || index < 0 || index >= source.length) {
+        throw new Error(
+          'This entry no longer exists in the legacy data. Reload and try again.',
+        );
+      }
+      const [removed] = source.splice(index, 1);
+
+      // `jsonEqual` rather than an index: the two copies are normally
+      // identical, but nothing enforces it, and chrome.storage reorders
+      // object keys on round-trips.
+      const other = source === backup ? legacy : backup;
+      if (other) {
+        const match = other.findIndex(item => jsonEqual(item, removed));
+        if (match >= 0) other.splice(match, 1);
+      }
+
+      if (backup) {
+        await local.set({[LEGACY_BACKUP_KEY]: JSON.stringify(backup)});
+      }
+      if (legacy) {
+        await sync.set({[LEGACY_FUNCTIONS_KEY]: legacy});
+      }
     },
   };
 }

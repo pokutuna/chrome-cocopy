@@ -416,3 +416,63 @@ test('createLegacyBackupRepository.status reports undefined fields when nothing 
   expect(status.backupRaw).toBeUndefined();
   expect(status.result).toBeUndefined();
 });
+
+test('deleteEntry removes the entry from both the backup and the legacy sync value', async () => {
+  // KeySortingStorage: the sync copy comes back with reordered keys, so the
+  // cross-store match must be structural, not positional or string-based.
+  const sync = new KeySortingStorage();
+  const local = new InMemoryKeyValueStorage();
+  const fns = [makeFunction('a'), makeFunction('b'), makeFunction('c')];
+  await sync.set({[LEGACY_FUNCTIONS_KEY]: fns});
+  await local.set({[LEGACY_BACKUP_KEY]: JSON.stringify(fns)});
+  const legacyBackupRepo = createLegacyBackupRepository({sync, local});
+
+  await legacyBackupRepo.deleteEntry(1);
+
+  const backupRaw = (await local.get([LEGACY_BACKUP_KEY]))[
+    LEGACY_BACKUP_KEY
+  ] as string;
+  expect((JSON.parse(backupRaw) as CopyFunction[]).map(fn => fn.id)).toEqual([
+    'a',
+    'c',
+  ]);
+  const legacy = (await sync.get([LEGACY_FUNCTIONS_KEY]))[
+    LEGACY_FUNCTIONS_KEY
+  ] as CopyFunction[];
+  expect(legacy.map(fn => fn.id)).toEqual(['a', 'c']);
+});
+
+test('deleteEntry works when only the legacy sync value exists', async () => {
+  const sync = new InMemoryKeyValueStorage();
+  const local = new InMemoryKeyValueStorage();
+  const fns = [makeFunction('a'), makeFunction('b')];
+  await sync.set({[LEGACY_FUNCTIONS_KEY]: fns});
+  const legacyBackupRepo = createLegacyBackupRepository({sync, local});
+
+  await legacyBackupRepo.deleteEntry(0);
+
+  const legacy = (await sync.get([LEGACY_FUNCTIONS_KEY]))[
+    LEGACY_FUNCTIONS_KEY
+  ] as CopyFunction[];
+  expect(legacy.map(fn => fn.id)).toEqual(['b']);
+  expect(
+    (await local.get([LEGACY_BACKUP_KEY]))[LEGACY_BACKUP_KEY],
+  ).toBeUndefined();
+});
+
+test('deleteEntry throws on an index outside the displayed array', async () => {
+  const sync = new InMemoryKeyValueStorage();
+  const local = new InMemoryKeyValueStorage();
+  await local.set({[LEGACY_BACKUP_KEY]: JSON.stringify([makeFunction('a')])});
+  const legacyBackupRepo = createLegacyBackupRepository({sync, local});
+
+  const error = await catchAsync(() => legacyBackupRepo.deleteEntry(1));
+  expect(error).toBeInstanceOf(Error);
+  expect((error as Error).message).toMatch(/no longer exists/);
+
+  // Nothing was written.
+  const backupRaw = (await local.get([LEGACY_BACKUP_KEY]))[
+    LEGACY_BACKUP_KEY
+  ] as string;
+  expect(JSON.parse(backupRaw)).toEqual([makeFunction('a')]);
+});
