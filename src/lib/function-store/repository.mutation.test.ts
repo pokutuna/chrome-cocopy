@@ -128,6 +128,40 @@ test('update of a function that no longer exists is a ConflictError', async () =
   );
 });
 
+test('update with the current base documentId succeeds', async () => {
+  const {storage, repo} = createHarness();
+  await seedSnapshot(storage, [makeFunction('a')]);
+  const [ref] = await repo.list();
+
+  await repo.update(makeFunction('a', {name: 'renamed'}), ref.documentId);
+
+  expect((await repo.list())[0].name).toBe('renamed');
+});
+
+test('update with a stale base documentId is a ConflictError', async () => {
+  const {storage, repo} = createHarness();
+  await seedSnapshot(storage, [makeFunction('a')]);
+  const [ref] = await repo.list();
+
+  // Another window saves the same function after this editor loaded it.
+  await repo.update(makeFunction('a', {name: 'theirs'}));
+
+  await expect(
+    repo.update(makeFunction('a', {name: 'ours'}), ref.documentId),
+  ).rejects.toThrow(ConflictError);
+  expect((await repo.list())[0].name).toBe('theirs');
+});
+
+test('update without a base documentId stays last-write-wins', async () => {
+  const {storage, repo} = createHarness();
+  await seedSnapshot(storage, [makeFunction('a')]);
+
+  await repo.update(makeFunction('a', {name: 'first'}));
+  await repo.update(makeFunction('a', {name: 'second'}));
+
+  expect((await repo.list())[0].name).toBe('second');
+});
+
 test('delete removes the entry and keeps the rest in order', async () => {
   const {storage, repo} = createHarness();
   await seedSnapshot(

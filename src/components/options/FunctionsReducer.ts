@@ -20,6 +20,13 @@ export interface State {
   dragOrder: CopyFunctionRef[] | null;
   editing: CopyFunction | undefined;
   original: CopyFunction | undefined;
+  /**
+   * documentId the open function was loaded with, passed to `update` so a
+   * save from another window during this editing session is a conflict
+   * instead of a silent overwrite. Deliberately NOT touched by `refresh`:
+   * only opening the editor or settling a mutation may move the base.
+   */
+  baseDocumentId: string | undefined;
   draggable: boolean;
   saving: boolean;
   /** True only after a mutation resolved, cleared by any further edit. */
@@ -29,7 +36,7 @@ export interface State {
 
 export type Action =
   | {t: 'refresh'; refs: CopyFunctionRef[]}
-  | {t: 'open'; fn: CopyFunction}
+  | {t: 'open'; fn: CopyFunction; documentId: string}
   | {t: 'add'}
   | {t: 'close'}
   | {t: 'edit'; function: Partial<CopyFunction>}
@@ -48,6 +55,7 @@ export const initialState: State = {
   dragOrder: null,
   editing: undefined,
   original: undefined,
+  baseDocumentId: undefined,
   draggable: true,
   saving: false,
   saved: false,
@@ -106,9 +114,26 @@ function closeEditor(state: State): State {
     activeId: undefined,
     editing: undefined,
     original: undefined,
+    baseDocumentId: undefined,
     saved: false,
     error: undefined,
   };
+}
+
+/**
+ * The base documentId after a mutation settled: the entry as the just-reloaded
+ * catalog has it. After a success this is the document the save produced;
+ * after a conflict it re-arms the editor so that "review your changes and save
+ * again" deliberately overwrites, as the error message promises.
+ */
+function rearmedBase(state: State): string | undefined {
+  if (state.activeId === undefined || state.activeId === newId) {
+    return undefined;
+  }
+  return (
+    state.refs.find(ref => ref.id === state.activeId)?.documentId ??
+    state.baseDocumentId
+  );
 }
 
 function reduce(state: State, action: Action): State {
@@ -124,6 +149,7 @@ function reduce(state: State, action: Action): State {
         activeId: action.fn.id,
         editing: action.fn,
         original: action.fn,
+        baseDocumentId: action.documentId,
         saved: false,
         error: undefined,
       };
@@ -161,7 +187,11 @@ function reduce(state: State, action: Action): State {
       // adopting the newer draft as `original` would mark unsaved edits as
       // saved and let them be discarded without a prompt.
       const stored = action.submitted ?? state.editing ?? state.original;
-      const next = {...state, original: stored};
+      const next = {
+        ...state,
+        original: stored,
+        baseDocumentId: rearmedBase(state),
+      };
       return {
         ...next,
         saving: false,
@@ -174,7 +204,13 @@ function reduce(state: State, action: Action): State {
     }
     case 'mutation-failed':
       // The draft is deliberately kept so the user can retry.
-      return {...state, saving: false, saved: false, error: action.message};
+      return {
+        ...state,
+        saving: false,
+        saved: false,
+        error: action.message,
+        baseDocumentId: rearmedBase(state),
+      };
     case 'error':
       return {...state, error: action.message};
     case 'dragging': {

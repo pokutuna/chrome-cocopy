@@ -49,7 +49,13 @@ export interface FunctionRepository {
   listForUrl(url: string): Promise<CopyFunctionRef[]>;
   get(ref: CopyFunctionRef): Promise<CopyFunction | undefined>;
   create(fn: CopyFunction): Promise<void>;
-  update(fn: CopyFunction): Promise<void>;
+  /**
+   * Replaces the stored function that has `fn.id`. When `baseDocumentId` is
+   * given (the documentId the caller loaded the function with), the update is
+   * refused with a ConflictError if the stored entry has moved on — so an
+   * editor opened before another window's save does not silently overwrite it.
+   */
+  update(fn: CopyFunction, baseDocumentId?: string): Promise<void>;
   delete(id: string): Promise<void>;
   reorder(orderedIds: string[]): Promise<void>;
   subscribe(listener: () => void): Unsubscribe;
@@ -128,7 +134,13 @@ function entriesOf(
   const entries: CopyFunctionRef[] = [];
   for (const shardId of root.shardIds) {
     const shard = byId.get(shardId);
-    if (!shard) continue;
+    if (!shard) {
+      // Accepting a partial entry list here would let a later mutation commit
+      // a catalog that silently drops functions.
+      throw new CorruptionError(
+        `Catalog Shard ${shardId} referenced by the Root is missing.`,
+      );
+    }
     entries.push(...shard.entries);
   }
   return entries;
@@ -767,13 +779,21 @@ export function createFunctionRepository(
       });
     },
 
-    async update(fn: CopyFunction): Promise<void> {
+    async update(fn: CopyFunction, baseDocumentId?: string): Promise<void> {
       const {document, ref} = prepareWrite(fn);
       return mutate(snapshot => {
         const index = snapshot.entries.findIndex(entry => entry.id === fn.id);
         if (index === -1) {
           throw new ConflictError(
             `Function "${fn.id}" is no longer in the stored function list; it may have been deleted in another window. Reload and try again.`,
+          );
+        }
+        if (
+          baseDocumentId !== undefined &&
+          snapshot.entries[index].documentId !== baseDocumentId
+        ) {
+          throw new ConflictError(
+            `Function "${fn.id}" was changed in another window after it was opened here. Reload and try again.`,
           );
         }
         const entries = [...snapshot.entries];

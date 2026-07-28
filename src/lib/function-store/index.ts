@@ -27,6 +27,9 @@ let instance: FunctionStore | undefined;
  */
 export function getFunctionStore(): FunctionStore {
   if (!instance) {
+    // A future Safari build must select a storage.local-backed adapter as the
+    // source of truth here: Safari's storage.sync does not sync across devices
+    // (docs/function-storage.md, "Storage Port"). Only Chrome ships today.
     const sync = new ChromeKeyValueStorage(chrome.storage.sync, 'sync');
     const local = new ChromeKeyValueStorage(chrome.storage.local, 'local');
     const coordinator = createMigrationCoordinator({sync, local});

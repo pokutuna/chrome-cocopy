@@ -290,6 +290,30 @@ test('a shard that has not synced yet falls back to the cache', async () => {
   expect((await repo.list()).map(r => r.id)).toEqual(['a', 'b']);
 });
 
+test('a cached snapshot missing a shard its root names is rejected', async () => {
+  const {storage, cache, repo} = createHarness();
+  await seedSnapshot(storage, [makeFunction('a'), makeFunction('b')], {
+    entriesPerShard: 1,
+  });
+  await repo.list(); // populates the cache
+
+  // Corrupt the cache: drop one shard while the root still names it. Reading
+  // it as a partial snapshot would let a mutation publish a catalog that
+  // silently drops function 'b'.
+  const cached = (await cache.get([SNAPSHOT_CACHE_KEY]))[
+    SNAPSHOT_CACHE_KEY
+  ] as {shards: {shardId: string}[]};
+  cached.shards = cached.shards.filter(s => s.shardId !== 'seed-shard-2');
+  await cache.set({[SNAPSHOT_CACHE_KEY]: cached});
+
+  // Make the pointer's own catalog unreadable so the cache is the only source.
+  await storage.set({
+    [ACTIVE_POINTER_KEY]: {formatVersion: 1, catalogId: 'not-yet-synced'},
+  });
+
+  await expect(repo.list()).rejects.toThrow(CorruptionError);
+});
+
 test('an invalid cache value is ignored', async () => {
   const {storage, cache, repo} = createHarness();
   await seedSnapshot(storage, [makeFunction('a')]);

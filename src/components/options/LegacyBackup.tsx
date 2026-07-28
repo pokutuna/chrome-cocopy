@@ -111,7 +111,7 @@ type EntryState =
 
 interface Entry {
   key: string;
-  /** The id recorded in the legacy data, used for skip and import matching. */
+  /** The id recorded in the legacy data, used for skip and catalog matching. */
   id: string;
   /** Position in the rendered legacy array; what `deleteEntry` addresses. */
   index: number;
@@ -238,16 +238,15 @@ function downloadJson(raw: string): void {
 /** The status/action line at the bottom of an expanded entry. */
 function EntryActions(props: {
   entry: Entry;
-  imported: boolean;
   busy: boolean;
   onImport: (fn: CopyFunction) => void;
   onDelete: (entry: Entry) => void;
 }) {
-  const {entry, imported, busy} = props;
+  const {entry, busy} = props;
   const {state} = entry;
 
   let status: React.ReactNode;
-  if (imported || state.kind === 'migrated') {
+  if (state.kind === 'migrated') {
     status = (
       <Item>
         <span className={styles.entryState}>Already in your functions</span>
@@ -319,16 +318,15 @@ function EntryActions(props: {
  */
 function EntryRow(props: {
   entry: Entry;
-  imported: boolean;
   busy: boolean;
   onImport: (fn: CopyFunction) => void;
   onDelete: (entry: Entry) => void;
 }) {
-  const {entry, imported} = props;
+  const {entry} = props;
   const [expanded, setExpanded] = useState(false);
   const toggle = useCallback(() => setExpanded(value => !value), []);
 
-  const done = imported || entry.state.kind === 'migrated';
+  const done = entry.state.kind === 'migrated';
 
   return (
     <div>
@@ -397,7 +395,6 @@ export function LegacyBackup() {
     undefined,
   );
   const [storedIds, setStoredIds] = useState<Set<string>>(() => new Set());
-  const [importedIds, setImportedIds] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | undefined>(undefined);
 
@@ -437,20 +434,20 @@ export function LegacyBackup() {
       if (busy) return;
       setBusy(true);
       setError(undefined);
-      // A fresh id keeps the import from colliding with anything already in
-      // the catalog, and leaves the legacy snapshot untouched.
+      // The legacy id is kept: an importable row's id is by definition absent
+      // from the catalog, and storing it under the same id is what marks the
+      // row as migrated on every future visit — no separate imported state to
+      // persist. Deleting the function re-enables Import again, symmetrically.
       repository
-        .create({...fn, id: generateId()})
-        .then(() => {
-          setImportedIds(current => [...current, fn.id]);
-          setBusy(false);
-        })
+        .create(fn)
+        .then(() => load())
+        .then(() => setBusy(false))
         .catch(e => {
           setError(messageForError(e));
           setBusy(false);
         });
     },
-    [repository, busy],
+    [repository, busy, load],
   );
 
   const onDelete = useCallback(
@@ -483,7 +480,6 @@ export function LegacyBackup() {
 
   const {result} = status;
   const summary = summaryText(raw, result);
-  const imported = new Set(importedIds);
 
   return (
     <Section title="Legacy storage backup">
@@ -510,7 +506,6 @@ export function LegacyBackup() {
             <EntryRow
               key={entry.key}
               entry={entry}
-              imported={imported.has(entry.id)}
               busy={busy}
               onImport={onImport}
               onDelete={onDelete}

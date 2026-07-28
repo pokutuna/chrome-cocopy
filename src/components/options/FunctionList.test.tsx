@@ -239,6 +239,45 @@ test('a ConflictError keeps the draft, reloads the list, and shows an error', as
   ]);
 });
 
+test('a save over an entry changed since the editor opened conflicts, then saving again overwrites', async () => {
+  const store = createTestStore();
+  await seedStore(store, [fn('a')]);
+
+  const {result} = renderStore(store);
+  await waitFor(() => expect(result.current.state.refs).toHaveLength(1));
+
+  await act(async () => {
+    await result.current.openFunction(result.current.state.refs[0]);
+  });
+  act(() => {
+    result.current.dispatch({t: 'edit', function: {name: 'my draft'}});
+  });
+
+  // Another window saves the same function while this editor is open. The
+  // commit succeeds long before our save starts, so only the editor's base
+  // documentId can catch it.
+  await act(async () => {
+    await store.repository.update(fn('a', {name: 'theirs'}));
+  });
+
+  await act(async () => {
+    result.current.saveFunction();
+  });
+
+  await waitFor(() => expect(result.current.state.error).toBeDefined());
+  expect(result.current.state.error).toContain('changed in another window');
+  expect((await store.repository.list())[0].name).toBe('theirs');
+  expect(result.current.state.editing?.name).toBe('my draft');
+
+  // The failure re-armed the base to the reloaded entry, so saving again is
+  // the deliberate overwrite the error message offers.
+  await act(async () => {
+    result.current.saveFunction();
+  });
+  await waitFor(() => expect(result.current.state.saved).toBe(true));
+  expect((await store.repository.list())[0].name).toBe('my draft');
+});
+
 test('a QuotaError is reported without losing the draft', async () => {
   const store = createTestStore();
   await seedStore(store, [fn('a')]);

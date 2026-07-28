@@ -183,7 +183,7 @@ export function useFunctionListStore(repository: FunctionRepository) {
           });
           return;
         }
-        dispatch({t: 'open', fn});
+        dispatch({t: 'open', fn, documentId: ref.documentId});
       } catch (error) {
         dispatch({t: 'error', message: messageForError(error)});
       }
@@ -192,11 +192,14 @@ export function useFunctionListStore(repository: FunctionRepository) {
   );
 
   const saveFunction = useCallback(() => {
-    const {editing, activeId} = stateRef.current;
+    const {editing, activeId, baseDocumentId} = stateRef.current;
     if (!editing || activeId === undefined) return;
     const isNew = activeId === newId;
     void runMutation(
-      () => (isNew ? repository.create(editing) : repository.update(editing)),
+      () =>
+        isNew
+          ? repository.create(editing)
+          : repository.update(editing, baseDocumentId),
       // Creating closes the editor; editing keeps it open showing "Saved",
       // matching the previous behaviour.
       isNew ? () => dispatch({t: 'close'}) : undefined,

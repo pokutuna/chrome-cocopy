@@ -249,8 +249,9 @@ test('a skipped function shows its reason and can be imported without touching t
 
   const ids = await storedIds(store);
   expect(ids[0]).toBe('a');
-  // The import mints a fresh id rather than reusing the legacy one.
-  expect(ids[1]).not.toBe('b');
+  // The import reuses the legacy id, which is what marks the row as migrated
+  // on later visits without any separate imported-state to persist.
+  expect(ids[1]).toBe('b');
 
   // The expanded row 'b' now reads as imported ('a' stays collapsed).
   await waitFor(() =>
@@ -268,6 +269,38 @@ test('a skipped function shows its reason and can be imported without touching t
       (await store.sync.get([LEGACY_FUNCTIONS_KEY]))[LEGACY_FUNCTIONS_KEY],
     ),
   ).toBe(legacyBefore);
+});
+
+test('an imported entry is still recognized after the page is reopened', async () => {
+  const store = createTestStore();
+  const legacy = [fn('b')];
+  await seedStore(store, []);
+  await seedLegacy(store, {
+    legacy,
+    backup: legacy,
+    result: result({
+      migratedCount: 0,
+      skipped: [{id: 'b', name: 'name-b', reason: 'size'}],
+    }),
+  });
+
+  const first = render(renderWithStore(store, <LegacyBackup />));
+  await screen.findByText('Legacy storage backup');
+  fireEvent.click(screen.getByText('name-b'));
+  fireEvent.click(screen.getByRole('button', {name: 'Import'}));
+  await waitFor(async () => expect(await storedIds(store)).toEqual(['b']));
+  first.unmount();
+
+  // Reopening the page rebuilds the row state from the catalog alone; the row
+  // must not offer Import again, which would create a duplicate.
+  render(renderWithStore(store, <LegacyBackup />));
+  await screen.findByText('Legacy storage backup');
+  fireEvent.click(screen.getByText('name-b'));
+
+  expect(screen.getByText('Already in your functions')).toBeInTheDocument();
+  expect(
+    screen.queryByRole('button', {name: 'Import'}),
+  ).not.toBeInTheDocument();
 });
 
 test('a function that fails validation cannot be imported and links to the editor', async () => {

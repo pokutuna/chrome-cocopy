@@ -46,7 +46,7 @@ ChromeとFirefoxの間では同期しない。
 
 ## Non-Goals
 
-- 複数端末での同時編集は、Commit Protocolで競合として検出するだけとし、データのマージは行わない。
+- 複数端末での同時編集は、競合として検出するだけとし、データのマージは行わない。検出は Commit Protocol の基点確認と、`update` に渡すエディタ基点 `documentId` の比較で行う。
 - ブラウザごとの最大容量までデータを保存することは保証しない。実効上限はquotaより小さく設定する。
 - ChromeとFirefoxの正本は`storage.sync`だけとする。全体quotaを超えた分を`storage.local`へ暗黙に退避するなど、正本を複数のstorage areaへ分割する構成は扱わない。
 - SafariではWebExtensions標準APIだけで端末間同期を保証しない。
@@ -139,8 +139,9 @@ sequenceDiagram
   Note over Options,Storage: 保存: Document と Catalog を書いてから Active Pointer を更新する
   User->>Options: Save
   Options->>Options: Save/Delete/Reorder を無効化
-  Options->>Repo: update(fn)
+  Options->>Repo: update(fn, 開いた時点の documentId)
   Repo->>Repo: schema と size limit を検証、開始時の catalogId を記録
+  Repo->>Repo: entry の documentId が基点と一致するか確認
   Repo->>Storage: set(新 Document + 新 Shard + 新 Root)
   Repo->>Storage: get(書いた item を読み戻す)
   Storage-->>Repo: 読み戻し結果
@@ -162,6 +163,10 @@ options は resolve 後にだけ「保存済み」と表示し、手元の state
 
 Active Pointer を切り替える前に失敗した場合、Pointer は旧 Catalog を指したままなので、従来の snapshot を読み続けられる。
 開始時と異なる `catalogId` を検出した場合は `ConflictError` として commit を中止し、自動マージせず UI に再読込を要求する。
+
+`update` はエディタが関数を開いた時点の `documentId` を基点として受け取る。
+エディタを開いてから保存するまでの間に別 window が同じ関数を保存していた場合、entry の `documentId` が基点と一致せず `ConflictError` になる。
+再読込後の再保存では基点が現在の entry に更新されるため、意図した上書きとして成功する。
 
 保存に失敗した場合、options は入力内容を保持し、再試行または JSON export を可能にする。
 
@@ -219,7 +224,7 @@ interface FunctionRepository {
   listForUrl(url: string): Promise<CopyFunctionRef[]>;
   get(ref: CopyFunctionRef): Promise<CopyFunction | undefined>;
   create(fn: CopyFunction): Promise<void>;
-  update(fn: CopyFunction): Promise<void>;
+  update(fn: CopyFunction, baseDocumentId?: string): Promise<void>;
   delete(id: string): Promise<void>;
   reorder(orderedIds: string[]): Promise<void>;
   subscribe(listener: () => void): Unsubscribe;
@@ -229,6 +234,7 @@ interface FunctionRepository {
 - mutation は永続化完了まで resolve しない。
 - schema error、quota error、conflict、corruption を型付き error として返す。
 - `listForUrl` は URL pattern の評価と Catalog からの絞り込みだけを担当し、Function Document を読まない。
+- `update` の `baseDocumentId` は呼び出し側が関数を読み込んだ時点の `documentId` で、entry がそれ以降に置き換わっていれば `ConflictError` とする。省略時は last-write-wins。
 - `subscribe` は「active snapshot が変わった」ことを通知し、受信側は repository からデータを再読込する。
 - repository は内部に mutation queue を持ち、同一 context からの mutation を直列化する。UI の操作無効化は体験のためであり、正しさは repository が担保する。
 
@@ -425,12 +431,14 @@ refとdocumentの内容一致は、自分が今生成した値どうしの比較
 local cacheは`storage.local`に検証済みsnapshotを1世代だけ保持する。
 書き込むのは、Pointerが指すsnapshotを全item揃った状態で検証できたときだけとする。
 不完全なsnapshotをcacheしないため、cacheは常に「かつて完全だったsnapshot」を指す。
+読み取り側もこの不変条件を検証し、Rootが参照するShardが欠けたcacheは外部要因による破損として破棄する。部分的なentry一覧を採用すると、後続のmutationが関数を失ったCatalogを公開しうるためである。
 Pointerが指す`catalogId`とcacheの`catalogId`が一致した時点でcacheの役目は終わり、次のsnapshotで置き換える。
 
 Active Pointer の更新自体は last-write-wins であり、storage API だけでは完全な排他を保証できない。
 極端に近い複数 context の同時 commit では、一方の更新が後勝ちになる可能性を許容する。
 repository は commit 直前に Active Pointer を読み直し、mutation の基点にした `catalogId` と一致するか確認する。
 一致しなければ `ConflictError` とし、自動マージせず UI に再読込を要求する。
+この確認が守るのは mutation の実行中だけであり、エディタを開いてから保存するまでの競合は `update` の基点 `documentId` 比較で検出する。
 
 1関数だけの編集であっても、commitは全entryを持つ新しいCatalogへの切り替えである。
 基点が古いままcommitすると、自分が変更していない関数まで基点時点の内容へ巻き戻す。
