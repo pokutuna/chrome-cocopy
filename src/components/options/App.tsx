@@ -11,11 +11,11 @@ import {Settings} from './Settings';
 const PageRoot = () => (
   <>
     <FunctionList />
-    <LegacyBackupBanner />
     <Settings />
     <Hint />
     <DebuggingHint />
     <Links />
+    <LegacyBackupBanner />
   </>
 );
 

@@ -494,7 +494,7 @@ export function LegacyBackup() {
   // must stand on its own instead of an empty page.
   if (!status) {
     return error ? (
-      <Section title="Legacy storage backup">
+      <Section title="Legacy Functions">
         <div className={styles.error} role="alert">
           {error}
         </div>
@@ -507,7 +507,7 @@ export function LegacyBackup() {
   const summary = summaryText(raw, result);
 
   return (
-    <Section title="Legacy storage backup">
+    <Section title="Legacy Functions">
       <p className={styles.lead}>
         {MIGRATION_INTRO} This is the original data from before that move, kept
         so you can recover anything the automatic migration missed. It will be
@@ -587,28 +587,30 @@ export function LegacyBackupBanner() {
   const detail = failed ? (
     <>
       The automatic migration failed. Your original data is kept untouched
-      &mdash; recover it from the{' '}
-      <Link to="/legacy">Legacy storage backup</Link>.
+      &mdash; recover it from the <Link to="/legacy">Legacy Functions</Link>{' '}
+      page.
     </>
   ) : skippedCount > 0 ? (
     <>
       Your previous functions were migrated automatically, but {skippedCount}{' '}
       function(s) could not be carried over. Review and import them from the{' '}
-      <Link to="/legacy">Legacy storage backup</Link>.
+      <Link to="/legacy">Legacy Functions</Link> page.
     </>
   ) : (
     <>
       Your previous functions were migrated automatically. If anything is
       missing, review and recover the original data from the{' '}
-      <Link to="/legacy">Legacy storage backup</Link>.
+      <Link to="/legacy">Legacy Functions</Link> page.
     </>
   );
 
   return (
-    <div className={failed ? styles.bannerProblem : styles.banner}>
-      <p>{MIGRATION_INTRO}</p>
-      <p>{detail}</p>
-      <p>The original data will be removed in a future update.</p>
-    </div>
+    <Section title="Legacy Functions">
+      <div className={failed ? styles.bannerProblem : styles.banner}>
+        <p>{MIGRATION_INTRO}</p>
+        <p>{detail}</p>
+        <p>The original data will be removed in a future update.</p>
+      </div>
+    </Section>
   );
 }
