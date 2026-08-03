@@ -9,3 +9,11 @@ export function FunctionError(props: {error: EvalError}) {
     </div>
   );
 }
+
+export function ListError(props: {message: string}) {
+  return (
+    <div className={styles.functionErrorBox} role="alert">
+      {props.message}
+    </div>
+  );
+}

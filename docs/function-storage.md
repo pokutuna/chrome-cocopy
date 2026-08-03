@@ -1,6 +1,6 @@
 # FunctionStore
 
-- Status: Draft, ready for implementation
+- Status: Implemented (`src/lib/function-store/`)
 - Created: 2026-07-20
 
 ## Objective
@@ -46,13 +46,12 @@ ChromeとFirefoxの間では同期しない。
 
 ## Non-Goals
 
-- 複数端末で同時編集したデータのマージは扱わない。
-- ユーザー関数の sandbox 実行方式は変更しない。
-- 大規模データベース向けの全文検索やページネーションは導入しない。
-- ブラウザごとの最大容量までデータを保存することは保証しない。
-- `storage.sync` の全体quotaを超える関数を端末ローカルだけに暗黙保存しない。
+- 複数端末での同時編集は、競合として検出するだけとし、データのマージは行わない。検出は Commit Protocol の基点確認と、`update` に渡すエディタ基点 `documentId` の比較で行う。
+- ブラウザごとの最大容量までデータを保存することは保証しない。実効上限はquotaより小さく設定する。
+- ChromeとFirefoxの正本は`storage.sync`だけとする。全体quotaを超えた分を`storage.local`へ暗黙に退避するなど、正本を複数のstorage areaへ分割する構成は扱わない。
 - SafariではWebExtensions標準APIだけで端末間同期を保証しない。
 - ChromeとFirefoxの間を横断して関数を同期しない。
+- IndexedDBや独自のsync backendは導入しない (Alternatives Considered参照)。
 
 ## Scenarios
 
@@ -60,21 +59,114 @@ ChromeとFirefoxの間では同期しない。
 
 1. popup がアクティブタブの URL を取得する。
 2. repository が現在の Catalog を読み、順序を保ったまま URL pattern に一致する entry を抽出する。
-3. repository が一致した entry の Function Document だけを一括取得する。
-4. repository が各 document を検証し、`CopyFunction[]` を返す。
-5. popup は Catalog の順序で関数を表示し、ユーザーが選んだ関数を sandbox に渡す。
+3. repository が一致した entry を `CopyFunctionRef[]` として返す。
+4. popup は Catalog の順序で関数を表示する。
+5. ユーザーが関数を選ぶと、repository がその関数の Function Document を読み、schema と ref の一致を検証する。他 device や DevTools 由来の破損は書き込み時に捕捉できないため、実行するコードは読み取り時に必ず検証する。
+6. popup は検証済みの code を sandbox に渡す。
+
+```mermaid
+sequenceDiagram
+  autonumber
+  actor User
+  participant Popup as popup
+  participant Repo as FunctionRepository
+  participant Storage as storage
+  participant Sandbox as sandbox
+
+  User->>Popup: popup を開く
+  Popup->>Popup: アクティブタブの URL を取得
+  Popup->>Repo: listForUrl(url)
+  Repo->>Storage: get(Active Pointer)
+  Storage-->>Repo: catalogId
+  Repo->>Storage: get(Catalog Root + Shards)
+  Storage-->>Repo: entries
+  Repo->>Repo: URL pattern に一致する entry を抽出
+  Repo-->>Popup: CopyFunctionRef[]
+  Popup-->>User: Catalog 順で一覧表示
+
+  User->>Popup: 関数を選択
+  Popup->>Repo: get(id)
+  Repo->>Storage: get(選ばれた 1 件の Function Document)
+  Storage-->>Repo: document
+  Repo->>Repo: schema と ref 一致を検証
+  Repo-->>Popup: CopyFunction
+  Popup->>Sandbox: postMessage(eval, code, page)
+  Sandbox->>Sandbox: ユーザーコードを評価
+  Sandbox-->>Popup: CopyResult
+  Popup-->>User: clipboard へ書き込み
+```
+
+一覧に何件並んでいても、popup が読む Function Document は実行する 1 件だけである。
 
 不正な URL pattern は保存時に拒否する。
-読み取り時に不正な entry や document を発見した場合、その関数を実行対象から外し、他の正常な関数は利用可能な状態を保つ。
+読み取り時に不正な entry を発見した場合、その関数を一覧から外し、他の正常な関数は利用可能な状態を保つ。
+document の破損は実行時に検出されるため、実行を中止してエラーを表示し、他の関数は選択可能な状態を保つ。
 
 ### options で関数を編集する
 
 1. options が Catalog から関数名、テーマ、URL pattern、順序を読み、コードを読まずに一覧を表示する。
 2. ユーザーが関数を開くと、repository が対応する Function Document を読む。
 3. ユーザーが保存すると、repository が schema と portable size limit を検証する。
-4. repository が新しい Function Document と Catalog を準備し、読み戻して検証する。
+4. repository が新しい Function Document と Catalog を準備し、読み戻して欠損がないことを確認する。
 5. repository が Active Pointer を新しい Catalog へ切り替える。
 6. options は永続化の完了後にだけ「保存済み」と表示する。
+
+```mermaid
+sequenceDiagram
+  autonumber
+  actor User
+  participant Options as options
+  participant Repo as FunctionRepository
+  participant Storage as storage
+
+  Note over Options,Storage: 一覧表示: code は読まない
+  Options->>Repo: list()
+  Repo->>Storage: get(Active Pointer)
+  Storage-->>Repo: catalogId
+  Repo->>Storage: get(Catalog Root + Shards)
+  Storage-->>Repo: entries
+  Repo-->>Options: CopyFunctionRef[]
+  Options-->>User: 名前・テーマ・pattern を一覧表示
+
+  Note over Options,Storage: 編集: 開いた関数の code だけ読む
+  User->>Options: 関数を開く
+  Options->>Repo: get(id)
+  Repo->>Storage: get(Function Document)
+  Storage-->>Repo: document
+  Repo-->>Options: CopyFunction
+  Options-->>User: editor を表示
+
+  Note over Options,Storage: 保存: Document と Catalog を書いてから Active Pointer を更新する
+  User->>Options: Save
+  Options->>Options: Save/Delete/Reorder を無効化
+  Options->>Repo: update(fn, 開いた時点の documentId)
+  Repo->>Repo: schema と size limit を検証、開始時の catalogId を記録
+  Repo->>Repo: entry の documentId が基点と一致するか確認
+  Repo->>Storage: set(新 Document + 新 Shard + 新 Root)
+  Repo->>Storage: get(書いた item を読み戻す)
+  Storage-->>Repo: 読み戻し結果
+  Repo->>Repo: 参照する全 document が揃っているか確認
+  Repo->>Storage: get(Active Pointer)
+  Storage-->>Repo: 現在の catalogId
+  Repo->>Repo: 開始時の catalogId と一致するか確認
+  Repo->>Storage: set(Active Pointer → 新 catalogId)
+  Repo->>Storage: get(Active Pointer)
+  Storage-->>Repo: commit 結果を確認
+  Repo-->>Options: resolve
+  Options->>Repo: 再読込して active snapshot を反映
+  Options-->>User: 「保存済み」を表示
+  Repo-)Storage: remove(orphan) を非同期で実行
+```
+
+mutation は永続化が完了するまで resolve しない。
+options は resolve 後にだけ「保存済み」と表示し、手元の state を正本とせず repository から読み直す。
+
+Active Pointer を切り替える前に失敗した場合、Pointer は旧 Catalog を指したままなので、従来の snapshot を読み続けられる。
+開始時と異なる `catalogId` を検出した場合は `ConflictError` として commit を中止し、自動マージせず UI に再読込を要求する。
+
+`update` はエディタが関数を開いた時点の `documentId` を基点として受け取る。
+エディタを開いてから保存するまでの間に別 window が同じ関数を保存していた場合、entry の `documentId` が基点と一致せず `ConflictError` になる。
+再読込後の再保存では基点が現在の entry に更新されるため、意図した上書きとして成功する。
 
 保存に失敗した場合、options は入力内容を保持し、再試行または JSON export を可能にする。
 
@@ -84,20 +176,28 @@ ChromeとFirefoxの間では同期しない。
 - 削除は対象への参照を除いた Catalog へ切り替え、削除した document は garbage collection まで残す。
 - 並べ替えは Function Document を変更せず、entry の順序が異なる Catalog へ切り替える。
 
+追加・削除・並べ替えも編集と同じ Commit Protocol に従う。
+たとえば追加の途中で別 window の commit が先行していた場合、Active Pointer の一致確認で `ConflictError` になり、UI は再読込後に改めて保存する。編集中の入力は保持される。
+
 ## Architecture
 
 ```mermaid
 flowchart LR
   Popup[popup] --> Repository[FunctionRepository]
   Options[options] --> Repository
-  Repository --> Store[FunctionStorage]
-  Store --> Adapter[WebExtension storage adapter]
-  Adapter --> Sync[(storage.sync<br/>Chrome / Firefox)]
-  Adapter --> SafariLocal[(storage.local<br/>Safari fallback)]
-  Store --> Cache[(storage.local<br/>validated snapshot cache)]
+  Repository -- 初期化時に1度 --> Migration[MigrationCoordinator]
+  Migration --> Store[KeyValueStorage]
+  Repository --> Store
+  Store --> Sync[(storage.sync<br/>Chrome / Firefox adapter)]
+  Store --> SafariLocal[(storage.local<br/>Safari adapter)]
+  Repository --> Cache[(storage.local<br/>validated snapshot cache)]
 ```
 
-図のソースはこの文書内の Mermaid ブロックとする。
+repositoryの初期化は、popupまたはoptionsを開いてデータを最初に読む前に行われる (Migration Trigger参照)。
+MigrationCoordinatorは移行期間だけ存在する。
+
+repositoryは`KeyValueStorage`契約 (Storage Port) だけに依存する。
+ブラウザ差はこの契約を実装するadapterのバリエーションとして閉じ込め、repositoryとadapterの間に中間層を置かない。
 
 依存方向は UI → application repository → storage port とする。
 domain と application 層から `chrome.*` / `browser.*` を参照しない。
@@ -105,11 +205,11 @@ domain と application 層から `chrome.*` / `browser.*` を参照しない。
 ### Domain
 
 - `CopyFunction`: 実行可能な完全な関数。
-- `FunctionSummary`: `id`, `name`, `pattern`, `theme`, `version` からなる一覧・検索用 projection。
+- `CopyFunctionRef`: `id`, `documentId`, `name`, `pattern`, `theme`, `version` からなる、実体への参照と一覧表示に必要な情報。popup と options の一覧はこれだけで描画でき、実行時に `documentId` から実体を引く。名称は既存の `CopyFunction` と接頭辞を揃える。
 - Valibot schema: Function Document、Catalog、Active Pointer を永続化境界で検証する。
 
-`FunctionSummary` は Catalog に複製するが、commit 対象の `CopyFunction` から repository が生成する。
-UI が summary と document を別々に組み立ててはならない。
+`CopyFunctionRef` は Catalog に複製するが、commit 対象の `CopyFunction` から repository が生成する。
+UI が ref と document を別々に組み立ててはならない。
 
 ### Application Repository
 
@@ -118,11 +218,11 @@ repository は、UI に次の契約を提供する。
 
 ```ts
 interface FunctionRepository {
-  listSummaries(): Promise<FunctionSummary[]>;
-  listForUrl(url: string): Promise<CopyFunction[]>;
-  get(id: string): Promise<CopyFunction | undefined>;
+  list(): Promise<CopyFunctionRef[]>;
+  listForUrl(url: string): Promise<CopyFunctionRef[]>;
+  get(ref: CopyFunctionRef): Promise<CopyFunction | undefined>;
   create(fn: CopyFunction): Promise<void>;
-  update(fn: CopyFunction): Promise<void>;
+  update(fn: CopyFunction, baseDocumentId?: string): Promise<void>;
   delete(id: string): Promise<void>;
   reorder(orderedIds: string[]): Promise<void>;
   subscribe(listener: () => void): Unsubscribe;
@@ -131,8 +231,14 @@ interface FunctionRepository {
 
 - mutation は永続化完了まで resolve しない。
 - schema error、quota error、conflict、corruption を型付き error として返す。
-- `listForUrl` が URL pattern の評価と必要 document の一括取得を担当する。
+- `listForUrl` は URL pattern の評価と Catalog からの絞り込みだけを担当し、Function Document を読まない。
+- `update` の `baseDocumentId` は呼び出し側が関数を読み込んだ時点の `documentId` で、entry がそれ以降に置き換わっていれば `ConflictError` とする。省略時は last-write-wins。
 - `subscribe` は「active snapshot が変わった」ことを通知し、受信側は repository からデータを再読込する。
+- repository は内部に mutation queue を持ち、同一 context からの mutation を直列化する。UI の操作無効化は体験のためであり、正しさは repository が担保する。
+
+`get` は ref が持つ `documentId` の document を直接読み、一覧で見た snapshot と実行する code の世代を一致させる。
+論理 ID から Catalog を引き直すと、その間に別 context が commit した場合に別世代の code を実行しうる。
+document が既に GC されていた場合は `undefined` を返し、UI は再読込を促す。
 
 ### Storage Port
 
@@ -149,6 +255,11 @@ interface KeyValueStorage {
 Chrome adapter は `chrome.storage.sync`、Firefox adapter は `browser.storage.sync` を包む。
 Safari adapter は同じkey/value契約を `browser.storage.local` で実装する。
 callback / Promise、namespace、同期可否の差はadapter内に閉じ込める。
+
+`subscribe`は`storage.onChanged`をadapterが正規化して実装する。
+`onChanged`はpopupとoptionsを含む拡張ページで受信でき、別contextからの`set`も通知される。
+ページを閉じている間の変更は通知されないため、popupとoptionsは開くたびにrepositoryから読み直す。
+Firefoxは変更のないキーも含めて通知することがあるため、通知内容を差分として信頼せず、受信側はrepositoryから再読込する。
 
 ChromeとFirefoxでは、最後に検証できたsnapshotを `storage.local` にcacheする。
 sync itemは端末間で到着順が保証されないため、新しいPointerだけが先に届いて参照先がまだ欠けている場合、repositoryは不完全なsnapshotを公開せずcache済みの旧snapshotを返す。
@@ -177,8 +288,6 @@ flowchart LR
   NS1 -. prepared .-> NewF2[New Function Document B']
 ```
 
-図のソースはこの文書内の Mermaid ブロックとする。
-
 正本はChromeとFirefoxでは `storage.sync`、Safariでは `storage.local` に保存する。
 キーにはアプリケーション名とstorage format versionを含める。
 以降のCatalog RootとShardを合わせて、論理的なCatalogと呼ぶ。
@@ -186,6 +295,8 @@ flowchart LR
 ### Active Pointer
 
 Key: `cocopy:function-store:active`
+
+各例の `"01J..."` は例示用のIDである。実装は `crypto.randomUUID()` を使い、IDに順序性は持たせない (`keys.ts`)。
 
 ```json
 {
@@ -196,7 +307,16 @@ Key: `cocopy:function-store:active`
 
 - すべての読み取りは Active Pointer から開始する。
 - Pointer が指す Catalog だけが commit 済みの正本である。
-- Pointer の切り替えを、複数 item にまたがる mutation のコミット点とする。
+- 保存は、新しい Document と Catalog を別のキーへ書いてから、最後に Active Pointer をそこへ向け替える。Pointer を書き換えるまで、途中の状態は誰からも見えない。
+
+Pointerのキーだけは、他のキーと異なりstorage format versionを含めない。
+Pointerはformat versionを跨いで単一であり、どのversionのCatalogを指しているかは値の`formatVersion`で判別する。
+これによりv2への移行時も「まずPointerを読む」という起点が変わらない。
+キーの`v1`とPointerの`formatVersion`が食い違う状態は`CorruptionError`とする。
+
+Pointerの`formatVersion`が既知のversionより新しい場合は、別のdeviceで新しいversionの拡張機能が動いていることを意味する。
+この場合はデータを読まず、書き換えもせず、拡張機能の更新を促すエラーとしてUIへ表示する。
+古いversionが新しいsnapshotを解釈してdowngrade書き込みを行うと、新しいversion側のデータを壊す。
 
 ### Catalog Root
 
@@ -224,6 +344,7 @@ Key: `cocopy:function-store:v1:catalog-shard:<shardId>`
   "formatVersion": 1,
   "catalogId": "01J...",
   "shardId": "01J...",
+  "createdAt": "2026-07-20T00:00:00.000Z",
   "entries": [
     {
       "id": "builtin-markdown",
@@ -242,9 +363,15 @@ Key: `cocopy:function-store:v1:catalog-shard:<shardId>`
 
 - Rootの`shardIds`順と各Shardの`entries`順を連結した順序を、optionsとpopupの表示順とする。
 - entry は URL filter と一覧表示に必要な情報だけを持つ。
-- `id` は関数の論理 ID、`documentId` は保存上の不変 document ID として分ける。
+- `id` は関数の論理 ID、`documentId` は関数のversionごとに一意な document ID として分ける。
 - user-controlled な `id` を storage key に直接埋め込まない。
 - Shardはentry境界で分割し、key長を含むserialized sizeが1 itemのquota未満になるようにする。
+
+分割は表示順のentry列を先頭から走査し、追加するとShardが実効上限を超える位置で切って次のShardを開始する。
+実効上限は`QUOTA_BYTES_PER_ITEM`の90%、7,372 bytesとする。
+Shard境界は毎回この規則から決まるため、分割結果は同じentry列に対して常に同じになり、
+どのdeviceでcommitしても同じ形になる。
+単一entryだけでこの上限を超える場合、そのentryは保存できない`QuotaError`とする。
 
 ### Function Document
 
@@ -254,6 +381,7 @@ Key: `cocopy:function-store:v1:function:<documentId>`
 {
   "formatVersion": 1,
   "documentId": "01J...",
+  "createdAt": "2026-07-20T00:00:00.000Z",
   "function": {
     "id": "builtin-markdown",
     "name": "Markdown: [title](url)",
@@ -268,10 +396,10 @@ Key: `cocopy:function-store:v1:function:<documentId>`
 ```
 
 - 1 関数の完全な実体を 1 item に保存する。
-- key長とvalueを含むserialized sizeが1 itemのquotaを超える関数は、保存を拒否する。
+- key長とvalueを含むserialized sizeが1 itemの実効上限 (7,372 bytes) を超える関数は、保存を拒否する。
 - document は不変とし、編集時は同じキーを上書きせず新しい `documentId` を作る。
 - Catalog entry は document から導出する。
-- 読み取り時に ID や summary が一致しなければ corruption として扱い、そのコードを実行しない。
+- 読み取り時に ID や ref の内容が document と一致しなければ corruption として扱い、そのコードを実行しない。
 
 ## Commit Protocol
 
@@ -281,7 +409,7 @@ FunctionStore は copy-on-write と Active Pointer により、旧 snapshot ま�
 1. mutation 開始時の `catalogId` を記録する。
 2. 新規または変更された Function Document を新しいキーへ書く。
 3. mutation後の全entryを持つ新しいCatalog ShardとCatalog Rootを書く。
-4. 新しいdocument、Shard、Rootを読み戻し、schema、参照、summary、容量を検証する。
+4. 新しいRootとShardを読み戻し、参照する全documentが揃っていることを確認する。
 5. Active Pointer を再読込し、手順1の `catalogId` と異なる場合は `ConflictError` としてcommitを中止する。
 6. Active Pointer を新しい `catalogId` へ切り替える。
 7. Pointer を読み戻して commit 結果を確認する。
@@ -289,37 +417,95 @@ FunctionStore は copy-on-write と Active Pointer により、旧 snapshot ま�
 手順2〜5で失敗した場合、Pointerは旧Catalogを指したままなので、従来のsnapshotを読み続けられる。
 途中まで作られたitemはorphanとして後で回収する。
 
+手順4と7で読み戻すのは、公開する直前のsnapshotに欠損がないことを確かめるためである。
+WebExtensions storageは、`set`のresolve後に`get`が書いた値を返すこと (read-your-writes) や、複数itemにまたがる書き込みの原子性を公式には保証していない。
+Active Pointerの切り替えはsnapshotの公開であり、読み戻しはその直前に完全性を確認できる最後の機会である。コストは1 mutationあたり`get`数回で済む。
+容量は手順2の前にCommit Preconditionsで判定済みであり、書いた後に測り直さない。
+refとdocumentの内容一致は、自分が今生成した値どうしの比較なのでunit testの範囲とする。
+他deviceやDevTools由来の破損は、書き込み時ではなく読み取り時の検証で捕捉する。
+
 別端末ではPointer、Root、Shard、Documentが異なる順序で同期されうる。
 新Pointerの参照先が揃うまではlocal cacheの旧snapshotを利用し、欠損をcorruptionとして確定しない。
-一定期間再取得しても揃わない場合に同期エラーとしてoptionsへ表示する。
+利用できるcacheがない場合 (同期途中の新規端末など) はエラーとして表示し、次にUIを開いたときの再読み込みに委ねる。時間をおいた自動再試行は持たない。
+
+local cacheは`storage.local`に検証済みsnapshotを1世代だけ保持する。
+書き込むのは、Pointerが指すsnapshotを全item揃った状態で検証できたときだけとする。
+不完全なsnapshotをcacheしないため、cacheは常に「かつて完全だったsnapshot」を指す。
+読み取り側もこの不変条件を検証し、Rootが参照するShardが欠けたcacheは外部要因による破損として破棄する。部分的なentry一覧を採用すると、後続のmutationが関数を失ったCatalogを公開しうるためである。
+Pointerが指す`catalogId`とcacheの`catalogId`が一致した時点でcacheの役目は終わり、次のsnapshotで置き換える。
 
 Active Pointer の更新自体は last-write-wins であり、storage API だけでは完全な排他を保証できない。
 極端に近い複数 context の同時 commit では、一方の更新が後勝ちになる可能性を許容する。
-repository は revision 確認により競合範囲を狭め、競合を検出した場合は自動マージせず UI に再読込を要求する。
+repository は commit 直前に Active Pointer を読み直し、mutation の基点にした `catalogId` と一致するか確認する。
+一致しなければ `ConflictError` とし、自動マージせず UI に再読込を要求する。
+この確認が守るのは mutation の実行中だけであり、エディタを開いてから保存するまでの競合は `update` の基点 `documentId` 比較で検出する。
 
-## Capacity and Performance
+1関数だけの編集であっても、commitは全entryを持つ新しいCatalogへの切り替えである。
+基点が古いままcommitすると、自分が変更していない関数まで基点時点の内容へ巻き戻す。
+「対象の関数だけを書き換える」部分更新としては扱えないため、基点のずれを`ConflictError`とする。
+
+## Capacity Model
 
 ChromeとFirefoxの`storage.sync` quotaを共通profileとする。
+FirefoxはChromeと同じ値・同じ計測方法 (key長 + JSON value長) をFirefox 79以降でenforceしている。
+Safariの正本は`storage.local` (既定5 MB) であり、このprofileに収まるデータは余裕を持って保存できる。
 
 - 1物理itemは、key長とJSON valueを合わせて8,192 bytes未満とする。
 - 全sync itemは、key長とJSON valueを合わせて102,400 bytes未満とする。
 - item数は512未満とする。
-- 書き込み回数は1分120回、1時間1,800回のquota内に収め、1 mutationのitemを可能な範囲で1回の`set`にまとめる。
-- 容量の事前判定にはstorage area全体を対象とする`getBytesInUse(null)`を使い、FunctionStore以外のsync itemとlegacy itemも計算に含める。
+- 書き込み回数は1分120回、1時間1,800回のquota内に収め、1 mutationのitemを可能な範囲で1回の`set`にまとめる。書き込み回数quotaはChrome固有で、Firefoxに相当する制限は確認されていない。Chromeのquota内に収めれば全ブラウザで安全である。
+
+### Effective Limits
+
+quotaいっぱいまで使うとcopy-on-writeの一時領域を確保できないため、次の実効上限を設ける。
+
+- 全体使用量は`QUOTA_BYTES`の90%、92,160 bytesを上限とする。
+- 1 itemあたりは`QUOTA_BYTES_PER_ITEM`の90%、7,372 bytesを上限とする。Function DocumentとCatalog Root/Shardの両方に適用する。
+- 関数数は128個を上限とし、これを超える`create`を拒否する。
+- peak item数は`MAX_ITEMS`の90%、460 itemsを上限とする。
+
+関数128個の場合、peakでも Document 128 + Catalog Root 2 + Shard 数件 + Pointer 1 でitem数には十分な余裕がある。
+先に尽きるのは通常bytesであり、関数数上限はitem数を安全側に抑えるための保険である。
+
+### Measuring Usage
+
+使用量は`getBytesInUse`ではなく、key長とJSON valueのbyte長から自前で計算した値を正とする。
+
+- `getBytesInUse`はブラウザ間で可用性が揃わない。Firefoxは`storage.local`について144以降でのみ対応する (Safariは14以降で対応済み)。
+- 自前計算なら全ブラウザで同じ判定になり、in-memory fakeでもテストできる。
+- adapterが`getBytesInUse`を提供できる場合、実測値との乖離を検出する診断用途には利用してよい。判定には使わない。
+
+1 itemのbyte数は `key.length + JSON.stringify(value).length` をUTF-8 byte長で測る。
+使用量は `getAll` が返す全itemの合計とし、FunctionStore以外のitem (legacy item を含む) も同じ式で数える。
+sync storageに何が入っているかを問わず、実際に残っている空きから判断する。
+ブラウザ実装との誤差は90% headroomで吸収する。
+
+容量計算はmutation開始時 (Commit Preconditions) に行い、不足した場合のみGC後に1度だけ再計測する。
+対象データは全体でも102,400 bytes以下であり、`getAll`と自前計算のコストは保存操作の頻度に対して無視できる。
+popupとoptionsの読み取り経路では容量計算を行わない。
+
+### Commit Preconditions
+
 - commit前に、旧snapshot、新document、新Catalog、Pointerが同時に存在するpeak usageを見積もる。
+- peak usageが実効上限を超える場合、mutationを開始しない。
+
+peak usageは「現在の全item使用量 + このmutationが新しく書くitemの合計byte数」とする。
+削除される旧snapshotの分は差し引かない。GCは commit 後に走るため、commit の瞬間には新旧が同時に存在する。
 - quota内でもcopy-on-writeの一時領域を確保できなければmutationを開始しない。
-- optionsに現在の使用量、次の保存に必要なpeak usage、quotaに対する割合を表示する。
 - quota超過時は保存を拒否し、JSON exportまたは不要な関数の削除を案内する。
+- 1 itemの上限を超える単一関数を保存できない場合、現在のサイズと上限を示し、コードの分割かJSON exportを案内する。
 - 端末間で保存内容が異なる状態を成功として扱わないため、`storage.local`への暗黙fallbackは行わない。
 - アプリケーションの事前検証に成功しても、browser側の書き込み失敗は必ず捕捉する。
 
-Pointer、shard化したCatalog、Function Documentへ分割するため、overheadとcommit用headroomを除いて`storage.sync`全体の約100 KiBまで利用できる。
-利用可能量はデータの形状とmutation内容に依存するため、固定の関数件数では保証しない。
+実際に保存できる量はデータの形状とmutation内容に依存するため、固定の関数件数では保証しない。
 
-- popupはCatalog Rootと全Shardを読み、URLに一致するFunction Documentだけを読む。
-- 複数 document は1回の `get` にまとめ、N+1 readを避ける。
+### Read Performance
+
+- popupはCatalog Rootと全Shardを読み、実行する1件のFunction Documentだけを読む。
 - options初期表示ではCatalogだけを読み、codeはeditorを開くまで読まない。
 - reorderはCatalogだけを新しく作り、Function Documentを複製しない。
+
+drag and dropの表示はcommit前でも即座に更新し、待ち時間をユーザーへ見せない。
 
 ## Garbage Collection
 
@@ -333,15 +519,30 @@ GCは正しさに必須ではなく、best effortとする。
 削除直前にActive Pointerを再読込し、到達可能なitemを改めて除外する。
 削除対象は`cocopy:function-store:v1:` prefixに限定し、storage areaの`clear()`は使用しない。
 
-commit の容量確保が必要な場合は既存 orphan の GC を先に試み、それでも不足すれば mutation を失敗させる。
+到達不能なitemをただちに削除しない。
+Pointerを読んだ後に別deviceのcommitが同期されると、そのdeviceが今publishしたばかりのdocumentを、
+こちらの古いPointerからは到達不能と判定してしまう。
+これを避けるため、各itemは`createdAt`を持ち、書き込みから10分以内のitemはGC対象から除外する。
+sync伝播はこの猶予内に収まる想定で、収まらなかった場合も次回のGCが同じitemを再評価する。
+
+次の2点をGCの起動契機とする。
+
+- commit成功後に非同期で実行する。mutationの応答を待たせない。
+- commitの容量確保が必要な場合に先行して実行し、それでも不足すればmutationを失敗させる。
+
+容量不足時だけを契機にすると、bytesに余裕がある間はGCが動かず、orphanがitem数の上限を静かに消費する。
+commit後のGCによって、容量とitem数のどちらの観点でもorphanが蓄積しない状態を保つ。
+
+削除対象が空の場合は`remove`を呼ばない。
+GCが書き込み回数quotaを不要に消費しないようにする。
 
 ## Data Integrity and Error Handling
 
 - storage から得た `unknown` はすべて Valibot schema で検証し、型 assertion だけで通さない。
 - Catalog 内の論理 ID と document ID は一意でなければならない。
-- Catalog summary は参照先 document から再計算した値と一致しなければならない。
+- Catalog の ref は参照先 document から再計算した値と一致しなければならない。
 - URL pattern は保存時に `RegExp` として構築可能か検証する。
-- 欠損 document、schema 不一致、summary 不一致は `CorruptionError` とする。
+- 欠損 document、schema 不一致、ref 不一致は `CorruptionError` とする。
 - popup は破損した関数を実行せず、正常な関数を表示する。
 - options は正常な関数と診断情報を表示し、JSON export を可能にする。
 - mutation 中は同じ UI からの Save、Delete、Reorder の競合操作を無効化する。
@@ -358,8 +559,23 @@ Scenario: storage は DevTools、拡張機能の不具合、旧バージョン�
 Mitigations:
 
 - Pointer、Catalog、Function Document の全境界を schema 検証する。
-- Catalog と document の ID および summary の一致を検証する。
+- Catalog と document の ID および ref の内容の一致を検証する。
 - ユーザーコードは sandbox だけで実行し、popup と options では評価しない。
+
+ref の一致検証が保証するのは「一覧で見た関数と実行する document が同じ実体である」ことまでで、document 内の code の書き換えは検出しない。
+storage へ書き込める主体は既に拡張と同等の権限を持つため、code の完全性検証 (hash 等) は脅威モデルに含めず、sandbox 実行を最終防衛線とする。
+
+### content script から関数コードが読まれる
+
+Scenario: sync storage を既定の access level のままにすると、任意のページで動く content script が関数コードとURL patternを読める。
+FunctionStoreの関数は content script からは不要である。
+
+Mitigations:
+
+- Chrome adapter は最初の storage 操作の前に `setAccessLevel({accessLevel: 'TRUSTED_CONTEXTS'})` を呼ぶ。
+- この呼び出しは1回だけ行い、以降の全操作をその完了後に直列化する。
+- `setAccessLevel` を利用できないbrowserでは、この呼び出しを省略して動作を継続する。Firefoxは未対応、Safariは`storage.session`のみ対応で、`local` / `sync` に対しては呼べない。
+- cocopy自身はcontent scriptを持たないため、`setAccessLevel`が効かないbrowserでも自拡張のcontent script経由で読まれる経路はなく、これは多層防御として扱う。
 
 ### GC が他の設定を削除する
 
@@ -387,10 +603,12 @@ domain repository test は特定の browser mock library に結合しない。
 - create/update/delete/reorder 後の順序と内容を保持する。
 - document、Catalog、Pointer の各書き込み地点で失敗しても旧 snapshot を読める。
 - quota error を呼び出し元へ返す。
-- Catalogを複数Shardへ分割しても、順序とsummaryを維持する。
+- 実効上限を超えるpeak usageのmutationを開始しない。
+- 関数数の上限を超える`create`を拒否する。
+- Catalogを複数Shardへ分割しても、順序とrefの内容を維持する。
 - orphan GC が active snapshot と他機能のキーを削除しない。
-- schema 不正、欠損 document、重複 ID、summary mismatch を検出する。
-- 2 writer の revision conflict を検出する。
+- schema 不正、欠損 document、重複 ID、ref mismatch を検出する。
+- 同じ snapshot を基点にした 2 writer の commit で、後発が `ConflictError` になる。
 - Pointerだけが先に同期された場合、完全な新snapshotが揃うまでlocal cacheを返す。
 
 ### Adapter Integration Tests
@@ -399,9 +617,12 @@ WebExtension storage adapter は、対象ブラウザに近い fake または実
 
 - 値の set/get/remove が Promise 契約へ正規化される。
 - browser の書き込みエラーが reject される。
-- Active Pointer の変更だけを subscription が通知する。
+- `storage.onChanged` が変更されたキーの一覧へ正規化される。
 - 複数キーを一括取得できる。
 - ChromeとFirefoxではsync area、Safariではlocal areaが選択される。
+
+adapterは変更されたキーをそのまま通知する。
+どのキーの変更を意味のある更新と見なすかはrepositoryの責務であり、adapterはフィルタしない。
 
 ### UI and E2E Tests
 
@@ -453,23 +674,23 @@ quota超過時だけ暗黙にlocalへfallbackする案も、端末ごとに異�
 
 ## AsIs（移行完了後に削除）
 
-現在の `src/lib/config.ts` は、すべての `CopyFunction` を配列にし、`chrome.storage.sync` の単一キー `functions` に保存する。
+legacy storageは、すべての `CopyFunction` を配列にし、`chrome.storage.sync` の単一キー `functions` に保存する形式である。
 
 ```text
 storage.sync
 └── functions: CopyFunction[]
 ```
 
-この構造には次の制約がある。
+この構造には次の制約があった。
 
 - 全関数が1 itemなので、合計が8 KiBを超えると保存できない。
 - 1関数の編集や並べ替えでも全配列を読み書きする。
 - popup は一致しない関数のcodeも読み、その後メモリ上で絞り込む。
-- `FunctionsReducer` は保存 Promise を待たず、永続化失敗時にも画面上のstateを更新する。
-- `config.ts`、React component、`chrome.storage` が直接結合している。
-- `useSubscribeFunctions` は `storage.onChanged` の `functions` キーを直接監視する。
+- 保存 Promise を待たず、永続化失敗時にも画面上のstateを更新していた。
+- 永続化処理、React component、`chrome.storage` が直接結合していた。
+- `storage.onChanged` の `functions` キーを直接監視していた。
 
-既存データ形式を、以降「legacy storage」と呼ぶ。
+この形式を書き込むコードは削除済みで、既存ユーザーのstorageに残るデータは読み取りと`deleteEntry`による関数単位の削除のみを行う。
 
 ## Migration Plan（移行完了後に削除）
 
@@ -477,58 +698,193 @@ storage.sync
 
 - legacy storage の `storage.sync["functions"]` は移行処理から変更・削除しない。
 - FunctionStore の Active Pointer が存在する場合は、legacy storage を自動で再移行しない。
-- FunctionStore の初期化が完了するまでは、検証済みの legacy data を読み取り専用で利用できる。
+- 移行後も legacy data を参照でき、関数を1件ずつ手動で取り込める。移行処理は legacy data を変更しないが、ユーザーは関数単位で legacy data から削除できる(秘密情報が残っている場合に消すため)。
 - 旧バージョンへrollbackした場合も、旧バージョンが読むlegacy dataを残す。
 - legacy itemもsync quotaを消費するため、保持中はその使用量をFunctionStoreの容量計算に含める。
 
+### Migration Trigger
+
+移行は`FunctionRepository`の初期化時に実行する。
+Active Pointerを読み、存在しなければその場でlegacy dataから移行してからデータを返す。
+
+popupとoptionsはActive Pointerの有無を意識せず、常に`FunctionRepository`だけを使う。
+読み取りより先に移行が完了するため、「移行されないまま関数を読む」状態が存在しない。
+移行完了フラグは持たない。Active Pointerの有無がそのまま移行済みかどうかを表す。
+
+移行元は単一itemであり、`get`1回で全体を読める。
+移行先も数itemに収まるため、初回起動に追加されるのは実質2往復であり、体感できる遅延にはならない。
+
+移行専用のservice workerは持たない。
+`onInstalled`は無効化→有効化で発火せず、更新の適用自体がidle待ちでブラウザ再起動まで遅延しうるため、
+「ユーザー操作より前に移行を終える」ことを保証できない。
+保証できない経路のために、その経路が動かなかった場合のfallbackを併存させると、
+両者の同時実行を防ぐlockとその失効処理が必要になる。
+移行の起点をrepositoryの初期化1箇所に定めることで、これらをすべて不要にする。
+
+参照:
+
+- [The Chrome Extension update lifecycle](https://developer.chrome.com/docs/extensions/develop/concepts/extensions-update-lifecycle) — 更新はidle時にのみ適用され、idleにならない場合はブラウザ再起動まで遅延する。
+- [The extension service worker lifecycle](https://developer.chrome.com/docs/extensions/develop/concepts/service-workers/lifecycle)
+
 ### Migration Coordinator
 
-通常の `FunctionRepository` に legacy 分岐を含めず、移行を `MigrationCoordinator`、legacy data の参照と復旧を read-only な `LegacyBackupRepository` に分ける。
+移行処理そのものを `MigrationCoordinator`、legacy data の参照を `LegacyBackupRepository` に分ける。
+`LegacyBackupRepository` の変更操作は関数単位の削除 (`deleteEntry`) のみに限定する。
+`FunctionRepository` は初期化時に `MigrationCoordinator` を呼ぶだけで、legacy 形式を直接解釈しない。
 
-初回移行は次の順序で行う。
+移行は次の順序で行う。
 
 1. `storage.sync["cocopy:function-store:active"]` を読む。
 2. Active Pointer がなければ、`storage.sync["functions"]` をデフォルト値なしで読む。
 3. legacy key 自体がなければ、組み込みの `defaultFunctions` を初期データとする。
-4. 配列、各関数、ID の一意性、URL pattern を検証する。
-5. legacy dataの生JSONを`storage.local["cocopy:legacy-backup:sync-functions"]`へ保存し、読み戻して一致を確認する。
-6. legacy item、新しいFunctionStore、copy-on-writeの一時itemを含むpeak usageがsync quota内か確認する。
-7. 各Function Document、Catalog Shard、Catalog Rootを`storage.sync`に書く。
+4. 配列として読めることを確認する。配列でなければ移行を中止する。
+5. legacy keyが存在した場合のみ、その生JSONを`storage.local["cocopy:legacy-backup:sync-functions"]`へ保存し、読み戻して一致を確認する。
+6. 関数を1件ずつ検証し、移行できるものとできないものに分ける。
+7. 移行できる関数のFunction Document、Catalog Shard、Catalog Rootを`storage.sync`に書く。
 8. 書いたデータを読み戻し、件数、順序、内容が移行元と一致することを確認する。
 9. 最後にActive Pointerを`storage.sync`へ書いてFunctionStoreを有効化する。
 10. 移行結果を`storage.local["cocopy:migration:sync-functions-to-function-store-v1"]`に記録する。
+
+legacy は単一 item であり、その時点で 8 KiB 以下であることが保証されている。
+移行後の合計サイズもこれとほぼ変わらず、実効上限の 92,160 bytes に対して十分小さい。
+このため移行時に peak usage を見積もらない。
+
+### Partial Migration
+
+移行の単位は関数1件とし、全件成功か全件失敗かのall or nothingにしない。
+関数10個のうち1個が検証を通らない場合、残る9個を移行してFunctionStoreを有効化する。
+1個のために全体を止めると、ユーザーは正常な9個も使えなくなる。
+
+step 6 の検証は関数ごとに独立して行う。次のいずれかに該当する関数を移行対象から外す。
+
+- schema 検証に失敗する。
+- URL pattern が `RegExp` として構築できない。
+- 単体で 1 item の実効上限 (7,372 bytes) を超える。
+
+ID の重複は、2件目以降を新しい ID へ採番し直して移行する。除外しない。
+採番し直した関数がその後サイズ超過で除外された場合は、元の ID で除外を記録し、採番は記録しない。実際には保存されなかった関数を移行済みと誤認させないためである。
+
+関数数上限 (128個) は移行では強制しない。legacyデータが上限を超えていても既存関数の閲覧・実行はそのまま動作し、以後の`create`だけが拒否される。
+
+移行できなかった関数は件数と名前を step 10 の移行結果に記録し、options に表示する。
+除外した関数のデータは legacy backup にそのまま残っており、失われない。
+
+移行を中止するのは、legacy dataが配列として読めない場合だけとする。
+この場合はActive Pointerを作らず、Migration Failureとして扱う。
+
+```mermaid
+sequenceDiagram
+  autonumber
+  actor User
+  participant UI as popup / options
+  participant Repo as FunctionRepository
+  participant Coord as MigrationCoordinator
+  participant Sync as storage.sync
+  participant Local as storage.local
+
+  User->>UI: popup または options を開く
+  UI->>Repo: init()
+  Repo->>Sync: get("cocopy:function-store:active")
+  Sync-->>Repo: なし（未移行）
+  Repo->>Coord: migrate()
+
+  Coord->>Sync: get("functions") ※デフォルト値なし
+  Sync-->>Coord: legacy data / キーなし
+  Note over Coord: キーなし → defaultFunctions を初期データにし、バックアップは書かない<br/>空配列 → 全削除済みの有効な状態として移行
+  Coord->>Coord: 配列として読めるか確認
+
+  Coord->>Local: set(legacy raw JSON をバックアップ)
+  Coord->>Local: get(バックアップ)
+  Local-->>Coord: 読み戻して一致を確認
+
+  Coord->>Coord: 関数を1件ずつ検証し、移行できるものだけ選ぶ
+  Coord->>Sync: set(Function Documents + Shards + Root)
+  Coord->>Sync: get(書いた item を読み戻す)
+  Sync-->>Coord: 件数・順序・内容が移行元と一致するか確認
+
+  Coord->>Sync: set(Active Pointer) ※ここで FunctionStore が有効化される
+  Coord->>Local: set(移行結果と、移行できなかった関数を記録)
+  Coord-->>Repo: 完了
+  Repo-->>UI: 移行後の snapshot を返す
+  UI-->>User: 関数を表示
+  UI-->>User: 移行できなかった関数があればその件数を表示
+
+  Note over Coord,Sync: legacy の "functions" は変更も削除もしない
+```
 
 Active Pointer を最後に書くため、途中で失敗しても不完全な FunctionStore は公開されない。
 次回起動時は同じlegacy dataから新しいsnapshotを作り直す。
 前回のitemはorphanとしてGCする。
 
 空配列は「legacy keyなし」と区別し、ユーザーが全関数を削除した有効な状態として移行する。
-不正なlegacy dataは自動で一部を捨てず、Active Pointerを作らない。
+
+legacy の ID はミリ秒timestampだけから作られており、同一ミリ秒内に作られた関数どうしで重複しうる。
+FunctionStore は重複 ID を `CorruptionError` として扱うため、
+step 6 で重複を検出した場合は 2 件目以降に新しい ID を採番し直してから移行する。
+採番し直した ID は step 10 の移行結果に記録する。
+
+popupとoptionsを同時に開くと、両方が移行を実行しうる。
+両者は同じlegacy dataから同じ内容を書き、Active Pointerはlast-write-winsでどちらか一方に決まる。
+負けた側のitemはorphanとしてGCされるため、公開されるsnapshotは常に1つである。
+これはcommit protocolが既に扱う競合と同じであり、移行のためのlockを設けない。
+
+### Migration Failure
+
+ここでいう失敗は、legacy dataが配列として読めない場合と、書き込み自体が失敗した場合を指す。
+個々の関数が検証を通らない場合は Partial Migration として扱い、失敗にはしない。
+
+失敗した場合、Active Pointerは書かれず、legacy dataも変更されていない。
+このとき`FunctionRepository`は関数を返さず、移行失敗をUIへ伝える。
+
+- optionsはエラーと失敗理由を表示し、Legacy Storage Backup UIからのexportを案内する。
+- 再試行はpopupまたはoptionsを開き直すことで行う。専用の操作を設けない。
+
+失敗を握りつぶしてdefault functionsを表示すると、ユーザーは自分の関数が消えたと受け取る。
+optionsでは移行できなかったことを明示し、legacy dataが無傷であることを伝える。
 
 ### Legacy Storage Backup UI
 
-options に一時的な「Legacy storage backup」セクションを追加する。
+optionsの`/legacy`に一時的な「Legacy storage backup」ページを置き、rootにはそこへのbannerだけを出す。
 
-- sync上のlegacy keyとlocal backupの有無、JSON byte数、件数、検証結果を表示する。
-- 未知fieldや不正な要素を含む原本全体をread-only JSONとして表示する。
-- 原本をJSONファイルとしてexportできるようにする。
-- 復旧前に検証結果とFunctionStoreへの反映内容をpreviewする。
-- 全体復旧は現在のFunctionStoreを置換する新snapshotとしてcommitする。
-- 復旧直前のCatalog IDをmigration metadataにcheckpointとして残す。
-- 一部が不正な場合は、validな関数だけを新しい論理IDで追加する操作と、exportして手動修正する選択肢を提供する。
-- 復旧後もlocal backupを変更・削除しない。
+主役はlegacy dataの関数一覧であり、それ以外の要素は最小限にする。
+ページは「導入文」「関数一覧」「exportと1行のsummary」の3つだけで構成する。
 
-このUIでは、legacy dataが現在のバックアップではなく「移行時点の読み取り専用原本」であることと、FunctionStoreの有効化日時を明示する。
+- 導入文は1段落で、新形式へ移行したこと、これが移行前の原本であること、将来削除するのでexportを促すことを述べる。
+- 関数一覧はoptionsの関数一覧と同じ行で描画し、行を展開するとeditorと同じ項目(name, color, URL pattern, code)を読み取り専用で表示する。
+- 各関数について、移行できたかどうかと、できなかった場合の理由を展開時に示す。
+- 各関数を個別にFunctionStoreへ取り込めるようにする。取り込みは通常の`create`と同じ検証を通す。
+- 検証を通らない関数と、サイズ超過で移行できなかった関数は、そのままでは取り込めない (後者はそのまま取り込んでも同じ上限で失敗する)。editorへ内容を渡し、ユーザーが修正・短縮して保存できるようにする。
+- 各関数を個別にlegacy dataから削除できるようにする。秘密情報を含む関数がlegacy dataに残り続けるのを避けるためであり、削除は確認の上でlocal backupとsync上のlegacy keyの両方から行う。削除が及ぶのはこの端末のbackupとsync上のlegacy keyのみで、移行を実行した他端末の`storage.local` backupには及ばない。
+- 原本をJSONファイルとしてexportできるようにする。exportしてもlegacy dataを変更・削除しない。
+- summaryは移行日時と原本のbyte数のみを1行で示す。migrationが失敗した場合はその旨とエラーを表示する。
+
+store別の有無・byte数・件数を並べる表は持たない。
+それらはdebug用途にしか意味がなく、export したJSONの方が正確に答えるためである。
+
+取り込みはlegacy dataを消費しない。取り込みはlegacy IDを保持するため、取り込み済みかどうかはcatalogとの照合だけで判定でき、別途の状態を持たない。
+取り込み済みの関数はその旨を表示してImportを出さず、二重取り込みは起こらない (関数一覧から削除すると再びImportできる)。
+
+このページは移行のための一時的なものであり、数か月後のリリースで削除する予定であることをUI上に明記する。
+legacy dataが現在のバックアップではなく「移行時点の原本」であることも明示する。
+編集・保存・共有はできず、変更操作は関数単位の削除のみとする。
+
+復旧操作は関数単位の取り込みに限定する。
+legacy snapshot全体でFunctionStoreを上書きする操作は用意しない。
+全体復元は、取り込み後に加えた編集を黙って捨てることになるためである。
 
 ### Implementation Sequence
 
 1. schema、repository interface、in-memory fake、FunctionStore repositoryをUIから独立して実装する。
-2. Migration CoordinatorとLegacy Backup Repositoryを実装し、障害注入テストを通す。
+2. Migration Coordinator と Legacy Backup Repository を実装し、repository の初期化に接続して障害注入テストを通す。
 3. optionsにmigration statusとLegacy Storage Backup UIを追加する。
 4. optionsの一覧、editor、mutationをFunctionRepositoryへ切り替える。
 5. popupを`listForUrl`へ切り替える。
 6. migration、Catalog sharding、quota超過、同期到着順、失敗時挙動をE2Eとintegration testへ追加する。
-7. 1リリース以上legacy dataを保持し、実利用でmigration failureがないことを確認する。
+7. 1リリース以上legacy dataを保持し、migration failureの報告がないことを確認する。
+
+既存の Playwright E2E は `chrome.storage.sync.set({functions})` で legacy 形式を直接seedしている。
+FunctionStore 形式でseedするfixture helperを用意し、各specをそれへ切り替える。
+legacy形式のseedは、migrationを検証する専用のspecにだけ残す。
 
 ### Migration Tests
 
@@ -537,10 +893,19 @@ options に一時的な「Legacy storage backup」セクションを追加する
 - 正常なlegacy dataの内容と順序を変えずに移行する。
 - 不正なlegacy dataではActive Pointerを作らない。
 - legacy raw backupの検証が終わるまでFunctionStoreを書き始めない。
-- legacy itemを含むpeak usageがquotaを超える場合、安全に移行を中止する。
-- 各書き込み地点で失敗してもlegacy dataが変化せず、次回再試行できる。
+- 10件中1件が検証を通らない場合、残る9件を移行してActive Pointerを作る。
+- 移行できなかった関数の件数と理由が移行結果に記録され、optionsに表示される。
+- legacy dataが配列として読めない場合はActive Pointerを作らない。
+- 各書き込み地点で失敗してもlegacy dataが変化せず、次に開いたときに再試行できる。
+- 移行が失敗したとき、UIがエラーを表示し、legacy dataをexportできる。
+- 移行できなかった関数をUIから個別に取り込める。
+- 検証を通らない関数の取り込みがeditorへ遷移し、修正して保存できる。
+- 取り込んでもlegacy dataが変化しない。
 - FunctionStoreが有効化済みならlegacy dataを再移行しない。
-- Legacy Storage Backup UIからraw JSONを確認、export、preview、復旧できる。
+- popupとoptionsが同時に移行しても、公開されるsnapshotが1つに収束する。
+- Legacy Storage Backup UIからstatusを確認し、raw JSONをexportできる。
+
+移行はpopupまたはoptionsを開くことだけで起動するため、legacy dataをseedしてUIを開くE2Eで経路全体を再現できる。
 
 ### Removal Criteria
 
@@ -548,8 +913,12 @@ options に一時的な「Legacy storage backup」セクションを追加する
 
 - popupとoptionsがFunctionRepositoryだけを使用している。
 - legacy形式へ書き込むコードが存在しない。
-- migration failureとrecovery pathがリリース済み環境で検証されている。
+- 開発者自身の環境でmigrationの動作を確認している。
+- legacy dataを保持したリリースを1回以上出し、その後一定期間migration failureの報告が届いていない。
 - legacy supportを終了するリリース方針が決定している。
 - Legacy Storage Backup UI、Migration Coordinator、Legacy Backup Repositoryを削除してよい状態になっている。
+
+cocopyはtelemetryを持たないため、migration failureの有無はissue報告の不在によって判断する。
+「failureが発生していない」ことを積極的に証明する手段はない。
 
 削除後も、上部のObjectiveからAlternatives ConsideredまではFunctionStoreの恒久的な設計文書として単独で成立する。

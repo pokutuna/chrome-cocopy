@@ -1,45 +1,17 @@
 import {faDizzy} from '@fortawesome/free-solid-svg-icons/faDizzy';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
-import {memo, useReducer, useMemo} from 'react';
+import {memo, useCallback, useMemo, useState} from 'react';
 import {useLocation} from 'react-router-dom';
 
-import {addCopyFunctions} from '../../lib/config';
-import {CopyFunction, isCopyFunction} from '../../lib/function';
+import {CopyFunction, generateId, isCopyFunction} from '../../lib/function';
 import {decodeSharable} from '../../lib/share';
 import {FunctionItem} from '../common/FunctionParts';
+import {useFunctionRepository} from '../common/FunctionStoreContext';
 import {Editor} from './Editor';
-import {EditorBox} from './FunctionList';
-import {Action} from './FunctionsReducer';
+import {EditorBox, messageForError} from './FunctionList';
 import {Section, TextList} from './Parts';
 
 import styles from './InstallFunction.module.css';
-
-interface State {
-  fn?: CopyFunction;
-}
-
-// partially emulate FunctionsReducer
-function reduce(state: State, action: Action): State {
-  switch (action.t) {
-    case 'edit':
-      if (!state.fn) return state;
-      return {
-        ...state,
-        fn: {
-          ...state.fn,
-          ...action.function,
-        },
-      };
-    case 'save':
-      if (state.fn) {
-        // XXX this doesn't care react-router-dom
-        addCopyFunctions(state.fn).then(() => (location.href = 'options.html'));
-      }
-      return state;
-    default:
-      return state;
-  }
-}
 
 const Notice = memo(() => {
   return (
@@ -61,7 +33,7 @@ const FailedMessage = memo(() => {
   );
 });
 
-function useSahredFunction(): CopyFunction | undefined {
+function useSharedFunction(): CopyFunction | undefined {
   const location = useLocation();
   const fn = useMemo<CopyFunction | undefined>(() => {
     const params = new URLSearchParams(location.search);
@@ -72,16 +44,55 @@ function useSahredFunction(): CopyFunction | undefined {
 }
 
 export function InstallFunction() {
-  const fn = useSahredFunction();
-  const [state, dispatch] = useReducer(reduce, {fn});
+  const repository = useFunctionRepository();
+  const shared = useSharedFunction();
+  const [fn, setFn] = useState<CopyFunction | undefined>(shared);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | undefined>(undefined);
+
+  const onEdit = useCallback(
+    (edited: Omit<CopyFunction, 'id'>) =>
+      setFn(current => (current ? {...current, ...edited} : current)),
+    [],
+  );
+
+  const onSave = useCallback(
+    (edited: Omit<CopyFunction, 'id'>) => {
+      if (!fn || saving) return;
+      setSaving(true);
+      setError(undefined);
+      // The shared URL carries whatever id the author had, which may already
+      // be in this user's catalog. Installing always mints a fresh id, the
+      // same way newFunction() does, so it never collides with or overwrites
+      // an existing function.
+      repository
+        .create({...fn, ...edited, id: generateId()})
+        .then(() => {
+          // XXX this doesn't care react-router-dom
+          location.href = 'options.html';
+        })
+        .catch(e => {
+          setError(messageForError(e));
+          setSaving(false);
+        });
+    },
+    [repository, fn, saving],
+  );
 
   return (
     <Section title="Install Function">
-      {state.fn ? (
+      {fn ? (
         <EditorBox>
           <Notice />
-          <FunctionItem fn={state.fn} />
-          <Editor function={state.fn} dispatch={dispatch} install />
+          <FunctionItem fn={fn} />
+          <Editor
+            function={fn}
+            onEdit={onEdit}
+            onSave={onSave}
+            saving={saving}
+            error={error}
+            install
+          />
         </EditorBox>
       ) : (
         <FailedMessage />

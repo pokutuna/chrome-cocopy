@@ -1,10 +1,25 @@
 import {CopyFunction, currentVersion} from '../../lib/function';
 import {textColorFromBgColor, isColorCode} from '../../lib/util';
-import {DispatchType as FnDispatchType} from './FunctionsReducer';
+
+/**
+ * Callbacks the editor uses to reach its owner. Save/delete are asynchronous in
+ * the owner (they go through FunctionRepository), so the editor no longer
+ * decides on its own whether a change was saved.
+ */
+export interface EditorCallbacks {
+  onEdit: (fn: Omit<CopyFunction, 'id'>) => void;
+  /**
+   * Receives the final draft directly: the owner must not read it back from
+   * its own state, which the deferred onEdit may not have reached yet.
+   */
+  onSave: (fn: Omit<CopyFunction, 'id'>) => void;
+  onCancel: () => void;
+  onDelete: () => void;
+}
 
 interface State {
   fn: CopyFunction;
-  fnDispatch: FnDispatchType;
+  callbacks: EditorCallbacks;
 
   name: string;
   textColor: string;
@@ -21,7 +36,6 @@ interface State {
   };
 
   canSave: boolean;
-  hasSaved: boolean;
 }
 
 type EditAction = {t: 'edit'; name: string; value: string};
@@ -33,10 +47,10 @@ type Action =
   | {t: 'cancel'}
   | {t: 'delete'};
 
-export function init(fn: CopyFunction, fnDispatch: FnDispatchType): State {
+export function init(fn: CopyFunction, callbacks: EditorCallbacks): State {
   return {
     fn,
-    fnDispatch,
+    callbacks,
     name: fn.name,
     textColor: fn.theme.textColor,
     backgroundColor: fn.theme.backgroundColor,
@@ -45,7 +59,6 @@ export function init(fn: CopyFunction, fnDispatch: FnDispatchType): State {
     openPalette: false,
     errors: {},
     canSave: true,
-    hasSaved: false,
   };
 }
 
@@ -101,7 +114,7 @@ function removeTrailingSpace(code: string): string {
 }
 
 function handleEdit(state: State, action: EditAction): State {
-  const next = {...state, [action.name]: action.value, hasSaved: false};
+  const next = {...state, [action.name]: action.value};
 
   if (action.name === 'backgroundColor') {
     if (/^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i.test(action.value)) {
@@ -119,7 +132,7 @@ function handleEdit(state: State, action: EditAction): State {
 
   next.errors = validateEdit(state.errors, action);
 
-  state.fnDispatch({t: 'edit', function: stateToFn(next)});
+  state.callbacks.onEdit(stateToFn(next));
   return next;
 }
 
@@ -139,20 +152,21 @@ function reduce(state: State, action: Action): State {
       return next;
     }
     case 'save': {
-      // remove trailing space
+      // remove trailing space; this also pushes the final draft to the owner
+      // before the save is requested.
       const next = handleEdit(state, {
         t: 'edit',
         name: 'code',
         value: removeTrailingSpace(state.code),
       });
-      state.fnDispatch({t: 'save'});
-      return {...next, hasSaved: true};
+      state.callbacks.onSave(stateToFn(next));
+      return next;
     }
     case 'cancel':
-      state.fnDispatch({t: 'cancel'});
+      state.callbacks.onCancel();
       return state;
     case 'delete':
-      state.fnDispatch({t: 'delete'});
+      state.callbacks.onDelete();
       return state;
   }
 }

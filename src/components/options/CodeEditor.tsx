@@ -41,24 +41,32 @@ const editorExtensions = [
 
 export const CodeEditor = (props: {
   code: string;
-  setCode: (code: string) => void;
+  setCode?: (code: string) => void;
   error?: string;
+  /** Render the same highlighted surface without accepting edits. */
+  readOnly?: boolean;
 }) => {
   const onCreateEditor = useCallback((view: EditorView) => {
     view.contentDOM.id = editorId;
     view.contentDOM.spellcheck = false;
   }, []);
+  const readOnly = props.readOnly ?? false;
 
   return (
     <InputBox>
-      <Label htmlFor="code">
+      <Label htmlFor={readOnly ? undefined : editorId}>
         Code
-        <LabelSub>Must be a single function.</LabelSub>
+        {!readOnly && <LabelSub>Must be a single function.</LabelSub>}
       </Label>
       <CodeMirror
         value={props.code}
         onChange={props.setCode}
-        onCreateEditor={onCreateEditor}
+        // The fixed contentDOM id exists for the editable form's label; a
+        // read-only viewer can appear several times on one page, so it must
+        // not claim the id.
+        onCreateEditor={readOnly ? undefined : onCreateEditor}
+        editable={!readOnly}
+        readOnly={readOnly}
         extensions={editorExtensions}
         basicSetup={{
           lineNumbers: false,
