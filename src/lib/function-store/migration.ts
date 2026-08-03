@@ -29,22 +29,24 @@ export const LEGACY_BACKUP_KEY = 'cocopy:legacy-backup:sync-functions';
 export const MIGRATION_RESULT_KEY =
   'cocopy:migration:sync-functions-to-function-store-v1';
 
-export interface MigrationSkip {
-  id: string;
-  name: string;
-  reason: 'schema' | 'pattern' | 'size';
-}
+const migrationSkipSchema = v.strictObject({
+  id: v.string(),
+  name: v.string(),
+  reason: v.picklist(['schema', 'pattern', 'size']),
+});
+export type MigrationSkip = v.InferOutput<typeof migrationSkipSchema>;
 
-export interface MigrationResult {
-  formatVersion: 1;
-  migratedAt: string; // ISO 8601
-  outcome: 'completed' | 'failed';
-  legacyExisted: boolean;
-  migratedCount: number;
-  skipped: MigrationSkip[];
-  renamedIds: {from: string; to: string}[];
-  error?: string; // outcome === 'failed' only
-}
+export const migrationResultSchema = v.strictObject({
+  formatVersion: v.literal(1),
+  migratedAt: v.pipe(v.string(), v.isoTimestamp()),
+  outcome: v.picklist(['completed', 'failed']),
+  legacyExisted: v.boolean(),
+  migratedCount: v.number(),
+  skipped: v.array(migrationSkipSchema),
+  renamedIds: v.array(v.strictObject({from: v.string(), to: v.string()})),
+  error: v.optional(v.string()), // outcome === 'failed' only
+});
+export type MigrationResult = v.InferOutput<typeof migrationResultSchema>;
 
 export interface CreateMigrationCoordinatorOptions {
   sync: KeyValueStorage;
@@ -93,8 +95,12 @@ export function classifyFunction(
   return {ok: true, fn: parsed.output};
 }
 
-/** Best-effort id/name for a skip entry even when schema validation failed. */
-function describeUnknown(fn: unknown): {id: string; name: string} {
+/**
+ * Best-effort id/name for a skip entry even when schema validation failed.
+ * Exported so the Legacy Storage Backup UI matches its rows against skip
+ * records the same way they were written.
+ */
+export function describeUnknown(fn: unknown): {id: string; name: string} {
   const obj =
     typeof fn === 'object' && fn !== null
       ? (fn as Record<string, unknown>)
@@ -232,6 +238,9 @@ export function createMigrationCoordinator(
     const renamedIds: {from: string; to: string}[] = [];
     const seenIds = new Set<string>();
     const migratable: ValidatedFunction[] = [];
+    // new id -> original id; recorded in renamedIds only once the function is
+    // actually stored, so a later skip is reported under the id the user knows.
+    const renamedFrom = new Map<string, string>();
 
     for (const item of source) {
       const classified = classifyFunction(item);
@@ -246,7 +255,7 @@ export function createMigrationCoordinator(
         const from = fn.id;
         const to = newId();
         fn = {...fn, id: to};
-        renamedIds.push({from, to});
+        renamedFrom.set(to, from);
       }
       seenIds.add(fn.id);
 
@@ -268,9 +277,15 @@ export function createMigrationCoordinator(
       };
       const size = itemByteSize(functionDocumentKey(documentId), document);
       if (size > EFFECTIVE_ITEM_BYTES) {
-        skipped.push({id: fn.id, name: fn.name, reason: 'size'});
+        skipped.push({
+          id: renamedFrom.get(fn.id) ?? fn.id,
+          name: fn.name,
+          reason: 'size',
+        });
         continue;
       }
+      const from = renamedFrom.get(fn.id);
+      if (from !== undefined) renamedIds.push({from, to: fn.id});
       documents.push(document);
       entries.push(refFromFunction(fn, documentId));
     }
@@ -381,10 +396,15 @@ export interface LegacyBackupRepository {
   /**
    * Deletes one function from the legacy data. `index` is the position in
    * the array the UI renders (the backup when present, otherwise the legacy
-   * sync value). The matching entry is removed from the other copy as well:
-   * data deleted for containing a secret must be gone from both stores.
+   * sync value), and `expected` is the raw entry the UI showed there: the
+   * delete only proceeds if that position still holds that entry, so a stale
+   * page cannot delete a different function. The matching entry is removed
+   * from the other copy as well: data deleted for containing a secret must
+   * be gone from both stores, and the delete fails without writing anything
+   * when the other copy holds a diverged version of the entry that a
+   * structural match would leave behind.
    */
-  deleteEntry(index: number): Promise<void>;
+  deleteEntry(index: number, expected: unknown): Promise<void>;
 }
 
 function parseBackupArray(raw: unknown): unknown[] | undefined {
@@ -423,26 +443,46 @@ export function createLegacyBackupRepository(options: {
       const backupRawValue = localValues[LEGACY_BACKUP_KEY];
       const backupRaw =
         typeof backupRawValue === 'string' ? backupRawValue : undefined;
-      const result = localValues[MIGRATION_RESULT_KEY] as
-        | MigrationResult
-        | undefined;
+      // A corrupt result degrades to "no result recorded" rather than
+      // crashing the backup UI.
+      const parsedResult = v.safeParse(
+        migrationResultSchema,
+        localValues[MIGRATION_RESULT_KEY],
+      );
+      const result = parsedResult.success ? parsedResult.output : undefined;
 
       return {legacyRaw, backupRaw, result};
     },
 
-    async deleteEntry(index: number): Promise<void> {
+    async deleteEntry(index: number, expected: unknown): Promise<void> {
       const legacyValue = (await sync.get([LEGACY_FUNCTIONS_KEY]))[
         LEGACY_FUNCTIONS_KEY
       ];
       const legacy = Array.isArray(legacyValue) ? legacyValue : undefined;
-      const backup = parseBackupArray(
-        (await local.get([LEGACY_BACKUP_KEY]))[LEGACY_BACKUP_KEY],
-      );
+      const backupRawValue = (await local.get([LEGACY_BACKUP_KEY]))[
+        LEGACY_BACKUP_KEY
+      ];
+      const backup = parseBackupArray(backupRawValue);
+      // Deleting only from sync while an unreadable backup keeps the entry
+      // would silently break the both-stores guarantee this page promises.
+      if (backupRawValue !== undefined && backup === undefined) {
+        throw new Error(
+          'The legacy backup could not be read, so the entry cannot be deleted from it.',
+        );
+      }
 
       const source = backup ?? legacy;
       if (!source || index < 0 || index >= source.length) {
         throw new Error(
           'This entry no longer exists in the legacy data. Reload and try again.',
+        );
+      }
+      // The index was taken from a rendered snapshot; another page may have
+      // rewritten the array since. Deleting by a stale index would remove a
+      // different function than the one the user confirmed.
+      if (!jsonEqual(source[index], expected)) {
+        throw new Error(
+          'The legacy data changed since it was displayed. Reload and try again.',
         );
       }
       const [removed] = source.splice(index, 1);
@@ -453,7 +493,32 @@ export function createLegacyBackupRepository(options: {
       const other = source === backup ? legacy : backup;
       if (other) {
         const match = other.findIndex(item => jsonEqual(item, removed));
-        if (match >= 0) other.splice(match, 1);
+        if (match >= 0) {
+          other.splice(match, 1);
+        } else {
+          // No structural match. An entry that is absent from the other copy
+          // is fine (a retry after a partial failure lands here), but a
+          // diverged version under the same id — e.g. the old extension
+          // edited the sync value after migration — must not survive a
+          // delete that reports success. Fail closed before writing.
+          // Identity is the entry's `id` when it has one; an id-less entry
+          // has no identity to diverge under and falls through to "absent".
+          const removedId =
+            typeof removed === 'object' &&
+            removed !== null &&
+            typeof (removed as {id?: unknown}).id === 'string'
+              ? (removed as {id: string}).id
+              : undefined;
+          const diverged =
+            removedId !== undefined &&
+            other.some(item => describeUnknown(item).id === removedId);
+          if (diverged) {
+            throw new Error(
+              'The old sync data holds a different version of this function, ' +
+                'so it was not deleted. Reload and try again.',
+            );
+          }
+        }
       }
 
       // sync before backup, deliberately. The two writes are not atomic, so

@@ -64,7 +64,7 @@ export const initialState: State = {
 
 export type DispatchType = (action: Action) => void;
 
-export const newId = 'new';
+export const NEW_FUNCTION_ID = 'new';
 
 export function moved(
   refs: CopyFunctionRef[],
@@ -83,7 +83,7 @@ export function moved(
  * before throwing the draft away.
  */
 export function hasEdited(state: State): boolean {
-  if (state.activeId === newId) return true;
+  if (state.activeId === NEW_FUNCTION_ID) return true;
 
   const orig = state.original;
   const item = state.editing;
@@ -127,7 +127,7 @@ function closeEditor(state: State): State {
  * again" deliberately overwrites, as the error message promises.
  */
 function rearmedBase(state: State): string | undefined {
-  if (state.activeId === undefined || state.activeId === newId) {
+  if (state.activeId === undefined || state.activeId === NEW_FUNCTION_ID) {
     return undefined;
   }
   return (
@@ -161,7 +161,7 @@ function reduce(state: State, action: Action): State {
         ...next,
         editing: newFunction(),
         original: undefined,
-        activeId: newId,
+        activeId: NEW_FUNCTION_ID,
       };
     }
     case 'close':

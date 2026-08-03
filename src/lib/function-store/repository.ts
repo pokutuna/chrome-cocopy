@@ -18,6 +18,7 @@ import {
   catalogShardSchema,
   FunctionDocument,
   functionDocumentSchema,
+  activePointerV1Schema,
   looseActivePointerSchema,
 } from './schema';
 import {
@@ -211,29 +212,29 @@ export function createFunctionRepository(
     return run;
   }
 
+  function parsePointer(value: unknown): string {
+    const loose = v.safeParse(looseActivePointerSchema, value);
+    if (!loose.success) {
+      throw new CorruptionError('Active Pointer failed schema validation.');
+    }
+    if (loose.output.formatVersion > 1) {
+      throw new UnsupportedVersionError(
+        `Active Pointer uses storage format version ${loose.output.formatVersion}, which this version of cocopy cannot read. Update the extension.`,
+        loose.output.formatVersion,
+      );
+    }
+    const parsed = v.safeParse(activePointerV1Schema, value);
+    if (!parsed.success) {
+      throw new CorruptionError('Active Pointer failed schema validation.');
+    }
+    return parsed.output.catalogId;
+  }
+
   async function readPointerValue(): Promise<string | undefined> {
     const raw = await storage.get([ACTIVE_POINTER_KEY]);
     const value = raw[ACTIVE_POINTER_KEY];
     if (value === undefined) return undefined;
-
-    const parsed = v.safeParse(looseActivePointerSchema, value);
-    if (!parsed.success) {
-      throw new CorruptionError('Active Pointer failed schema validation.');
-    }
-    if (parsed.output.formatVersion > 1) {
-      throw new UnsupportedVersionError(
-        `Active Pointer uses storage format version ${parsed.output.formatVersion}, which this version of cocopy cannot read. Update the extension.`,
-        parsed.output.formatVersion,
-      );
-    }
-    if (parsed.output.formatVersion !== 1) {
-      // The keys we would read are v1-prefixed; a pointer claiming another
-      // version cannot describe them.
-      throw new CorruptionError(
-        `Active Pointer declares formatVersion ${parsed.output.formatVersion} but the store uses v1 keys.`,
-      );
-    }
-    return parsed.output.catalogId;
+    return parsePointer(value);
   }
 
   /**
@@ -570,11 +571,13 @@ export function createFunctionRepository(
       throw error;
     }
 
-    // (7) Confirm the commit landed.
+    // (7) Confirm the commit landed. A different catalogId here means another
+    // context's commit won the race after ours — a tolerated conflict
+    // (last-write-wins), not corruption.
     const confirmed = await readPointerValue();
     if (confirmed !== catalogId) {
-      throw new CorruptionError(
-        'Aborting commit: the Active Pointer did not hold the new catalog after writing it.',
+      throw new ConflictError(
+        'The stored functions changed in another window while this change was being saved. Reload and try again.',
       );
     }
 
@@ -735,7 +738,14 @@ export function createFunctionRepository(
 
     async get(ref: CopyFunctionRef): Promise<CopyFunction | undefined> {
       const key = functionDocumentKey(ref.documentId);
-      const raw = (await storage.get([key]))[key];
+      // The pointer is read alongside the document (one batched `get`): a ref
+      // obtained before another context upgraded the storage format must not
+      // read a document this version cannot interpret — an unsupported
+      // formatVersion means no data may be read, not just no catalog.
+      const values = await storage.get([ACTIVE_POINTER_KEY, key]);
+      const pointerValue = values[ACTIVE_POINTER_KEY];
+      if (pointerValue !== undefined) parsePointer(pointerValue);
+      const raw = values[key];
       if (raw === undefined) return undefined;
 
       const doc = parseOrThrow(

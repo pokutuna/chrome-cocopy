@@ -19,7 +19,7 @@ import {Editor} from './Editor';
 import {
   reducer,
   initialState,
-  newId,
+  NEW_FUNCTION_ID,
   moved,
   visibleRefs,
   confirmDiscard,
@@ -74,9 +74,9 @@ function AddFunction(props: {onClick: () => void}) {
 }
 
 /**
- * Wording for a failed mutation. Conflict and quota get their own message
- * because the user can act on them (docs/function-storage.md, "Data Integrity
- * and Error Handling").
+ * Wording for a failed repository operation (mutations and reads alike).
+ * Conflict and quota get their own message because the user can act on them
+ * (docs/function-storage.md, "Data Integrity and Error Handling").
  */
 export function messageForError(error: unknown): string {
   const code =
@@ -92,7 +92,7 @@ export function messageForError(error: unknown): string {
     }`.trim();
   }
   if (error instanceof Error && error.message) return error.message;
-  return 'Saving failed. Please try again.';
+  return 'The operation failed. Please try again.';
 }
 
 /**
@@ -128,33 +128,51 @@ export function useFunctionListStore(repository: FunctionRepository) {
   const onExternalChange = useCallback(() => void refresh(), [refresh]);
   useSubscribeFunctions(repository, onExternalChange);
 
+  // Synchronous re-entrancy lock: `state.saving` only flips after a render,
+  // which is too late for a double-fired save (Editor defers callbacks with
+  // setTimeout, so two calls can land before the reducer state is visible).
+  const mutationInFlight = useRef(false);
+
   /**
    * Runs one mutation: disables the other actions, waits for persistence, then
    * re-reads the catalog. On failure the editor draft is kept for a retry.
    */
   const runMutation = useCallback(
-    async (mutate: () => Promise<void>, onSuccess?: () => void) => {
-      if (stateRef.current.saving) return;
-      // The draft as submitted. `mutation-succeeded` compares it with the draft
-      // at resolution time so typing during the write is not mistaken for
-      // saved content.
-      const submitted = stateRef.current.editing;
-      dispatch({t: 'mutation-start'});
+    async (
+      mutate: () => Promise<void>,
+      options?: {submitted?: CopyFunction; onSuccess?: () => void},
+    ) => {
+      if (mutationInFlight.current || stateRef.current.saving) return;
+      mutationInFlight.current = true;
       try {
-        await mutate();
-      } catch (error) {
-        // Reload first: a conflict means the stored list moved on, and a failed
-        // commit still leaves the previous snapshot readable.
+        // The draft as submitted. `mutation-succeeded` compares it with the
+        // draft at resolution time so typing during the write is not mistaken
+        // for saved content.
+        const submitted = options?.submitted ?? stateRef.current.editing;
+        dispatch({t: 'mutation-start'});
+        try {
+          await mutate();
+        } catch (error) {
+          // Reload first: a conflict means the stored list moved on, and a
+          // failed commit still leaves the previous snapshot readable.
+          await refresh();
+          dispatch({t: 'mutation-failed', message: messageForError(error)});
+          return;
+        }
         await refresh();
-        dispatch({t: 'mutation-failed', message: messageForError(error)});
-        return;
+        dispatch({t: 'mutation-succeeded', submitted});
+        options?.onSuccess?.();
+      } finally {
+        mutationInFlight.current = false;
       }
-      await refresh();
-      dispatch({t: 'mutation-succeeded', submitted});
-      onSuccess?.();
     },
     [refresh],
   );
+
+  // Serial number of the latest openFunction call. A row click supersedes any
+  // load still in flight; the superseded load must not dispatch, or a slower
+  // earlier request would replace the editor for the row clicked later.
+  const openRequestId = useRef(0);
 
   const openFunction = useCallback(
     async (ref: CopyFunctionRef) => {
@@ -172,8 +190,10 @@ export function useFunctionListStore(repository: FunctionRepository) {
         if (current.activeId === ref.id) return;
       }
 
+      const requestId = ++openRequestId.current;
       try {
         const fn = await repository.get(ref);
+        if (requestId !== openRequestId.current) return;
         if (!fn) {
           await refresh();
           dispatch({
@@ -185,40 +205,49 @@ export function useFunctionListStore(repository: FunctionRepository) {
         }
         dispatch({t: 'open', fn, documentId: ref.documentId});
       } catch (error) {
+        if (requestId !== openRequestId.current) return;
         dispatch({t: 'error', message: messageForError(error)});
       }
     },
     [repository, refresh],
   );
 
-  const saveFunction = useCallback(() => {
-    const {editing, activeId, baseDocumentId} = stateRef.current;
-    if (!editing || activeId === undefined) return;
-    const isNew = activeId === newId;
-    void runMutation(
-      () =>
-        isNew
-          ? repository.create(editing)
-          : repository.update(editing, baseDocumentId),
-      // Creating closes the editor; editing keeps it open showing "Saved",
-      // matching the previous behaviour.
-      isNew ? () => dispatch({t: 'close'}) : undefined,
-    );
-  }, [repository, runMutation]);
+  const saveFunction = useCallback(
+    (fn?: Omit<CopyFunction, 'id'>) => {
+      const {editing, activeId, baseDocumentId} = stateRef.current;
+      if (!editing || activeId === undefined) return;
+      // The Editor hands over the final draft itself; its deferred onEdit may
+      // not have reached `editing` yet. Only the id comes from state.
+      const submitted: CopyFunction = fn ? {...fn, id: editing.id} : editing;
+      const isNew = activeId === NEW_FUNCTION_ID;
+      void runMutation(
+        () =>
+          isNew
+            ? repository.create(submitted)
+            : repository.update(submitted, baseDocumentId),
+        {
+          submitted,
+          // Creating closes the editor; editing keeps it open showing
+          // "Saved", matching the previous behaviour.
+          onSuccess: isNew ? () => dispatch({t: 'close'}) : undefined,
+        },
+      );
+    },
+    [repository, runMutation],
+  );
 
   const deleteFunction = useCallback(() => {
     const id = stateRef.current.activeId;
     if (id === undefined) return;
-    if (id === newId) {
+    if (id === NEW_FUNCTION_ID) {
       // Never persisted, so there is nothing to delete.
       dispatch({t: 'close'});
       return;
     }
     if (!confirm('Are you sure you want to delete this function?')) return;
-    void runMutation(
-      () => repository.delete(id),
-      () => dispatch({t: 'close'}),
-    );
+    void runMutation(() => repository.delete(id), {
+      onSuccess: () => dispatch({t: 'close'}),
+    });
   }, [repository, runMutation]);
 
   // dnd-kit reports the final move and the drop in the same tick, so the
@@ -250,7 +279,6 @@ export function useFunctionListStore(repository: FunctionRepository) {
   return {
     state,
     dispatch,
-    refresh,
     openFunction,
     saveFunction,
     deleteFunction,
@@ -337,7 +365,8 @@ export function FunctionList() {
   const onClickAdd = useCallback(() => dispatch({t: 'add'}), [dispatch]);
 
   const refs = visibleRefs(state);
-  const newDraft = state.activeId === newId ? state.editing : undefined;
+  const newDraft =
+    state.activeId === NEW_FUNCTION_ID ? state.editing : undefined;
 
   return (
     <Section title="Functions">

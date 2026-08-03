@@ -207,6 +207,28 @@ test('duplicate logical ids are renamed on the second occurrence and recorded', 
   expect(result.renamedIds[0].to).toBe(entries[1].id);
 });
 
+test('a renamed duplicate that is then skipped for size is reported under its original id', async () => {
+  const {sync, local, coordinator} = makeHarness();
+  const small = makeFunction('dup', {name: 'kept'});
+  const huge = makeFunction('dup', {name: 'dropped', code: 'x'.repeat(8_000)});
+  await sync.set({[LEGACY_FUNCTIONS_KEY]: [small, huge]});
+
+  await coordinator.migrate();
+
+  expect((await readCatalogEntries(sync)).map(e => e.id)).toEqual(['dup']);
+
+  // The skip carries the id the user knows, and no rename is recorded for a
+  // function that was never stored — otherwise the backup UI would show the
+  // dropped entry as migrated.
+  const result = (await local.get([MIGRATION_RESULT_KEY]))[
+    MIGRATION_RESULT_KEY
+  ] as MigrationResult;
+  expect(result.skipped).toEqual([
+    {id: 'dup', name: 'dropped', reason: 'size'},
+  ]);
+  expect(result.renamedIds).toEqual([]);
+});
+
 test('an oversized function is skipped with reason size', async () => {
   const {sync, local, coordinator} = makeHarness();
   const huge = makeFunction('huge', {code: 'x'.repeat(8_000)});
@@ -417,6 +439,15 @@ test('createLegacyBackupRepository.status reports undefined fields when nothing 
   expect(status.result).toBeUndefined();
 });
 
+test('createLegacyBackupRepository.status degrades a corrupt result to undefined', async () => {
+  const sync = new InMemoryKeyValueStorage();
+  const local = new InMemoryKeyValueStorage();
+  await local.set({[MIGRATION_RESULT_KEY]: {skipped: 'x'}});
+  const legacyBackupRepo = createLegacyBackupRepository({sync, local});
+
+  expect((await legacyBackupRepo.status()).result).toBeUndefined();
+});
+
 test('deleteEntry removes the entry from both the backup and the legacy sync value', async () => {
   // KeySortingStorage: the sync copy comes back with reordered keys, so the
   // cross-store match must be structural, not positional or string-based.
@@ -427,7 +458,7 @@ test('deleteEntry removes the entry from both the backup and the legacy sync val
   await local.set({[LEGACY_BACKUP_KEY]: JSON.stringify(fns)});
   const legacyBackupRepo = createLegacyBackupRepository({sync, local});
 
-  await legacyBackupRepo.deleteEntry(1);
+  await legacyBackupRepo.deleteEntry(1, fns[1]);
 
   const backupRaw = (await local.get([LEGACY_BACKUP_KEY]))[
     LEGACY_BACKUP_KEY
@@ -456,7 +487,7 @@ test('deleteEntry leaves the entry visible when the backup write fails', async (
   failing.set = () => Promise.reject(new Error('local write failed'));
   const legacyBackupRepo = createLegacyBackupRepository({sync, local: failing});
 
-  const error = await catchAsync(() => legacyBackupRepo.deleteEntry(0));
+  const error = await catchAsync(() => legacyBackupRepo.deleteEntry(0, fns[0]));
   expect((error as Error).message).toMatch(/local write failed/);
 
   // sync was written first, so the entry is already gone there...
@@ -482,7 +513,7 @@ test('deleteEntry works when only the legacy sync value exists', async () => {
   await sync.set({[LEGACY_FUNCTIONS_KEY]: fns});
   const legacyBackupRepo = createLegacyBackupRepository({sync, local});
 
-  await legacyBackupRepo.deleteEntry(0);
+  await legacyBackupRepo.deleteEntry(0, fns[0]);
 
   const legacy = (await sync.get([LEGACY_FUNCTIONS_KEY]))[
     LEGACY_FUNCTIONS_KEY
@@ -499,7 +530,9 @@ test('deleteEntry throws on an index outside the displayed array', async () => {
   await local.set({[LEGACY_BACKUP_KEY]: JSON.stringify([makeFunction('a')])});
   const legacyBackupRepo = createLegacyBackupRepository({sync, local});
 
-  const error = await catchAsync(() => legacyBackupRepo.deleteEntry(1));
+  const error = await catchAsync(() =>
+    legacyBackupRepo.deleteEntry(1, makeFunction('a')),
+  );
   expect(error).toBeInstanceOf(Error);
   expect((error as Error).message).toMatch(/no longer exists/);
 
@@ -508,4 +541,79 @@ test('deleteEntry throws on an index outside the displayed array', async () => {
     LEGACY_BACKUP_KEY
   ] as string;
   expect(JSON.parse(backupRaw)).toEqual([makeFunction('a')]);
+});
+
+test('deleteEntry rejects a stale index instead of deleting a different entry', async () => {
+  // Two /legacy pages: the other page already deleted index 0, so this
+  // page's index 1 now points at a different function.
+  const sync = new InMemoryKeyValueStorage();
+  const local = new InMemoryKeyValueStorage();
+  const fns = [makeFunction('a'), makeFunction('b'), makeFunction('c')];
+  await sync.set({[LEGACY_FUNCTIONS_KEY]: fns.slice(1)});
+  await local.set({[LEGACY_BACKUP_KEY]: JSON.stringify(fns.slice(1))});
+  const legacyBackupRepo = createLegacyBackupRepository({sync, local});
+
+  const error = await catchAsync(() => legacyBackupRepo.deleteEntry(1, fns[1]));
+  expect((error as Error).message).toMatch(/changed since it was displayed/);
+
+  // Nothing was written.
+  const backupRaw = (await local.get([LEGACY_BACKUP_KEY]))[
+    LEGACY_BACKUP_KEY
+  ] as string;
+  expect((JSON.parse(backupRaw) as CopyFunction[]).map(fn => fn.id)).toEqual([
+    'b',
+    'c',
+  ]);
+});
+
+test('deleteEntry fails closed when the sync copy holds a diverged version', async () => {
+  // The old extension edited the function in sync after migration: no
+  // structural match, but the same id is present. Reporting success while
+  // that copy keeps the secret would defeat the page's purpose.
+  const sync = new InMemoryKeyValueStorage();
+  const local = new InMemoryKeyValueStorage();
+  const fns = [makeFunction('a'), makeFunction('b')];
+  const edited = [{...fns[0], code: '() => "edited elsewhere"'}, fns[1]];
+  await sync.set({[LEGACY_FUNCTIONS_KEY]: edited});
+  await local.set({[LEGACY_BACKUP_KEY]: JSON.stringify(fns)});
+  const legacyBackupRepo = createLegacyBackupRepository({sync, local});
+
+  const error = await catchAsync(() => legacyBackupRepo.deleteEntry(0, fns[0]));
+  expect((error as Error).message).toMatch(/different version/);
+
+  // Nothing was written to either store.
+  const legacy = (await sync.get([LEGACY_FUNCTIONS_KEY]))[
+    LEGACY_FUNCTIONS_KEY
+  ] as CopyFunction[];
+  expect(legacy).toEqual(edited);
+  const backupRaw = (await local.get([LEGACY_BACKUP_KEY]))[
+    LEGACY_BACKUP_KEY
+  ] as string;
+  expect(JSON.parse(backupRaw)).toEqual(fns);
+});
+
+test('deleteEntry completes a retry after a partial failure', async () => {
+  // The first attempt deleted from sync and failed writing the backup. On
+  // retry the entry is absent from sync entirely (no entry with its id),
+  // which is the successful half of the previous attempt — the delete must
+  // finish, not fail closed.
+  const sync = new InMemoryKeyValueStorage();
+  const local = new InMemoryKeyValueStorage();
+  const fns = [makeFunction('a'), makeFunction('b')];
+  await sync.set({[LEGACY_FUNCTIONS_KEY]: [fns[1]]});
+  await local.set({[LEGACY_BACKUP_KEY]: JSON.stringify(fns)});
+  const legacyBackupRepo = createLegacyBackupRepository({sync, local});
+
+  await legacyBackupRepo.deleteEntry(0, fns[0]);
+
+  const legacy = (await sync.get([LEGACY_FUNCTIONS_KEY]))[
+    LEGACY_FUNCTIONS_KEY
+  ] as CopyFunction[];
+  expect(legacy.map(fn => fn.id)).toEqual(['b']);
+  const backupRaw = (await local.get([LEGACY_BACKUP_KEY]))[
+    LEGACY_BACKUP_KEY
+  ] as string;
+  expect((JSON.parse(backupRaw) as CopyFunction[]).map(fn => fn.id)).toEqual([
+    'b',
+  ]);
 });

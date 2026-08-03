@@ -12,6 +12,7 @@ import {Link} from 'react-router-dom';
 import {CopyFunction, currentVersion, generateId} from '../../lib/function';
 import {
   classifyFunction,
+  describeUnknown,
   LegacyBackupStatus,
   MigrationResult,
   MigrationSkip,
@@ -38,7 +39,7 @@ const EXPORT_FILENAME = 'cocopy-legacy-functions.json';
  * users are not confronted with "legacy data" out of nowhere.
  */
 const MIGRATION_INTRO =
-  'Since version 0.6, cocopy stores functions in a new format to handle extension storage size limits.';
+  'cocopy now stores functions in a new format to handle extension storage size limits.';
 
 /** UTF-8 byte length of the raw JSON, matching what storage accounts for. */
 function byteLength(raw: string): number {
@@ -106,15 +107,15 @@ export function hasLegacyBackupContent(status: LegacyBackupStatus): boolean {
 
 type EntryState =
   | {kind: 'migrated'}
-  | {kind: 'importable'; reason?: MigrationSkip['reason']}
+  | {kind: 'importable'}
   | {kind: 'invalid'; reason: MigrationSkip['reason']; sharable?: string};
 
 interface Entry {
   key: string;
-  /** The id recorded in the legacy data, used for skip and catalog matching. */
-  id: string;
   /** Position in the rendered legacy array; what `deleteEntry` addresses. */
   index: number;
+  /** The raw legacy item at `index`; `deleteEntry` verifies it is unchanged. */
+  raw: unknown;
   /** What the row renders: the validated function, or a repaired stand-in. */
   fn: CopyFunction;
   state: EntryState;
@@ -182,18 +183,17 @@ function buildEntries(
   const renamedFrom = new Set(
     (result?.renamedIds ?? []).map(rename => rename.from),
   );
-  // Skips are matched positionally per id: the same id can appear twice in a
-  // corrupt legacy array, and consuming one skip per row keeps them aligned.
+  // Skips are matched on (id, name), consuming one per row: a corrupt legacy
+  // array can hold the same id twice, with one copy stored and one skipped.
   const skips = [...(result?.skipped ?? [])];
 
   return source.map((item, index) => {
     const classified = classifyFunction(item);
-    const id =
-      typeof item === 'object' && item !== null && 'id' in item
-        ? String((item as {id: unknown}).id)
-        : '(unknown id)';
+    const {id, name} = describeUnknown(item);
 
-    const skipIndex = skips.findIndex(skip => skip.id === id);
+    const skipIndex = skips.findIndex(
+      skip => skip.id === id && skip.name === name,
+    );
     const skip = skipIndex >= 0 ? skips.splice(skipIndex, 1)[0] : undefined;
 
     if (!classified.ok) {
@@ -202,8 +202,8 @@ function buildEntries(
       const repaired = repairFunction(item);
       return {
         key: `${id}-${index}`,
-        id,
         index,
+        raw: item,
         fn: repaired,
         state: {
           kind: 'invalid' as const,
@@ -213,11 +213,29 @@ function buildEntries(
       };
     }
 
+    // Skipped for size: importing as-is can only hit the same per-item limit
+    // again (and a renamed duplicate would collide with its stored sibling),
+    // so route it to the editor under a fresh id like an invalid entry.
+    if (skip?.reason === 'size') {
+      const fresh = {...classified.fn, id: generateId()};
+      return {
+        key: `${id}-${index}`,
+        index,
+        raw: item,
+        fn: classified.fn,
+        state: {
+          kind: 'invalid' as const,
+          reason: skip.reason,
+          sharable: toSharable(fresh),
+        },
+      };
+    }
+
     const state: EntryState =
       storedIds.has(id) || renamedFrom.has(id)
         ? {kind: 'migrated'}
-        : {kind: 'importable', reason: skip?.reason};
-    return {key: `${id}-${index}`, id, index, fn: classified.fn, state};
+        : {kind: 'importable'};
+    return {key: `${id}-${index}`, index, raw: item, fn: classified.fn, state};
   });
 }
 
@@ -256,13 +274,7 @@ function EntryActions(props: {
     status = (
       <>
         <Item>
-          <span
-            className={state.reason ? styles.entryProblem : styles.entryState}
-          >
-            {state.reason
-              ? `Not migrated: ${reasonText(state.reason)}`
-              : 'Not migrated'}
-          </span>
+          <span className={styles.entryState}>Not migrated</span>
         </Item>
         <Item>
           <Button disabled={busy} onClick={() => props.onImport(entry.fn)}>
@@ -400,6 +412,8 @@ export function LegacyBackup() {
 
   const load = useCallback(async () => {
     try {
+      // list() failures degrade to "nothing stored" instead of failing the
+      // whole page: this UI is the recovery path when the store is broken.
       const [next, refs] = await Promise.all([
         legacyBackup.status(),
         repository.list().catch(() => []),
@@ -461,7 +475,7 @@ export function LegacyBackup() {
       setBusy(true);
       setError(undefined);
       legacyBackup
-        .deleteEntry(entry.index)
+        .deleteEntry(entry.index, entry.raw)
         .then(() => load())
         .then(() => setBusy(false))
         .catch(e => {
@@ -476,7 +490,18 @@ export function LegacyBackup() {
     if (raw !== undefined) downloadJson(raw);
   }, [raw]);
 
-  if (!status || !hasLegacyBackupContent(status)) return null;
+  // status() itself failed: without it nothing below can render, so the error
+  // must stand on its own instead of an empty page.
+  if (!status) {
+    return error ? (
+      <Section title="Legacy storage backup">
+        <div className={styles.error} role="alert">
+          {error}
+        </div>
+      </Section>
+    ) : null;
+  }
+  if (!hasLegacyBackupContent(status)) return null;
 
   const {result} = status;
   const summary = summaryText(raw, result);

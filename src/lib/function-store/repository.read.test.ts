@@ -67,7 +67,7 @@ test('listForUrl drops entries whose pattern is not a valid RegExp', async () =>
   expect(refs.map(r => r.id)).toEqual(['ok']);
 });
 
-test('get reads only the referenced document and validates it', async () => {
+test('get reads the referenced document in a single batched get and validates it', async () => {
   const {storage, repo} = createHarness();
   const fns = [makeFunction('a'), makeFunction('b')];
   await seedSnapshot(storage, fns);
@@ -78,7 +78,28 @@ test('get reads only the referenced document and validates it', async () => {
 
   expect(fn).toEqual(fns[1]);
   expect(getSpy).toHaveBeenCalledTimes(1);
-  expect(getSpy).toHaveBeenCalledWith([functionDocumentKey('seed-doc-2')]);
+  expect(getSpy).toHaveBeenCalledWith([
+    ACTIVE_POINTER_KEY,
+    functionDocumentKey('seed-doc-2'),
+  ]);
+});
+
+test('get throws UnsupportedVersionError for a newer pointer format', async () => {
+  // A popup/options page may still hold a v1 ref when another context
+  // upgrades the storage format; the document must not be read (and its code
+  // later executed) through that stale ref.
+  const {storage, repo} = createHarness();
+  await seedSnapshot(storage, [makeFunction('a')]);
+  const [ref] = await repo.list();
+
+  await storage.set({
+    [ACTIVE_POINTER_KEY]: {formatVersion: 2, catalogId: 'c', addedInV2: true},
+  });
+
+  const error = await catchAsync(() => repo.get(ref));
+
+  expect(error).toBeInstanceOf(UnsupportedVersionError);
+  expect((error as UnsupportedVersionError).formatVersion).toBe(2);
 });
 
 test('get returns undefined when the document is gone', async () => {
@@ -123,8 +144,9 @@ test('get throws CorruptionError when the document fails schema validation', asy
 test('reading throws UnsupportedVersionError for a newer pointer format', async () => {
   const {storage, repo} = createHarness();
   await seedSnapshot(storage, [makeFunction('a')]);
+  // A future format may add fields; they must not mask the version signal.
   await storage.set({
-    [ACTIVE_POINTER_KEY]: {formatVersion: 2, catalogId: 'seed-catalog'},
+    [ACTIVE_POINTER_KEY]: {formatVersion: 2, catalogId: 'c', addedInV2: true},
   });
 
   const error = await catchAsync(() => repo.list());

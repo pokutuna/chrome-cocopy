@@ -87,8 +87,6 @@ test('opening options migrates legacy data, preserving content and order', async
   );
 
   // The migrated functions render in the list in their original order.
-  // Scoped to the function list's name cells: the Legacy storage backup
-  // section below the list repeats every migrated name in its own rows.
   const names = options.locator('[class*="functionName"]', {
     hasText: /^Legacy Function [ABC]$/,
   });
@@ -166,8 +164,7 @@ test('partially migrates legacy data, offering the rejected function in the back
   ]);
 
   // The section explains why the function was left behind, with a route into
-  // the editor to repair it. The count of left-behind functions is not
-  // rendered anywhere; the per-entry state below carries that information.
+  // the editor to repair it.
   await options.reload();
   const section = await openLegacySection(options);
   await expect(section.getByText('migrated', {exact: false})).toBeVisible();
@@ -225,7 +222,8 @@ test('imports a function the migration left behind, without touching the legacy 
   await expect(importButton).toBeVisible();
   await importButton.click();
 
-  // Imported under a fresh id, appended to the catalog.
+  // Re-imported under its legacy id, appended to the catalog; keeping the id
+  // is what marks the row as migrated on later visits.
   await expect
     .poll(() => readStoredFunctionNames(options))
     .toEqual(['Legacy Function A', 'Legacy Function C', 'Legacy Function B']);

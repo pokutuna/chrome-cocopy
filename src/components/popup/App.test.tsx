@@ -3,7 +3,10 @@ import '@testing-library/jest-dom';
 import {vi, test, expect, afterEach} from 'vitest';
 
 import {FunctionStore} from '../../lib/function-store';
-import {functionDocumentKey} from '../../lib/function-store/keys';
+import {
+  ACTIVE_POINTER_KEY,
+  functionDocumentKey,
+} from '../../lib/function-store/keys';
 import {InMemoryKeyValueStorage} from '../../lib/function-store/memory-storage';
 import {createLegacyBackupRepository} from '../../lib/function-store/migration';
 import {createFunctionRepository} from '../../lib/function-store/repository';
@@ -102,6 +105,25 @@ test('clicking a function reads its code via repository.get and runs it in the s
   const payload = evaluateMock.mock.calls[0][0];
   expect(payload.command).toBe('eval');
   expect(payload.code).toContain(fn.code);
+});
+
+test('a newer storage format shows an update prompt instead of a blank popup', async () => {
+  vi.mocked(chrome.tabs.query).mockImplementation(
+    async () => [{url: 'https://example.test/page'}] as chrome.tabs.Tab[],
+  );
+  vi.mocked(chrome.runtime.getManifest).mockImplementation(
+    () => ({version_name: 'Build v0.0.0'}) as chrome.runtime.Manifest,
+  );
+
+  const {store, storage} = buildStore();
+  await seedSnapshot(storage, [makeFunction('a')]);
+  await storage.set({[ACTIVE_POINTER_KEY]: {formatVersion: 2, catalogId: 'c'}});
+
+  renderApp(store);
+
+  await waitFor(() =>
+    expect(screen.getByRole('alert')).toHaveTextContent('Update the extension'),
+  );
 });
 
 test('a document that fails to load shows an error but keeps other functions usable', async () => {

@@ -7,6 +7,7 @@
 // Root -> Shards -> entries in the right order, and that a rejected mutation
 // leaves the stored snapshot intact.
 
+import {EFFECTIVE_TOTAL_BYTES} from '../src/lib/function-store/size';
 import {test, expect} from './fixtures';
 import {
   readShardCount,
@@ -15,8 +16,6 @@ import {
   seedFunctionStore,
   type SeedFunction,
 } from './function-store';
-
-const EFFECTIVE_TOTAL_BYTES = 92_160;
 
 /**
  * A function whose catalog entry is deliberately bulky: the entry carries the

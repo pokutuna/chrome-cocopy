@@ -14,14 +14,11 @@ const copyFunctionRefSchema = v.strictObject({
   version: v.number(),
 });
 
-// Loose variant accepts any formatVersion so callers can branch on it before
-// deciding whether the rest of the value is safe to interpret (see
-// UnsupportedVersionError in types.ts).
-export const looseActivePointerSchema = v.strictObject({
+// Validates only formatVersion, ignoring unknown fields, so callers can
+// branch to UnsupportedVersionError before interpreting the rest.
+export const looseActivePointerSchema = v.looseObject({
   formatVersion: v.number(),
-  catalogId: v.string(),
 });
-export type LooseActivePointer = v.InferOutput<typeof looseActivePointerSchema>;
 
 export const activePointerV1Schema = v.strictObject({
   formatVersion: v.literal(1),

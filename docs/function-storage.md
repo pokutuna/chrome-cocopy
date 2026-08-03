@@ -1,6 +1,6 @@
 # FunctionStore
 
-- Status: Draft, ready for implementation
+- Status: Implemented (`src/lib/function-store/`)
 - Created: 2026-07-20
 
 ## Objective
@@ -199,8 +199,6 @@ MigrationCoordinatorは移行期間だけ存在する。
 repositoryは`KeyValueStorage`契約 (Storage Port) だけに依存する。
 ブラウザ差はこの契約を実装するadapterのバリエーションとして閉じ込め、repositoryとadapterの間に中間層を置かない。
 
-図のソースはこの文書内の Mermaid ブロックとする。
-
 依存方向は UI → application repository → storage port とする。
 domain と application 層から `chrome.*` / `browser.*` を参照しない。
 
@@ -297,6 +295,8 @@ flowchart LR
 ### Active Pointer
 
 Key: `cocopy:function-store:active`
+
+各例の `"01J..."` は例示用のIDである。実装は `crypto.randomUUID()` を使い、IDに順序性は持たせない (`keys.ts`)。
 
 ```json
 {
@@ -396,7 +396,7 @@ Key: `cocopy:function-store:v1:function:<documentId>`
 ```
 
 - 1 関数の完全な実体を 1 item に保存する。
-- key長とvalueを含むserialized sizeが1 itemのquotaを超える関数は、保存を拒否する。
+- key長とvalueを含むserialized sizeが1 itemの実効上限 (7,372 bytes) を超える関数は、保存を拒否する。
 - document は不変とし、編集時は同じキーを上書きせず新しい `documentId` を作る。
 - Catalog entry は document から導出する。
 - 読み取り時に ID や ref の内容が document と一致しなければ corruption として扱い、そのコードを実行しない。
@@ -426,7 +426,7 @@ refとdocumentの内容一致は、自分が今生成した値どうしの比較
 
 別端末ではPointer、Root、Shard、Documentが異なる順序で同期されうる。
 新Pointerの参照先が揃うまではlocal cacheの旧snapshotを利用し、欠損をcorruptionとして確定しない。
-一定期間再取得しても揃わない場合に同期エラーとしてoptionsへ表示する。
+利用できるcacheがない場合 (同期途中の新規端末など) はエラーとして表示し、次にUIを開いたときの再読み込みに委ねる。時間をおいた自動再試行は持たない。
 
 local cacheは`storage.local`に検証済みsnapshotを1世代だけ保持する。
 書き込むのは、Pointerが指すsnapshotを全item揃った状態で検証できたときだけとする。
@@ -460,6 +460,7 @@ Safariの正本は`storage.local` (既定5 MB) であり、このprofileに収�
 quotaいっぱいまで使うとcopy-on-writeの一時領域を確保できないため、次の実効上限を設ける。
 
 - 全体使用量は`QUOTA_BYTES`の90%、92,160 bytesを上限とする。
+- 1 itemあたりは`QUOTA_BYTES_PER_ITEM`の90%、7,372 bytesを上限とする。Function DocumentとCatalog Root/Shardの両方に適用する。
 - 関数数は128個を上限とし、これを超える`create`を拒否する。
 - peak item数は`MAX_ITEMS`の90%、460 itemsを上限とする。
 
@@ -479,7 +480,7 @@ quotaいっぱいまで使うとcopy-on-writeの一時領域を確保できな�
 sync storageに何が入っているかを問わず、実際に残っている空きから判断する。
 ブラウザ実装との誤差は90% headroomで吸収する。
 
-容量計算を行うのはmutation開始時 (Commit Preconditions) の1度だけとする。
+容量計算はmutation開始時 (Commit Preconditions) に行い、不足した場合のみGC後に1度だけ再計測する。
 対象データは全体でも102,400 bytes以下であり、`getAll`と自前計算のコストは保存操作の頻度に対して無視できる。
 popupとoptionsの読み取り経路では容量計算を行わない。
 
@@ -689,7 +690,7 @@ storage.sync
 - 永続化処理、React component、`chrome.storage` が直接結合していた。
 - `storage.onChanged` の `functions` キーを直接監視していた。
 
-この形式を書き込むコードは削除済みで、既存ユーザーのstorageに残るデータを読むだけである。
+この形式を書き込むコードは削除済みで、既存ユーザーのstorageに残るデータは読み取りと`deleteEntry`による関数単位の削除のみを行う。
 
 ## Migration Plan（移行完了後に削除）
 
@@ -737,7 +738,7 @@ popupとoptionsはActive Pointerの有無を意識せず、常に`FunctionReposi
 2. Active Pointer がなければ、`storage.sync["functions"]` をデフォルト値なしで読む。
 3. legacy key 自体がなければ、組み込みの `defaultFunctions` を初期データとする。
 4. 配列として読めることを確認する。配列でなければ移行を中止する。
-5. legacy dataの生JSONを`storage.local["cocopy:legacy-backup:sync-functions"]`へ保存し、読み戻して一致を確認する。
+5. legacy keyが存在した場合のみ、その生JSONを`storage.local["cocopy:legacy-backup:sync-functions"]`へ保存し、読み戻して一致を確認する。
 6. 関数を1件ずつ検証し、移行できるものとできないものに分ける。
 7. 移行できる関数のFunction Document、Catalog Shard、Catalog Rootを`storage.sync`に書く。
 8. 書いたデータを読み戻し、件数、順序、内容が移行元と一致することを確認する。
@@ -758,9 +759,12 @@ step 6 の検証は関数ごとに独立して行う。次のいずれかに該�
 
 - schema 検証に失敗する。
 - URL pattern が `RegExp` として構築できない。
-- 単体で 1 item のquotaを超える。
+- 単体で 1 item の実効上限 (7,372 bytes) を超える。
 
 ID の重複は、2件目以降を新しい ID へ採番し直して移行する。除外しない。
+採番し直した関数がその後サイズ超過で除外された場合は、元の ID で除外を記録し、採番は記録しない。実際には保存されなかった関数を移行済みと誤認させないためである。
+
+関数数上限 (128個) は移行では強制しない。legacyデータが上限を超えていても既存関数の閲覧・実行はそのまま動作し、以後の`create`だけが拒否される。
 
 移行できなかった関数は件数と名前を step 10 の移行結果に記録し、options に表示する。
 除外した関数のデータは legacy backup にそのまま残っており、失われない。
@@ -786,7 +790,7 @@ sequenceDiagram
 
   Coord->>Sync: get("functions") ※デフォルト値なし
   Sync-->>Coord: legacy data / キーなし
-  Note over Coord: キーなし → defaultFunctions を初期データにする<br/>空配列 → 全削除済みの有効な状態として移行
+  Note over Coord: キーなし → defaultFunctions を初期データにし、バックアップは書かない<br/>空配列 → 全削除済みの有効な状態として移行
   Coord->>Coord: 配列として読めるか確認
 
   Coord->>Local: set(legacy raw JSON をバックアップ)
@@ -849,16 +853,16 @@ optionsの`/legacy`に一時的な「Legacy storage backup」ページを置き�
 - 関数一覧はoptionsの関数一覧と同じ行で描画し、行を展開するとeditorと同じ項目(name, color, URL pattern, code)を読み取り専用で表示する。
 - 各関数について、移行できたかどうかと、できなかった場合の理由を展開時に示す。
 - 各関数を個別にFunctionStoreへ取り込めるようにする。取り込みは通常の`create`と同じ検証を通す。
-- 検証を通らない関数は、そのままでは取り込めない。editorへ内容を渡し、ユーザーが修正して保存できるようにする。
-- 各関数を個別にlegacy dataから削除できるようにする。秘密情報を含む関数がlegacy dataに残り続けるのを避けるためであり、削除は確認の上でlocal backupとsync上のlegacy keyの両方から行う。
+- 検証を通らない関数と、サイズ超過で移行できなかった関数は、そのままでは取り込めない (後者はそのまま取り込んでも同じ上限で失敗する)。editorへ内容を渡し、ユーザーが修正・短縮して保存できるようにする。
+- 各関数を個別にlegacy dataから削除できるようにする。秘密情報を含む関数がlegacy dataに残り続けるのを避けるためであり、削除は確認の上でlocal backupとsync上のlegacy keyの両方から行う。削除が及ぶのはこの端末のbackupとsync上のlegacy keyのみで、移行を実行した他端末の`storage.local` backupには及ばない。
 - 原本をJSONファイルとしてexportできるようにする。exportしてもlegacy dataを変更・削除しない。
 - summaryは移行日時と原本のbyte数のみを1行で示す。migrationが失敗した場合はその旨とエラーを表示する。
 
 store別の有無・byte数・件数を並べる表は持たない。
 それらはdebug用途にしか意味がなく、export したJSONの方が正確に答えるためである。
 
-取り込みはlegacy dataを消費しない。同じ関数を二重に取り込むと、別のIDを持つ関数が2つできる。
-既に取り込み済みの関数はその旨を表示し、誤って重複させないようにする。
+取り込みはlegacy dataを消費しない。取り込みはlegacy IDを保持するため、取り込み済みかどうかはcatalogとの照合だけで判定でき、別途の状態を持たない。
+取り込み済みの関数はその旨を表示してImportを出さず、二重取り込みは起こらない (関数一覧から削除すると再びImportできる)。
 
 このページは移行のための一時的なものであり、数か月後のリリースで削除する予定であることをUI上に明記する。
 legacy dataが現在のバックアップではなく「移行時点の原本」であることも明示する。

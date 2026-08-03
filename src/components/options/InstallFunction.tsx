@@ -33,7 +33,7 @@ const FailedMessage = memo(() => {
   );
 });
 
-function useSahredFunction(): CopyFunction | undefined {
+function useSharedFunction(): CopyFunction | undefined {
   const location = useLocation();
   const fn = useMemo<CopyFunction | undefined>(() => {
     const params = new URLSearchParams(location.search);
@@ -45,7 +45,7 @@ function useSahredFunction(): CopyFunction | undefined {
 
 export function InstallFunction() {
   const repository = useFunctionRepository();
-  const shared = useSahredFunction();
+  const shared = useSharedFunction();
   const [fn, setFn] = useState<CopyFunction | undefined>(shared);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | undefined>(undefined);
@@ -56,25 +56,28 @@ export function InstallFunction() {
     [],
   );
 
-  const onSave = useCallback(() => {
-    if (!fn || saving) return;
-    setSaving(true);
-    setError(undefined);
-    // The shared URL carries whatever id the author had, which may already be
-    // in this user's catalog. Installing always mints a fresh id, the same way
-    // newFunction() does, so it never collides with or overwrites an existing
-    // function.
-    repository
-      .create({...fn, id: generateId()})
-      .then(() => {
-        // XXX this doesn't care react-router-dom
-        location.href = 'options.html';
-      })
-      .catch(e => {
-        setError(messageForError(e));
-        setSaving(false);
-      });
-  }, [repository, fn, saving]);
+  const onSave = useCallback(
+    (edited: Omit<CopyFunction, 'id'>) => {
+      if (!fn || saving) return;
+      setSaving(true);
+      setError(undefined);
+      // The shared URL carries whatever id the author had, which may already
+      // be in this user's catalog. Installing always mints a fresh id, the
+      // same way newFunction() does, so it never collides with or overwrites
+      // an existing function.
+      repository
+        .create({...fn, ...edited, id: generateId()})
+        .then(() => {
+          // XXX this doesn't care react-router-dom
+          location.href = 'options.html';
+        })
+        .catch(e => {
+          setError(messageForError(e));
+          setSaving(false);
+        });
+    },
+    [repository, fn, saving],
+  );
 
   return (
     <Section title="Install Function">

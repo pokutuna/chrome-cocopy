@@ -28,20 +28,11 @@ import {
   MIGRATION_RESULT_KEY,
   type MigrationResult,
 } from '../src/lib/function-store/migration';
-import {SNAPSHOT_CACHE_KEY} from '../src/lib/function-store/repository';
 import type {
   CatalogRoot,
   FunctionDocument,
 } from '../src/lib/function-store/schema';
 import {refFromFunction} from '../src/lib/function-store/types';
-
-export {
-  ACTIVE_POINTER_KEY,
-  LEGACY_BACKUP_KEY,
-  LEGACY_FUNCTIONS_KEY,
-  MIGRATION_RESULT_KEY,
-  type MigrationResult,
-};
 
 const SEED_CREATED_AT = '2026-07-20T00:00:00.000Z';
 
@@ -301,5 +292,3 @@ export async function readShardCount(page: Page): Promise<number> {
     {pointer: ACTIVE_POINTER_KEY, prefix: 'cocopy:function-store:v1:'},
   );
 }
-
-export {SNAPSHOT_CACHE_KEY};

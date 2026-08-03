@@ -8,7 +8,11 @@ import {textColorFromBgColor, isColorCode} from '../../lib/util';
  */
 export interface EditorCallbacks {
   onEdit: (fn: Omit<CopyFunction, 'id'>) => void;
-  onSave: () => void;
+  /**
+   * Receives the final draft directly: the owner must not read it back from
+   * its own state, which the deferred onEdit may not have reached yet.
+   */
+  onSave: (fn: Omit<CopyFunction, 'id'>) => void;
   onCancel: () => void;
   onDelete: () => void;
 }
@@ -155,7 +159,7 @@ function reduce(state: State, action: Action): State {
         name: 'code',
         value: removeTrailingSpace(state.code),
       });
-      state.callbacks.onSave();
+      state.callbacks.onSave(stateToFn(next));
       return next;
     }
     case 'cancel':

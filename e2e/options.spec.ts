@@ -6,15 +6,11 @@ import {
   type SeedFunction,
 } from './function-store';
 
-const getStoredFunctionNames = readStoredFunctionNames;
-
 async function getStoredFunctions(
   page: import('@playwright/test').Page,
 ): Promise<SeedFunction[]> {
   return ((await readStoredFunctions(page)) ?? []) as SeedFunction[];
 }
-
-const seedStorage = seedFunctionStore;
 
 // Minimal CopyFunction fixtures matching src/lib/function.ts's CopyFunction
 // shape / src/lib/function.schema.ts. `pattern` is intentionally omitted.
@@ -54,7 +50,7 @@ test('adding a function via the options UI persists to chrome.storage.sync', asy
   // FunctionStore (rather than clearing storage) also writes an Active
   // Pointer, which keeps the repository from running migration and seeding
   // the defaults on reload.
-  await seedStorage(options, []);
+  await seedFunctionStore(options, []);
   await options.reload();
 
   const newFunctionName = 'E2E Added Function';
@@ -79,7 +75,7 @@ test('adding a function via the options UI persists to chrome.storage.sync', asy
 
   // Verify persistence directly against chrome.storage.sync.
   await expect
-    .poll(() => getStoredFunctionNames(options))
+    .poll(() => readStoredFunctionNames(options))
     .toContain(newFunctionName);
 
   // And that it survives a reload (i.e. is actually read back from storage,
@@ -94,7 +90,7 @@ test('editing a function via the options UI persists the changes', async ({
 }) => {
   const options = await context.newPage();
   await options.goto(`chrome-extension://${extensionId}/options.html`);
-  await seedStorage(options, [threeFunctions[1]]);
+  await seedFunctionStore(options, [threeFunctions[1]]);
   await options.reload();
 
   await options.getByText('E2E Function B').click();
@@ -113,7 +109,7 @@ test('editing a function via the options UI persists the changes', async ({
   // button label to "Saved".
   await expect(saveButton).toHaveText('Saved');
   await expect
-    .poll(() => getStoredFunctionNames(options))
+    .poll(() => readStoredFunctionNames(options))
     .toEqual(['E2E Function B edited']);
   await expect
     .poll(async () => (await getStoredFunctions(options))[0]?.code)
@@ -128,13 +124,13 @@ test('editing a function via the options UI persists the changes', async ({
   ).not.toBeVisible();
 });
 
-test('shows destructured variables in the function body', async ({
+test('autocompletes destructured variables and methods in the code editor', async ({
   context,
   extensionId,
 }) => {
   const options = await context.newPage();
   await options.goto(`chrome-extension://${extensionId}/options.html`);
-  await seedStorage(options, [{...threeFunctions[1], code: '() => "b"'}]);
+  await seedFunctionStore(options, [{...threeFunctions[1], code: '() => "b"'}]);
   await options.reload();
 
   await options.getByText('E2E Function B').click();
@@ -180,7 +176,7 @@ test('disables saving when the function name is empty', async ({
 }) => {
   const options = await context.newPage();
   await options.goto(`chrome-extension://${extensionId}/options.html`);
-  await seedStorage(options, [threeFunctions[1]]);
+  await seedFunctionStore(options, [threeFunctions[1]]);
   await options.reload();
   await options.getByText('E2E Function B').click();
 
@@ -190,7 +186,7 @@ test('disables saving when the function name is empty', async ({
   await expect(options.getByText('Cannot be empty.')).toBeVisible();
   await expect(saveButton).toBeDisabled();
   await expect
-    .poll(() => getStoredFunctionNames(options))
+    .poll(() => readStoredFunctionNames(options))
     .toEqual(['E2E Function B']);
 });
 
@@ -200,7 +196,7 @@ test('disables saving when the URL pattern is invalid', async ({
 }) => {
   const options = await context.newPage();
   await options.goto(`chrome-extension://${extensionId}/options.html`);
-  await seedStorage(options, [threeFunctions[1]]);
+  await seedFunctionStore(options, [threeFunctions[1]]);
   await options.reload();
   await options.getByText('E2E Function B').click();
 
@@ -210,7 +206,7 @@ test('disables saving when the URL pattern is invalid', async ({
   await expect(options.getByText(/Invalid regular expression/)).toBeVisible();
   await expect(saveButton).toBeDisabled();
   await expect
-    .poll(() => getStoredFunctionNames(options))
+    .poll(() => readStoredFunctionNames(options))
     .toEqual(['E2E Function B']);
 });
 
@@ -220,7 +216,7 @@ test('disables saving when the function code has a syntax error', async ({
 }) => {
   const options = await context.newPage();
   await options.goto(`chrome-extension://${extensionId}/options.html`);
-  await seedStorage(options, [threeFunctions[1]]);
+  await seedFunctionStore(options, [threeFunctions[1]]);
   await options.reload();
   await options.getByText('E2E Function B').click();
 
@@ -232,7 +228,7 @@ test('disables saving when the function code has a syntax error', async ({
   await expect(options.getByText(/Unexpected token/)).toBeVisible();
   await expect(saveButton).toBeDisabled();
   await expect
-    .poll(() => getStoredFunctionNames(options))
+    .poll(() => readStoredFunctionNames(options))
     .toEqual(['E2E Function B']);
 });
 
@@ -242,7 +238,7 @@ test('deleting a function via the options UI removes it from chrome.storage.sync
 }) => {
   const options = await context.newPage();
   await options.goto(`chrome-extension://${extensionId}/options.html`);
-  await seedStorage(options, threeFunctions);
+  await seedFunctionStore(options, threeFunctions);
   await options.reload();
 
   await expect(options.getByText('E2E Function A')).toBeVisible();
@@ -266,7 +262,7 @@ test('deleting a function via the options UI removes it from chrome.storage.sync
 
   // ...and chrome.storage.sync no longer contains it.
   await expect
-    .poll(() => getStoredFunctionNames(options))
+    .poll(() => readStoredFunctionNames(options))
     .toEqual(['E2E Function A', 'E2E Function C']);
 
   // Survives a reload (i.e. actually persisted, not just in-memory state).
@@ -282,7 +278,7 @@ test('reordering functions via drag & drop persists the new order to chrome.stor
 }) => {
   const options = await context.newPage();
   await options.goto(`chrome-extension://${extensionId}/options.html`);
-  await seedStorage(options, threeFunctions);
+  await seedFunctionStore(options, threeFunctions);
   await options.reload();
 
   await expect(options.getByText('E2E Function A')).toBeVisible();
@@ -296,8 +292,8 @@ test('reordering functions via drag & drop persists the new order to chrome.stor
   //
   // Each function row renders a "drag knob" (the faBars icon) as the drag
   // handle (see DragKnob in FunctionList.tsx); grab the source via the icon
-  // rather than styled-components' generated class names, which aren't
-  // stable selectors. Rows render in storage order (seeded as A, B, C above).
+  // rather than hashed CSS Modules class names, which aren't stable
+  // selectors. Rows render in storage order (seeded as A, B, C above).
   const dragKnobs = options.locator('svg[data-icon="bars"] >> xpath=..');
 
   // Drag "E2E Function A" (index 0) down past "E2E Function C" (index 2).
@@ -316,7 +312,7 @@ test('reordering functions via drag & drop persists the new order to chrome.stor
   // ...and the reordered array is persisted to chrome.storage.sync on drop
   // (see the 'dropped' action in FunctionsReducer.ts).
   await expect
-    .poll(() => getStoredFunctionNames(options))
+    .poll(() => readStoredFunctionNames(options))
     .toEqual(expectedOrder);
 
   // Survives a reload.

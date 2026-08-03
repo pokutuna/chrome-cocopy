@@ -18,8 +18,6 @@ const seedFunctions: SeedFunction[] = [
   },
 ];
 
-const seedStorage = seedFunctionStore;
-
 test('popup lists seeded functions and copies via the sandbox', async ({
   context,
   extensionId,
@@ -30,7 +28,7 @@ test('popup lists seeded functions and copies via the sandbox', async ({
   // are only available to pages running in the extension's own origin).
   const seeder = await context.newPage();
   await seeder.goto(`chrome-extension://${extensionId}/options.html`);
-  await seedStorage(seeder, seedFunctions);
+  await seedFunctionStore(seeder, seedFunctions);
   await seeder.close();
 
   const popup = await context.newPage();

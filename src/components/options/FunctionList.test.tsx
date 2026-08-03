@@ -109,6 +109,33 @@ test('a successful save persists and reloads the list from the repository', asyn
   });
 });
 
+test('a double-fired save runs the mutation only once', async () => {
+  const store = createTestStore();
+  await seedStore(store, [fn('a')]);
+
+  const {result} = renderStore(store);
+  await waitFor(() => expect(result.current.state.refs).toHaveLength(1));
+
+  await act(async () => {
+    await result.current.openFunction(result.current.state.refs[0]);
+  });
+  act(() => {
+    result.current.dispatch({t: 'edit', function: {name: 'renamed'}});
+  });
+
+  const updateSpy = vi.spyOn(store.repository, 'update');
+  // Both calls land before `state.saving` is rendered; the second would
+  // otherwise conflict against the already-rotated documentId.
+  await act(async () => {
+    result.current.saveFunction();
+    result.current.saveFunction();
+  });
+
+  await waitFor(() => expect(result.current.state.saving).toBe(false));
+  expect(updateSpy).toHaveBeenCalledTimes(1);
+  expect(result.current.state.error).toBeUndefined();
+});
+
 test('editing while a save is in flight keeps the new draft unsaved', async () => {
   const store = createTestStore();
   await seedStore(store, [fn('a')]);

@@ -20,7 +20,8 @@ import styles from './Editor.module.css';
 type EditorProps = {
   function: CopyFunction;
   onEdit: (fn: Omit<CopyFunction, 'id'>) => void;
-  onSave: () => void;
+  /** Called with the final draft (trailing space stripped); see EditorCallbacks. */
+  onSave: (fn: Omit<CopyFunction, 'id'>) => void;
   onCancel?: () => void;
   onDelete?: () => void;
   /** A mutation is in flight; Save/Delete stay disabled until it settles. */
@@ -44,7 +45,7 @@ export function Editor(props: EditorProps) {
       // Deferred: the owner's state must not be updated while this component
       // renders. See https://github.com/facebook/react/issues/18178
       onEdit: fn => setTimeout(() => propsRef.current.onEdit(fn), 1),
-      onSave: () => setTimeout(() => propsRef.current.onSave(), 1),
+      onSave: fn => setTimeout(() => propsRef.current.onSave(fn), 1),
       onCancel: () => setTimeout(() => propsRef.current.onCancel?.(), 1),
       onDelete: () => setTimeout(() => propsRef.current.onDelete?.(), 1),
     }),

@@ -1,14 +1,14 @@
 // storage.sync quota profile shared by Chrome and Firefox.
-export const QUOTA_BYTES = 102_400;
-export const QUOTA_BYTES_PER_ITEM = 8_192;
-export const MAX_ITEMS = 512;
+const QUOTA_BYTES = 102_400;
+const QUOTA_BYTES_PER_ITEM = 8_192;
+const MAX_ITEMS = 512;
 
-// Effective limits leave headroom for the copy-on-write staging area used
-// while committing a new snapshot (see docs/function-storage.md, Effective
-// Limits).
-export const EFFECTIVE_TOTAL_BYTES = 92_160; // 90% of QUOTA_BYTES
-export const EFFECTIVE_ITEM_BYTES = 7_372; // 90% of QUOTA_BYTES_PER_ITEM
-export const EFFECTIVE_MAX_ITEMS = 460; // 90% of MAX_ITEMS
+// Effective limits (90% of quota) leave headroom for the copy-on-write
+// staging area used while committing a new snapshot (see
+// docs/function-storage.md, Effective Limits).
+export const EFFECTIVE_TOTAL_BYTES = Math.floor(QUOTA_BYTES * 0.9); // 92,160
+export const EFFECTIVE_ITEM_BYTES = Math.floor(QUOTA_BYTES_PER_ITEM * 0.9); // 7,372
+export const EFFECTIVE_MAX_ITEMS = Math.floor(MAX_ITEMS * 0.9); // 460
 export const MAX_FUNCTIONS = 128;
 
 const encoder = new TextEncoder();

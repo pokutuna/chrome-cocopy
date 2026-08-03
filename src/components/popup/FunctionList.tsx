@@ -1,12 +1,16 @@
 import {useState, useEffect, useCallback} from 'react';
 
 import {EvalResult, EvalError, isRichContent} from '../../lib/eval';
-import {CopyFunctionRef} from '../../lib/function-store/types';
+import {
+  CopyFunctionRef,
+  UnsupportedVersionError,
+} from '../../lib/function-store/types';
 import {createPageTargetFromTab} from '../../lib/page';
 import {getActiveTab} from '../../lib/tab';
 import {codeToIndex} from '../../lib/util';
 import {useFunctionRepository} from '../common/FunctionStoreContext';
 import {useEvaluate} from '../common/Sandbox';
+import {ListError} from './Error';
 import {FunctionItem} from './Function';
 import {useModifier} from './hooks';
 
@@ -52,7 +56,8 @@ function isEvalRejection(r: unknown): r is {error: EvalError} {
     typeof r === 'object' &&
     r !== null &&
     'error' in r &&
-    typeof (r as {error?: unknown}).error === 'object'
+    typeof (r as {error?: unknown}).error === 'object' &&
+    (r as {error?: unknown}).error !== null
   );
 }
 
@@ -62,6 +67,7 @@ export const FunctionList = () => {
   const [functions, setFunctions] = useState<CopyFunctionRef[]>([]);
   const [running, setRunning] = useState<string | null>(null);
   const [fnError, setFnError] = useState<FunctionError>(null);
+  const [listError, setListError] = useState<string | null>(null);
   const modifier = useModifier();
 
   useEffect(() => {
@@ -72,7 +78,14 @@ export const FunctionList = () => {
     };
     run()
       .then(setFunctions)
-      .catch(e => console.error(e));
+      .catch((e: unknown) => {
+        console.error(e);
+        setListError(
+          e instanceof UnsupportedVersionError
+            ? 'Your functions were saved by a newer version of cocopy. Update the extension.'
+            : 'Failed to load functions.',
+        );
+      });
   }, [repository]);
 
   const onClick = useCallback(
@@ -128,6 +141,7 @@ export const FunctionList = () => {
 
   return (
     <>
+      {listError && <ListError message={listError} />}
       {functions.map((r, idx) => (
         <FunctionItem
           key={r.id}

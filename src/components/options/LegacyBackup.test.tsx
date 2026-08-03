@@ -204,37 +204,26 @@ test('shows the entry list with a one-line summary and per-function state', asyn
   ).not.toBeInTheDocument();
 });
 
-test('a skipped function shows its reason and can be imported without touching the legacy data', async () => {
+test('an entry missing from the catalog can be imported without touching the legacy data', async () => {
   const store = createTestStore();
   const migrated = fn('a');
-  const skipped = fn('b', {pattern: '(('});
-  const legacy = [migrated, skipped];
+  // 'b' was migrated but later deleted from the function list, so its row
+  // offers Import again.
+  const deleted = fn('b');
+  const legacy = [migrated, deleted];
 
   await seedStore(store, [migrated]);
   await seedLegacy(store, {
     legacy,
     backup: legacy,
-    result: result({
-      migratedCount: 1,
-      skipped: [{id: 'b', name: 'name-b', reason: 'size'}],
-    }),
+    result: result({migratedCount: 2}),
   });
-
-  // The skip reason recorded by migration ('size') is what the row reports;
-  // the function itself still validates, so it stays importable.
-  const importable = fn('b');
-  await store.local.set({
-    [LEGACY_BACKUP_KEY]: JSON.stringify([migrated, importable]),
-  });
-  await store.sync.set({[LEGACY_FUNCTIONS_KEY]: [migrated, importable]});
 
   render(renderWithStore(store, <LegacyBackup />));
   await screen.findByText('Legacy storage backup');
 
   fireEvent.click(screen.getByText('name-b'));
-  expect(
-    screen.getByText('Not migrated: it is too large to store'),
-  ).toBeInTheDocument();
+  expect(screen.getByText('Not migrated')).toBeInTheDocument();
 
   const before = JSON.stringify(
     (await store.local.get([LEGACY_BACKUP_KEY]))[LEGACY_BACKUP_KEY],
@@ -278,10 +267,7 @@ test('an imported entry is still recognized after the page is reopened', async (
   await seedLegacy(store, {
     legacy,
     backup: legacy,
-    result: result({
-      migratedCount: 0,
-      skipped: [{id: 'b', name: 'name-b', reason: 'size'}],
-    }),
+    result: result({migratedCount: 0}),
   });
 
   const first = render(renderWithStore(store, <LegacyBackup />));
@@ -301,6 +287,33 @@ test('an imported entry is still recognized after the page is reopened', async (
   expect(
     screen.queryByRole('button', {name: 'Import'}),
   ).not.toBeInTheDocument();
+});
+
+test('a function skipped for size cannot be imported as-is and links to the editor', async () => {
+  const store = createTestStore();
+  const legacy = [fn('b')];
+  await seedLegacy(store, {
+    legacy,
+    backup: legacy,
+    result: result({
+      migratedCount: 0,
+      skipped: [{id: 'b', name: 'name-b', reason: 'size'}],
+    }),
+  });
+
+  render(renderWithStore(store, <LegacyBackup />));
+  await screen.findByText('Legacy storage backup');
+  fireEvent.click(screen.getByText('name-b'));
+
+  // Import as-is would only hit the per-item limit again; recovery goes
+  // through the editor, where the user can shrink the code.
+  expect(
+    screen.getByText('Cannot be imported: it is too large to store'),
+  ).toBeInTheDocument();
+  expect(
+    screen.queryByRole('button', {name: 'Import'}),
+  ).not.toBeInTheDocument();
+  expect(screen.getByRole('link', {name: 'Fix in editor'})).toBeInTheDocument();
 });
 
 test('a function that fails validation cannot be imported and links to the editor', async () => {
@@ -509,10 +522,9 @@ test('banner links to the legacy page without rendering the full section', async
   // The banner explains why legacy data exists before pointing at it, and
   // warns that the backup is temporary.
   expect(
-    screen.getByText(
-      'Since version 0.6, cocopy stores functions in a new format',
-      {exact: false},
-    ),
+    screen.getByText('cocopy now stores functions in a new format', {
+      exact: false,
+    }),
   ).toBeInTheDocument();
   expect(
     screen.getByText('Your previous functions were migrated automatically.', {
