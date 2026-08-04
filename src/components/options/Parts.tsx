@@ -65,8 +65,6 @@ export const Row = (props: {children?: React.ReactNode}) => (
   <div className={styles.row}>{props.children}</div>
 );
 
-export const DividerH = () => <div className={styles.dividerH} />;
-
 export const DividerV = () => <div className={styles.dividerV} />;
 
 export const ExternalLink = (props: {

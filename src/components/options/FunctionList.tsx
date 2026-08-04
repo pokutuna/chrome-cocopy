@@ -1,21 +1,18 @@
-import {faBars} from '@fortawesome/free-solid-svg-icons/faBars';
-import {faCaretDown} from '@fortawesome/free-solid-svg-icons/faCaretDown';
-import {faCaretRight} from '@fortawesome/free-solid-svg-icons/faCaretRight';
-import {faPlus} from '@fortawesome/free-solid-svg-icons/faPlus';
-import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
-import {useEffect, useCallback, useReducer, useRef} from 'react';
+import {
+  useEffect,
+  useLayoutEffect,
+  useCallback,
+  useReducer,
+  useRef,
+} from 'react';
 
 import {CopyFunction} from '../../lib/function';
 import {FunctionRepository} from '../../lib/function-store/repository';
 import {CopyFunctionRef} from '../../lib/function-store/types';
-import {
-  FunctionItem,
-  AddFunctionItem,
-  FunctionDisplay,
-} from '../common/FunctionParts';
 import {useFunctionRepository} from '../common/FunctionStoreContext';
-import {DnDWrapper, useDnDItem} from './DnD';
-import {Editor} from './Editor';
+import {DnDWrapper} from './DnD';
+import {AddFunction} from './FunctionItemParts';
+import {FunctionListItem} from './FunctionListItem';
 import {
   reducer,
   initialState,
@@ -23,66 +20,12 @@ import {
   moved,
   visibleRefs,
   confirmDiscard,
-  DispatchType,
   State,
 } from './FunctionsReducer';
 import {Section} from './Parts';
 import {useSubscribeFunctions} from './Subscribe';
 
 import styles from './FunctionList.module.css';
-
-export const Caret = (props: {active: boolean; onClick: () => void}) => {
-  const {active, onClick} = props;
-  return (
-    <button
-      type="button"
-      className={styles.itemButton}
-      onClick={onClick}
-      aria-label={active ? 'Collapse function' : 'Expand function'}
-      aria-expanded={active}
-    >
-      <FontAwesomeIcon icon={active ? faCaretDown : faCaretRight} size="lg" />
-    </button>
-  );
-};
-
-const DragKnob = (props: {draggable: boolean}) => {
-  return (
-    // dragKnobBox extends itemButton (was styled(ItemButton)); keep both
-    // classes so the flex centering and size come from itemButton.
-    <div
-      className={[
-        styles.itemButton,
-        styles.dragKnobBox,
-        props.draggable ? styles.draggable : '',
-      ]
-        .join(' ')
-        .trim()}
-    >
-      <FontAwesomeIcon icon={faBars} />
-    </div>
-  );
-};
-
-export function EditorBox(props: {children?: React.ReactNode}) {
-  return <div className={styles.editorBox}>{props.children}</div>;
-}
-
-function AddFunction(props: {onClick: () => void}) {
-  return (
-    <div className={styles.functionItemBox}>
-      <button
-        type="button"
-        className={styles.itemButton}
-        onClick={props.onClick}
-        aria-label="Create new function"
-      >
-        <FontAwesomeIcon icon={faPlus} />
-      </button>
-      <AddFunctionItem onClick={props.onClick} />
-    </div>
-  );
-}
 
 /**
  * Wording for a failed repository operation (mutations and reads alike).
@@ -118,9 +61,15 @@ export function useFunctionListStore(repository: FunctionRepository) {
   const [state, dispatch] = useReducer(reducer, initialState);
 
   // Callbacks read the current state through a ref so their identity does not
-  // change whenever the list or the draft does.
+  // change whenever the list or the draft does. Assigning in a layout effect
+  // (not during render) keeps render pure; the effect commits synchronously
+  // right after, before any event handler or async callback below can run,
+  // so stateRef.current is always up to date wherever it is read (including
+  // the runMutation re-entrancy guard).
   const stateRef = useRef<State>(state);
-  stateRef.current = state;
+  useLayoutEffect(() => {
+    stateRef.current = state;
+  }, [state]);
 
   const refresh = useCallback(async () => {
     try {
@@ -296,69 +245,6 @@ export function useFunctionListStore(repository: FunctionRepository) {
     moveFunction,
     dropped,
   };
-}
-
-type FunctionListItemProps = {
-  display: FunctionDisplay;
-  index: number;
-  draggable: boolean;
-  /** The open draft, or undefined when this row's editor is closed. */
-  editing?: CopyFunction;
-  saving: boolean;
-  saved: boolean;
-  error?: string;
-  dispatch: DispatchType;
-  onOpen: () => void;
-  onSave: () => void;
-  onDelete: () => void;
-};
-
-function FunctionListItem(props: FunctionListItemProps) {
-  const {display, index, draggable, editing} = props;
-  const {isDragging, ref, handleRef} = useDnDItem({
-    id: display.id,
-    index,
-    canDrag: draggable,
-  });
-
-  const onEdit = useCallback(
-    (fn: Omit<CopyFunction, 'id'>) => props.dispatch({t: 'edit', function: fn}),
-    [props.dispatch],
-  );
-  const onCancel = useCallback(
-    () => props.dispatch({t: 'cancel'}),
-    [props.dispatch],
-  );
-
-  return (
-    <div ref={ref}>
-      <div
-        className={[styles.functionItemBox, isDragging ? styles.dragging : '']
-          .join(' ')
-          .trim()}
-      >
-        <Caret active={!!editing} onClick={props.onOpen} />
-        <FunctionItem fn={display} onClick={props.onOpen} />
-        <div ref={handleRef}>
-          <DragKnob draggable={draggable} />
-        </div>
-      </div>
-      {editing && (
-        <EditorBox>
-          <Editor
-            function={editing}
-            onEdit={onEdit}
-            onSave={props.onSave}
-            onCancel={onCancel}
-            onDelete={props.onDelete}
-            saving={props.saving}
-            saved={props.saved}
-            error={props.error}
-          />
-        </EditorBox>
-      )}
-    </div>
-  );
 }
 
 export function FunctionList() {

@@ -65,7 +65,7 @@ type ColorPickerProps = {
   togglePalette: () => void;
 };
 
-export function ColorPicker(props: ColorPickerProps) {
+function ColorPicker(props: ColorPickerProps) {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -92,8 +92,8 @@ export function ColorPicker(props: ColorPickerProps) {
       />
       {props.show && (
         <div className={styles.paletteBox} data-testid="palette">
-          {colorPalette.map((c, i) => (
-            <PaletteColor key={i} color={c} onClick={props.onSelect} />
+          {colorPalette.map(c => (
+            <PaletteColor key={c} color={c} onClick={props.onSelect} />
           ))}
           <PaletteColorRandom onClick={props.onSelect} />
         </div>

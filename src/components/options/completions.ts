@@ -252,23 +252,20 @@ function isStringProperty(property: string): boolean {
   return stringProperties.has(property);
 }
 
-const stringCompletionOptions = Object.getOwnPropertyNames(String.prototype)
-  .filter(label => javascriptIdentifier.test(label))
-  .map(label => {
-    const value = Object.getOwnPropertyDescriptor(
-      String.prototype,
-      label,
-    )?.value;
-    return {
-      label,
-      type:
-        typeof value === 'function'
-          ? /^[A-Z]/.test(label)
-            ? 'class'
-            : 'method'
-          : 'property',
-    } satisfies Completion;
+const stringCompletionOptions: Completion[] = [];
+for (const label of Object.getOwnPropertyNames(String.prototype)) {
+  if (!javascriptIdentifier.test(label)) continue;
+  const value = Object.getOwnPropertyDescriptor(String.prototype, label)?.value;
+  stringCompletionOptions.push({
+    label,
+    type:
+      typeof value === 'function'
+        ? /^[A-Z]/.test(label)
+          ? 'class'
+          : 'method'
+        : 'property',
   });
+}
 
 function findStringLiteralMember(node: SyntaxNode): SyntaxNode | null {
   const member =
