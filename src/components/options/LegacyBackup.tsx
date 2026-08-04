@@ -345,9 +345,15 @@ function EntryRow(props: {
       <div className={listStyles.functionItemBox}>
         <Caret active={expanded} onClick={toggle} />
         <FunctionItem fn={entry.fn} onClick={toggle} />
-        <div
+        <button
+          type="button"
           className={[listStyles.itemButton, styles.stateIconBox].join(' ')}
           onClick={toggle}
+          aria-label={
+            done
+              ? 'Show function details'
+              : 'Show migration warning and function details'
+          }
         >
           {!done && (
             <FontAwesomeIcon
@@ -355,7 +361,7 @@ function EntryRow(props: {
               title="Not in your functions"
             />
           )}
-        </div>
+        </button>
       </div>
       {expanded && (
         <EditorBox>

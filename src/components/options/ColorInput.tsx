@@ -11,16 +11,19 @@ import styles from './ColorInput.module.css';
 
 const PaletteColorBox = (props: {
   $color: string;
+  ariaLabel: string;
   onClick: () => void;
   children?: React.ReactNode;
 }) => (
-  <div
+  <button
+    type="button"
+    aria-label={props.ariaLabel}
     className={styles.paletteColorBox}
     style={{'--palette-color': props.$color} as React.CSSProperties}
     onClick={props.onClick}
   >
     {props.children}
-  </div>
+  </button>
 );
 
 const PaletteColor = (props: {
@@ -31,7 +34,13 @@ const PaletteColor = (props: {
     () => props.onClick(props.color),
     [props.onClick, props.color],
   );
-  return <PaletteColorBox $color={props.color} onClick={onClick} />;
+  return (
+    <PaletteColorBox
+      $color={props.color}
+      ariaLabel={props.color}
+      onClick={onClick}
+    />
+  );
 };
 
 const PaletteColorRandom = (props: {onClick: (color: string) => void}) => {
@@ -40,7 +49,11 @@ const PaletteColorRandom = (props: {onClick: (color: string) => void}) => {
     [props.onClick],
   );
   return (
-    <PaletteColorBox $color="transparent" onClick={onClick}>
+    <PaletteColorBox
+      $color="transparent"
+      ariaLabel="Choose a random color"
+      onClick={onClick}
+    >
       <FontAwesomeIcon icon={faRandom} />
     </PaletteColorBox>
   );

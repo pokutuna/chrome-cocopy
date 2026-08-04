@@ -28,10 +28,15 @@
 
 .paletteColorBox {
   background-color: var(--palette-color);
+  appearance: none;
   width: var(--size-2xl);
   height: var(--size-2xl);
   margin: var(--space-1);
+  padding: 0;
+  border: 0;
   cursor: pointer;
+  color: inherit;
+  font: inherit;
 
   display: flex;
   justify-content: center;
