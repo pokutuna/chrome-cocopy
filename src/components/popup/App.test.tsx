@@ -2,6 +2,7 @@ import {render, screen, waitFor, fireEvent} from '@testing-library/react';
 import '@testing-library/jest-dom';
 import {vi, test, expect, afterEach} from 'vitest';
 
+import {ConfigStore, createConfigStore} from '../../lib/config';
 import {FunctionStore} from '../../lib/function-store';
 import {
   ACTIVE_POINTER_KEY,
@@ -14,6 +15,7 @@ import {
   makeFunction,
   seedSnapshot,
 } from '../../lib/function-store/repository.test-helpers';
+import {ConfigStoreProvider} from '../common/ConfigContext';
 import {FunctionStoreProvider} from '../common/FunctionStoreContext';
 import {App} from './App';
 
@@ -34,16 +36,37 @@ function buildStore(): {
   return {store: {repository, legacyBackup}, storage};
 }
 
-function renderApp(store: FunctionStore) {
+function buildConfigStore(): ConfigStore {
+  return createConfigStore(new InMemoryKeyValueStorage());
+}
+
+function renderApp(
+  store: FunctionStore,
+  configStore: ConfigStore = buildConfigStore(),
+) {
   return render(
-    <FunctionStoreProvider value={store}>
-      <App />
-    </FunctionStoreProvider>,
+    <ConfigStoreProvider value={configStore}>
+      <FunctionStoreProvider value={store}>
+        <App />
+      </FunctionStoreProvider>
+    </ConfigStoreProvider>,
   );
 }
 
+const clipboardWriteTextMock = vi.fn().mockResolvedValue(undefined);
+const clipboardWriteMock = vi.fn().mockResolvedValue(undefined);
+vi.stubGlobal('navigator', {
+  ...navigator,
+  clipboard: {
+    writeText: clipboardWriteTextMock,
+    write: clipboardWriteMock,
+  },
+});
+
 afterEach(() => {
   evaluateMock.mockReset();
+  clipboardWriteTextMock.mockClear();
+  clipboardWriteMock.mockClear();
 });
 
 test('lists only functions whose pattern matches the active tab URL, in Catalog order', async () => {
@@ -162,4 +185,100 @@ test('a document that fails to load shows an error but keeps other functions usa
   // The healthy function is still selectable and runs normally.
   fireEvent.click(screen.getByText(healthy.name));
   await waitFor(() => expect(evaluateMock).toHaveBeenCalledTimes(1));
+});
+
+test('closeAfterCopy=true closes the popup after the clipboard write completes', async () => {
+  vi.mocked(chrome.tabs.query).mockImplementation(
+    async () =>
+      [{id: 1, url: 'https://example.test/page'}] as chrome.tabs.Tab[],
+  );
+  vi.mocked(chrome.runtime.getManifest).mockImplementation(
+    () => ({version_name: 'Build v0.0.0'}) as chrome.runtime.Manifest,
+  );
+  vi.mocked(chrome.scripting.executeScript).mockImplementation(async () => []);
+  evaluateMock.mockResolvedValue({result: 'copied!'});
+  const closeSpy = vi.spyOn(window, 'close').mockImplementation(() => {});
+
+  const fn = makeFunction('runnable', {name: 'Run me'});
+  const {store, storage} = buildStore();
+  await seedSnapshot(storage, [fn]);
+  const configStore = buildConfigStore();
+  await configStore.update({closeAfterCopy: true});
+
+  renderApp(store, configStore);
+
+  await waitFor(() => expect(screen.getByText(fn.name)).toBeInTheDocument());
+  fireEvent.click(screen.getByText(fn.name));
+
+  await waitFor(() => expect(clipboardWriteTextMock).toHaveBeenCalledTimes(1));
+  // The clipboard write resolves well within the 300ms running animation;
+  // the popup must stay open until the animation finishes.
+  expect(closeSpy).not.toHaveBeenCalled();
+  await waitFor(() => expect(closeSpy).toHaveBeenCalledTimes(1));
+
+  // The clipboard write must complete before the popup closes.
+  expect(clipboardWriteTextMock.mock.invocationCallOrder[0]).toBeLessThan(
+    closeSpy.mock.invocationCallOrder[0],
+  );
+
+  closeSpy.mockRestore();
+});
+
+test('closeAfterCopy=false (default) does not close the popup after copying', async () => {
+  vi.mocked(chrome.tabs.query).mockImplementation(
+    async () =>
+      [{id: 1, url: 'https://example.test/page'}] as chrome.tabs.Tab[],
+  );
+  vi.mocked(chrome.runtime.getManifest).mockImplementation(
+    () => ({version_name: 'Build v0.0.0'}) as chrome.runtime.Manifest,
+  );
+  vi.mocked(chrome.scripting.executeScript).mockImplementation(async () => []);
+  evaluateMock.mockResolvedValue({result: 'copied!'});
+  const closeSpy = vi.spyOn(window, 'close').mockImplementation(() => {});
+
+  const fn = makeFunction('runnable', {name: 'Run me'});
+  const {store, storage} = buildStore();
+  await seedSnapshot(storage, [fn]);
+
+  renderApp(store);
+
+  await waitFor(() => expect(screen.getByText(fn.name)).toBeInTheDocument());
+  fireEvent.click(screen.getByText(fn.name));
+
+  await waitFor(() => expect(clipboardWriteTextMock).toHaveBeenCalledTimes(1));
+  expect(closeSpy).not.toHaveBeenCalled();
+
+  closeSpy.mockRestore();
+});
+
+test('closeAfterCopy=true does not close the popup when the function errors', async () => {
+  vi.mocked(chrome.tabs.query).mockImplementation(
+    async () =>
+      [{id: 1, url: 'https://example.test/page'}] as chrome.tabs.Tab[],
+  );
+  vi.mocked(chrome.runtime.getManifest).mockImplementation(
+    () => ({version_name: 'Build v0.0.0'}) as chrome.runtime.Manifest,
+  );
+  vi.mocked(chrome.scripting.executeScript).mockImplementation(async () => []);
+  evaluateMock.mockRejectedValue({
+    error: {type: 'ExecutionError', name: 'Error', message: 'boom'},
+  });
+  const closeSpy = vi.spyOn(window, 'close').mockImplementation(() => {});
+
+  const fn = makeFunction('runnable', {name: 'Run me'});
+  const {store, storage} = buildStore();
+  await seedSnapshot(storage, [fn]);
+  const configStore = buildConfigStore();
+  await configStore.update({closeAfterCopy: true});
+
+  renderApp(store, configStore);
+
+  await waitFor(() => expect(screen.getByText(fn.name)).toBeInTheDocument());
+  fireEvent.click(screen.getByText(fn.name));
+
+  await waitFor(() => expect(evaluateMock).toHaveBeenCalledTimes(1));
+  expect(closeSpy).not.toHaveBeenCalled();
+  expect(clipboardWriteTextMock).not.toHaveBeenCalled();
+
+  closeSpy.mockRestore();
 });

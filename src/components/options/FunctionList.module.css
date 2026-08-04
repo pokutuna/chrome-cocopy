@@ -18,6 +18,11 @@
   justify-content: center;
   width: var(--size-4xl);
   height: var(--constants-functionHeight);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
   cursor: pointer;
 }
 

@@ -114,7 +114,7 @@ test('render legacy page', async () => {
   render(renderWithStore(store, <App />, ['/legacy']));
 
   await waitFor(() =>
-    expect(screen.getByText('Legacy storage backup')).toBeInTheDocument(),
+    expect(screen.getByText('Legacy Functions')).toBeInTheDocument(),
   );
 
   // The full inspection UI renders on its own page, not the function list.

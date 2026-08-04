@@ -57,7 +57,7 @@ async function openOptionsWithLegacy(
 }
 
 /**
- * Opens the "Legacy storage backup" page and returns its section. The backup
+ * Opens the "Legacy Functions" page and returns its section. The backup
  * lives on its own `/legacy` route, so the options root only carries a banner
  * linking to it; asserting on the root page finds the banner text but none of
  * the controls.
@@ -70,7 +70,7 @@ async function openLegacySection(page: import('@playwright/test').Page) {
   await page.goto(`${page.url().split('#')[0]}#/legacy`);
   const section = page
     .locator('div')
-    .filter({has: page.getByRole('heading', {name: 'Legacy storage backup'})})
+    .filter({has: page.getByRole('heading', {name: 'Legacy Functions'})})
     .last();
   await expect(section).toBeVisible();
   return section;
@@ -118,7 +118,7 @@ test('opening options migrates legacy data, preserving content and order', async
   // ...and the legacy sync key itself is left exactly as it was.
   expect(await readLegacyFunctions(options)).toEqual(legacyThree);
 
-  // The Legacy storage backup section reports the completed migration.
+  // The Legacy Functions section reports the completed migration.
   await options.reload();
   const section = await openLegacySection(options);
   await expect(section.getByText('migrated', {exact: false})).toBeVisible();
@@ -326,6 +326,6 @@ test('seeds the default functions when there is no legacy data', async ({
 
   // Nothing to recover, so the temporary backup section stays hidden.
   await expect(
-    options.getByRole('heading', {name: 'Legacy storage backup'}),
+    options.getByRole('heading', {name: 'Legacy Functions'}),
   ).toHaveCount(0);
 });

@@ -34,9 +34,15 @@ import styles from './FunctionList.module.css';
 export const Caret = (props: {active: boolean; onClick: () => void}) => {
   const {active, onClick} = props;
   return (
-    <div className={styles.itemButton} onClick={onClick}>
+    <button
+      type="button"
+      className={styles.itemButton}
+      onClick={onClick}
+      aria-label={active ? 'Collapse function' : 'Expand function'}
+      aria-expanded={active}
+    >
       <FontAwesomeIcon icon={active ? faCaretDown : faCaretRight} size="lg" />
-    </div>
+    </button>
   );
 };
 
@@ -65,9 +71,14 @@ export function EditorBox(props: {children?: React.ReactNode}) {
 function AddFunction(props: {onClick: () => void}) {
   return (
     <div className={styles.functionItemBox}>
-      <div className={styles.itemButton} onClick={props.onClick}>
+      <button
+        type="button"
+        className={styles.itemButton}
+        onClick={props.onClick}
+        aria-label="Create new function"
+      >
         <FontAwesomeIcon icon={faPlus} />
-      </div>
+      </button>
       <AddFunctionItem onClick={props.onClick} />
     </div>
   );

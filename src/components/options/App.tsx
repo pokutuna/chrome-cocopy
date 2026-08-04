@@ -6,14 +6,16 @@ import {InstallFunction} from './InstallFunction';
 import {LegacyBackup, LegacyBackupBanner} from './LegacyBackup';
 import {Links} from './Links';
 import {MainColumn, Title, VersionLabel} from './Parts';
+import {Settings} from './Settings';
 
 const PageRoot = () => (
   <>
     <FunctionList />
-    <LegacyBackupBanner />
+    <Settings />
     <Hint />
     <DebuggingHint />
     <Links />
+    <LegacyBackupBanner />
   </>
 );
 

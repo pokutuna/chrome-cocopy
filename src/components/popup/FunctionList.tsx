@@ -1,5 +1,6 @@
-import {useState, useEffect, useCallback} from 'react';
+import {useState, useEffect, useCallback, useRef} from 'react';
 
+import {DEFAULT_CONFIG} from '../../lib/config';
 import {EvalResult, EvalError, isRichContent} from '../../lib/eval';
 import {
   CopyFunctionRef,
@@ -8,6 +9,7 @@ import {
 import {createPageTargetFromTab} from '../../lib/page';
 import {getActiveTab} from '../../lib/tab';
 import {codeToIndex} from '../../lib/util';
+import {useConfigStore} from '../common/ConfigContext';
 import {useFunctionRepository} from '../common/FunctionStoreContext';
 import {useEvaluate} from '../common/Sandbox';
 import {ListError} from './Error';
@@ -19,19 +21,27 @@ type FunctionError = {
   error: EvalError;
 } | null;
 
-function writeResultToClipboard(res: EvalResult) {
+// Must match animation-duration of `.running` in Function.module.css: the
+// popup stays open (even with closeAfterCopy) until the indicator finishes.
+const RUNNING_ANIMATION_MS = 300;
+
+/** Resolves once the clipboard write settles (or immediately, if there was
+ * nothing to copy), so callers can wait for it before closing the popup:
+ * window.close() can otherwise abort an in-flight clipboard write. */
+function writeResultToClipboard(res: EvalResult): Promise<void> {
   if (res.result) {
     if (isRichContent(res.result)) {
-      navigator.clipboard.write([
+      return navigator.clipboard.write([
         new ClipboardItem({
           'text/plain': new Blob([res.result.text], {type: 'text/plain'}),
           'text/html': new Blob([res.result.html], {type: 'text/html'}),
         }),
       ]);
     } else {
-      navigator.clipboard.writeText(res.result.toString());
+      return navigator.clipboard.writeText(res.result.toString());
     }
   }
+  return Promise.resolve();
 }
 
 /** Shown when `repository.get` returns undefined (document gone) or throws
@@ -64,11 +74,21 @@ function isEvalRejection(r: unknown): r is {error: EvalError} {
 export const FunctionList = () => {
   const evaluate = useEvaluate();
   const repository = useFunctionRepository();
+  const configStore = useConfigStore();
   const [functions, setFunctions] = useState<CopyFunctionRef[]>([]);
   const [running, setRunning] = useState<string | null>(null);
   const [fnError, setFnError] = useState<FunctionError>(null);
   const [listError, setListError] = useState<string | null>(null);
+  const [config, setConfig] = useState(DEFAULT_CONFIG);
   const modifier = useModifier();
+
+  // The running indicator is cleared by a timer; clear it on unmount so it
+  // never fires setState after the popup is gone (and a rapid second click
+  // does not get its indicator wiped by the first click's timer).
+  const runningTimer = useRef<ReturnType<typeof setTimeout> | undefined>(
+    undefined,
+  );
+  useEffect(() => () => clearTimeout(runningTimer.current), []);
 
   useEffect(() => {
     const run = async () => {
@@ -88,10 +108,23 @@ export const FunctionList = () => {
       });
   }, [repository]);
 
+  useEffect(() => {
+    configStore.read().then(setConfig);
+  }, [configStore]);
+
   const onClick = useCallback(
     (ref: CopyFunctionRef) => {
       setRunning(ref.id);
-      setTimeout(() => setRunning(null), 300);
+      clearTimeout(runningTimer.current);
+      // Resolves when the running indicator finishes. Never resolves if a
+      // rapid second click replaces the timer, but then that click's own
+      // flow takes over closing the popup.
+      const animationDone = new Promise<void>(resolve => {
+        runningTimer.current = setTimeout(() => {
+          setRunning(null);
+          resolve();
+        }, RUNNING_ANIMATION_MS);
+      });
 
       const run = async () => {
         const tab = await getActiveTab();
@@ -110,7 +143,13 @@ export const FunctionList = () => {
         });
       };
       run()
-        .then(writeResultToClipboard)
+        .then(async res => {
+          await writeResultToClipboard(res);
+          if (config.closeAfterCopy) {
+            await animationDone;
+            window.close();
+          }
+        })
         .catch((r: unknown) =>
           setFnError({
             id: ref.id,
@@ -118,7 +157,7 @@ export const FunctionList = () => {
           }),
         );
     },
-    [evaluate, modifier, repository],
+    [config, evaluate, modifier, repository],
   );
 
   // Kyeboard Shortcut
