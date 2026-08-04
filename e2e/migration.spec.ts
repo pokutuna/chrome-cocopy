@@ -9,6 +9,7 @@
 import type {CopyFunction} from '../src/lib/function';
 import {test, expect} from './fixtures';
 import {
+  clearStorage,
   readActivePointer,
   readLegacyBackup,
   readLegacyFunctions,
@@ -309,10 +310,7 @@ test('seeds the default functions when there is no legacy data', async ({
 }) => {
   const options = await context.newPage();
   await options.goto(`chrome-extension://${extensionId}/options.html`);
-  await options.evaluate(async () => {
-    await chrome.storage.sync.clear();
-    await chrome.storage.local.clear();
-  });
+  await clearStorage(options);
   await options.reload();
 
   await expect.poll(() => readActivePointer(options)).toBeTruthy();
