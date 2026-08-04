@@ -10,7 +10,7 @@
 
 ## Build, Test, and Development Commands
 
-Use Node 24.15.0 from `.node-version` and pnpm with the committed lockfile (`pnpm-lock.yaml`); the pnpm version is pinned via `packageManager` in `package.json` (corepack).
+Use Node 26.4.0 from `.node-version` and pnpm with the committed lockfile (`pnpm-lock.yaml`); the pnpm version is pinned via `packageManager` in `package.json` (corepack).
 
 - `pnpm install --frozen-lockfile` installs the exact dependency set.
 - `pnpm test` runs Jest and then the `gts check` post-test lint/type checks.

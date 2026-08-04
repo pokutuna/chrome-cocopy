@@ -8,7 +8,7 @@ cocopy is a Chrome extension (Manifest V3) that lets users define small JavaScri
 
 ## Tech Stack
 
-TypeScript 7 / React 19 / CSS Modules / Vite (build: `vite.config.ts` + `scripts/vite-manifest-plugin.ts` for manifest generation) / Vitest 4 (test: `vitest.config.ts` + `vitest.setup.ts`) / oxlint + oxfmt (lint/format: `.oxlintrc.json` + `.oxfmtrc.json`) / `tsc --noEmit` (typecheck, since neither Vite nor oxlint type-check) / tsx (gallery script runner). Node 24 (see `.node-version`), pnpm with committed lockfile (`pnpm-lock.yaml`); the pnpm version is pinned via `packageManager` in `package.json` (corepack).
+TypeScript 7 / React 19 / CSS Modules / Vite (build: `vite.config.ts` + `scripts/vite-manifest-plugin.ts` for manifest generation) / Vitest 4 (test: `vitest.config.ts` + `vitest.setup.ts`) / oxlint + oxfmt (lint/format: `.oxlintrc.json` + `.oxfmtrc.json`) / `tsc --noEmit` (typecheck, since neither Vite nor oxlint type-check) / tsx (gallery script runner). Node 26 (see `.node-version`), pnpm with committed lockfile (`pnpm-lock.yaml`); the pnpm version is pinned via `packageManager` in `package.json` (corepack).
 
 `tsconfig.json` is self-contained (previously extended gts's
 `tsconfig-google.json`; those compiler options are now inlined). TypeScript 7
