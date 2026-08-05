@@ -2,6 +2,7 @@ import * as v from 'valibot';
 
 import {CopyFunction} from '../function';
 import {copyFunctionSchema} from '../function.schema';
+import {timeIt} from '../perf-debug';
 import {splitIntoShards} from './catalog';
 import {
   ACTIVE_POINTER_KEY,
@@ -321,13 +322,19 @@ export function createFunctionRepository(
     catalogId: string,
   ): Promise<Snapshot | undefined> {
     const rootKey = catalogRootKey(catalogId);
-    const rootRaw = (await storage.get([rootKey]))[rootKey];
+    const rootRaw = (await timeIt('root get', storage.get([rootKey])))[rootKey];
     if (rootRaw === undefined) return undefined;
 
     const root = parseOrThrow(catalogRootSchema, rootRaw, 'Catalog Root');
 
     const shardKeys = root.shardIds.map(catalogShardKey);
-    const shardsRaw = shardKeys.length > 0 ? await storage.get(shardKeys) : {};
+    const shardsRaw =
+      shardKeys.length > 0
+        ? await timeIt(
+            `shards get (${shardKeys.length})`,
+            storage.get(shardKeys),
+          )
+        : {};
 
     const shards: CatalogShard[] = [];
     for (const shardId of root.shardIds) {
@@ -352,14 +359,19 @@ export function createFunctionRepository(
    * ahead of the items it refers to).
    */
   async function readActiveSnapshot(): Promise<Snapshot> {
-    const catalogId = await requirePointer();
+    return timeIt('readActiveSnapshot total', readActiveSnapshotInner());
+  }
+
+  async function readActiveSnapshotInner(): Promise<Snapshot> {
+    const catalogId = await timeIt('pointer get', requirePointer());
+
     const snapshot = await readSnapshotFor(catalogId);
     if (snapshot) {
       // Do NOT claim catalogId as notified here: reads must never suppress a
       // change notification for other listeners. Only the commit path and the
       // change handler update notifiedCatalogId; an extra notification is a
       // harmless re-read, a missed one leaves a subscriber stale.
-      await writeCachedSnapshot(snapshot);
+      await timeIt('cache write', writeCachedSnapshot(snapshot));
       return snapshot;
     }
 
