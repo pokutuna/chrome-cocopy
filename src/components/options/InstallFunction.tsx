@@ -8,7 +8,8 @@ import {decodeSharable} from '../../lib/share';
 import {FunctionItem} from '../common/FunctionParts';
 import {useFunctionRepository} from '../common/FunctionStoreContext';
 import {Editor} from './Editor';
-import {EditorBox, messageForError} from './FunctionList';
+import {EditorBox} from './FunctionItemParts';
+import {messageForError} from './FunctionList';
 import {Section, TextList} from './Parts';
 
 import styles from './InstallFunction.module.css';

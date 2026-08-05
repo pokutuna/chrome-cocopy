@@ -132,6 +132,19 @@ export async function seedFunctionStore(
 
 /** Removes everything from both storage areas, including any legacy value. */
 export async function clearStorage(page: Page): Promise<void> {
+  // The extension page that gives specs a chrome.storage-capable origin also
+  // boots the app, whose repository runs the defaults migration on the first
+  // read. Those writes land 50-400ms after `load`, so clearing immediately
+  // races them: a late Active Pointer write makes the next reload skip
+  // migration (the spec sees defaults instead of its seed), and a clear
+  // landing between the migration's item write and its pointer write leaves a
+  // pointer aimed at a wiped catalog. The migration result is its final write
+  // (recordResult in migration.ts), so once it exists nothing from that boot
+  // is still in flight.
+  await page.waitForFunction(
+    async key => (await chrome.storage.local.get(key))[key] !== undefined,
+    MIGRATION_RESULT_KEY,
+  );
   await page.evaluate(async () => {
     await chrome.storage.sync.clear();
     await chrome.storage.local.clear();

@@ -2,9 +2,9 @@ import {test, expect, EXTENSION_ID} from './fixtures';
 import {seedFunctionStore, type SeedFunction} from './function-store';
 
 // Minimal CopyFunction fixtures matching src/lib/function.ts's CopyFunction
-// shape / src/lib/function.schema.ts. `pattern` is intentionally omitted
-// so the function is shown regardless of the active tab's URL
-// (see filterFunctions in src/lib/function.ts).
+// shape / src/lib/function.schema.ts. `pattern` is intentionally omitted:
+// repository.listForUrl() only filters entries that have a pattern, so a
+// patternless function is shown regardless of the active tab's URL.
 const seedFunctions: SeedFunction[] = [
   {
     id: 'e2e-title-url',

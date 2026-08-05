@@ -61,18 +61,6 @@
   gap: 0 var(--space-4);
 }
 
-.dividerH {
-  margin: var(--space-4) 0;
-  height: var(--space-1);
-  background: linear-gradient(
-    90deg,
-    transparent 20%,
-    var(--color-lightgray) 20%,
-    var(--color-lightgray) 80%,
-    transparent 80%
-  );
-}
-
 .dividerV {
   margin: 0 var(--space-2);
   width: var(--space-1);

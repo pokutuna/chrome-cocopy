@@ -14,12 +14,6 @@ import {FunctionError} from './Error';
 
 import styles from './Function.module.css';
 
-function wrapKeyDown(cb: () => void) {
-  return (e: KeyboardEvent) => {
-    if (e.key === 'Enter' || e.key === ' ') cb();
-  };
-}
-
 type FunctionItemProps = {
   fn: CopyFunctionRef;
   index: number;
@@ -32,7 +26,12 @@ export function FunctionItem(props: FunctionItemProps) {
   const {fn, index, running, error} = props;
   const shortcut = useMemo(() => indexToKey(index), [index]);
   const onClick = useCallback(() => props.onClick(fn), [props.onClick, fn]);
-  const onKeyDown = useCallback(wrapKeyDown(onClick), [onClick]);
+  const onKeyDown = useCallback(
+    (e: KeyboardEvent) => {
+      if (e.key === 'Enter' || e.key === ' ') onClick();
+    },
+    [onClick],
+  );
 
   return (
     <FunctionBox
@@ -41,6 +40,9 @@ export function FunctionItem(props: FunctionItemProps) {
       $backgroundColor={fn.theme.backgroundColor}
       onClick={onClick}
       onKeyDown={onKeyDown as any}
+      // Intentional positive tabIndex: function items are tabbed first so the
+      // settings gear comes last (tabIndex={0} would follow DOM order and put
+      // the gear before the list). Do not "fix" to 0.
       tabIndex={1}
     >
       <Shortcut textColor={fn.theme.textColor} shortcut={shortcut} />

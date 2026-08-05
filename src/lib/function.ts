@@ -54,15 +54,6 @@ export function newFunction(): CopyFunction {
   };
 }
 
-export function filterFunctions<T extends CopyFunction>(
-  url: string,
-  functions: T[],
-): T[] {
-  return functions.filter(f =>
-    f.pattern ? new RegExp(f.pattern).test(url) : true,
-  );
-}
-
 export const colorPalette = [
   '#F44336',
   '#E91E63',
@@ -78,7 +69,7 @@ export const colorPalette = [
   '#CDDC39',
   '#FFEB3B',
   '#FFC107',
-  '#FFC107',
+  '#FF9800',
   '#FF5722',
   '#795548',
   '#9E9E9E',

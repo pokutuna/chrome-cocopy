@@ -1,4 +1,4 @@
-import {useState, useEffect, useCallback, useRef} from 'react';
+import {useState, useEffect, useEffectEvent, useCallback, useRef} from 'react';
 
 import {DEFAULT_CONFIG} from '../../lib/config';
 import {EvalResult, EvalError, isRichContent} from '../../lib/eval';
@@ -127,10 +127,12 @@ export const FunctionList = () => {
       });
 
       const run = async () => {
-        const tab = await getActiveTab();
-        const fn = await repository.get(ref).catch(e => {
-          throw loadError(e);
-        });
+        const [tab, fn] = await Promise.all([
+          getActiveTab(),
+          repository.get(ref).catch(e => {
+            throw loadError(e);
+          }),
+        ]);
         if (!fn) throw loadError();
 
         return evaluate({
@@ -161,22 +163,23 @@ export const FunctionList = () => {
   );
 
   // Kyeboard Shortcut
+  const onKeyDown = useEffectEvent((e: KeyboardEvent) => {
+    const index = codeToIndex(e.code);
+    if (index !== undefined) {
+      const rule = functions[index];
+      e.preventDefault();
+      if (rule) onClick(rule);
+    }
+    if (e.key === 'Esc' || e.key === 'Escape') {
+      e.preventDefault();
+      window.close();
+    }
+  });
   useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      const index = codeToIndex(e.code);
-      if (index !== undefined) {
-        const rule = functions[index];
-        e.preventDefault();
-        if (rule) onClick(rule);
-      }
-      if (e.key === 'Esc' || e.key === 'Escape') {
-        e.preventDefault();
-        window.close();
-      }
-    };
+    const handler = (e: KeyboardEvent) => onKeyDown(e);
     document.addEventListener('keydown', handler);
     return () => document.removeEventListener('keydown', handler);
-  }, [functions, onClick]);
+  }, []);
 
   return (
     <>

@@ -25,7 +25,8 @@ import {
 } from '../common/FunctionStoreContext';
 import {Button, ButtonIcon} from './Button';
 import {CodeEditor} from './CodeEditor';
-import {Caret, EditorBox, messageForError} from './FunctionList';
+import {Caret, EditorBox} from './FunctionItemParts';
+import {messageForError} from './FunctionList';
 import {TextInput} from './Input';
 import {Box, Item, Row, Section} from './Parts';
 

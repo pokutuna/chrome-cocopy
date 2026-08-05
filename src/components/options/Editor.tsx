@@ -2,7 +2,7 @@ import {faShareSquare} from '@fortawesome/free-solid-svg-icons/faShareSquare';
 import {faTrash} from '@fortawesome/free-solid-svg-icons/faTrash';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import debounce from 'lodash.debounce';
-import {useReducer, useMemo, useCallback, useRef} from 'react';
+import {useReducer, useMemo, useCallback, useRef, useLayoutEffect} from 'react';
 
 import {EvalPayload, EvalResult} from '../../lib/eval';
 import {CopyFunction} from '../../lib/function';
@@ -36,9 +36,13 @@ type EditorProps = {
 export function Editor(props: EditorProps) {
   // The reducer captures its callbacks once, so route them through a ref that
   // always points at the current props (the previous code had the same shape
-  // with a dispatch function).
+  // with a dispatch function). Assigning in a layout effect (not during
+  // render) keeps render pure; the effect commits before the setTimeout
+  // callbacks below can ever run, so they still always see the latest props.
   const propsRef = useRef(props);
-  propsRef.current = props;
+  useLayoutEffect(() => {
+    propsRef.current = props;
+  }, [props]);
 
   const callbacks = useMemo<EditorCallbacks>(
     () => ({
@@ -69,7 +73,7 @@ export function Editor(props: EditorProps) {
       [dispatch],
     ),
   );
-  const parse = useMemo(() => debounce(_evaluate, 200), [dispatch, _evaluate]);
+  const parse = useMemo(() => debounce(_evaluate, 200), [_evaluate]);
 
   const onCodeEdit = useCallback(
     (value: string) => {
