@@ -3,10 +3,10 @@ import * as path from 'path';
 import license from 'rollup-plugin-license';
 import {defineConfig} from 'vite';
 
-import packageJson from './package.json';
-import {manifestPlugin} from './scripts/vite-manifest-plugin';
+import packageJson from './package.json' with {type: 'json'};
+import {manifestPlugin} from './scripts/vite-manifest-plugin.ts';
 
-const rootDir = __dirname;
+const rootDir = import.meta.dirname;
 const srcDir = path.join(rootDir, 'src');
 
 // Fallback license texts for packages whose published tarball omits a

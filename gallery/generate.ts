@@ -7,11 +7,11 @@ import Mustache from 'mustache';
 import {decodeSharable} from '../src/lib/share';
 
 const template = fs.readFileSync(
-  path.join(__dirname, './README.template.md'),
+  path.join(import.meta.dirname, './README.template.md'),
   'utf8',
 );
 const gallery = yaml.load(
-  fs.readFileSync(path.join(__dirname, './gallery.yaml'), 'utf8'),
+  fs.readFileSync(path.join(import.meta.dirname, './gallery.yaml'), 'utf8'),
 );
 
 const category = `
@@ -80,4 +80,4 @@ const rendered = Mustache.render(
   },
 );
 
-fs.writeFileSync(path.join(__dirname, './README.md'), rendered);
+fs.writeFileSync(path.join(import.meta.dirname, './README.md'), rendered);
