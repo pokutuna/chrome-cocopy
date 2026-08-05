@@ -23,7 +23,7 @@ const EXTENSION_PUBLIC_KEY =
 //     String.fromCharCode(97 + parseInt(c, 16)));
 export const EXTENSION_ID = 'hclhfjgikdikdeeopockeceinaijolho';
 
-const repoRoot = path.resolve(__dirname, '..');
+const repoRoot = path.resolve(import.meta.dirname, '..');
 const buildDir = path.join(repoRoot, 'build');
 
 function copyDir(src: string, dest: string) {

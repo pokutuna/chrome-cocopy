@@ -12,7 +12,7 @@ interface GalleryCategory {
 }
 
 const gallery = yaml.load(
-  fs.readFileSync(path.join(__dirname, './gallery.yaml'), 'utf8'),
+  fs.readFileSync(path.join(import.meta.dirname, './gallery.yaml'), 'utf8'),
 ) as GalleryCategory[];
 
 const run = (c: GalleryCategory) => {
