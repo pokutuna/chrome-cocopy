@@ -7,6 +7,7 @@ import {
   UnsupportedVersionError,
 } from '../../lib/function-store/types';
 import {createPageTargetFromTab} from '../../lib/page';
+import {timeIt} from '../../lib/perf-debug';
 import {getActiveTab} from '../../lib/tab';
 import {codeToIndex} from '../../lib/util';
 import {useConfigStore} from '../common/ConfigContext';
@@ -92,11 +93,11 @@ export const FunctionList = () => {
 
   useEffect(() => {
     const run = async () => {
-      const tab = await getActiveTab();
+      const tab = await timeIt('getActiveTab', getActiveTab());
       const url = tab.url || tab.pendingUrl || '';
-      return repository.listForUrl(url);
+      return timeIt('listForUrl', repository.listForUrl(url));
     };
-    run()
+    timeIt('FunctionList total', run())
       .then(setFunctions)
       .catch((e: unknown) => {
         console.error(e);
