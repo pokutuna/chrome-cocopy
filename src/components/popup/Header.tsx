@@ -3,10 +3,12 @@ import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {useMemo} from 'react';
 
 import {isDev} from '../../lib/util';
+import {useT} from '../common/I18nContext';
 
 import styles from './Header.module.css';
 
 export function PopupHeader() {
+  const t = useT();
   const dev = useMemo(() => isDev(), []);
   return (
     <div className={styles.headerBox}>
@@ -19,7 +21,7 @@ export function PopupHeader() {
         className={styles.optionLink}
         href="/options.html"
         target="_blank"
-        aria-label="Settings"
+        aria-label={t.popup.openSettings}
       >
         <FontAwesomeIcon icon={faCog} />
       </a>

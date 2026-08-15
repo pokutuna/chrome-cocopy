@@ -2,12 +2,18 @@ import React from 'react';
 import * as ReactDOM from 'react-dom/client';
 import {HashRouter as Router} from 'react-router-dom';
 
+import {ConfigProvider} from './components/common/ConfigContext';
+import {I18nProvider} from './components/common/I18nContext';
 import {App} from './components/options/App';
 
 import './theme.css';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <Router basename="/">
-    <App />
+    <ConfigProvider>
+      <I18nProvider>
+        <App />
+      </I18nProvider>
+    </ConfigProvider>
   </Router>,
 );

@@ -5,17 +5,21 @@ import {faPlus} from '@fortawesome/free-solid-svg-icons/faPlus';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 
 import {AddFunctionItem} from '../common/FunctionParts';
+import {useT} from '../common/I18nContext';
 
 import styles from './FunctionList.module.css';
 
 export const Caret = (props: {active: boolean; onClick: () => void}) => {
+  const t = useT();
   const {active, onClick} = props;
   return (
     <button
       type="button"
       className={styles.itemButton}
       onClick={onClick}
-      aria-label={active ? 'Collapse function' : 'Expand function'}
+      aria-label={
+        active ? t.functionList.collapseAria : t.functionList.expandAria
+      }
       aria-expanded={active}
     >
       <FontAwesomeIcon icon={active ? faCaretDown : faCaretRight} size="lg" />
@@ -46,13 +50,14 @@ export function EditorBox(props: {children?: React.ReactNode}) {
 }
 
 export function AddFunction(props: {onClick: () => void}) {
+  const t = useT();
   return (
     <div className={styles.functionItemBox}>
       <button
         type="button"
         className={styles.itemButton}
         onClick={props.onClick}
-        aria-label="Create new function"
+        aria-label={t.functionList.createNewAria}
       >
         <FontAwesomeIcon icon={faPlus} />
       </button>

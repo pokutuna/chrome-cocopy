@@ -8,8 +8,9 @@ import {InMemoryKeyValueStorage} from '../../lib/function-store/memory-storage';
 import {createLegacyBackupRepository} from '../../lib/function-store/migration';
 import {createFunctionRepository} from '../../lib/function-store/repository';
 import {seedSnapshot} from '../../lib/function-store/repository.test-helpers';
-import {ConfigStoreProvider} from '../common/ConfigContext';
+import {ConfigProvider, ConfigStoreProvider} from '../common/ConfigContext';
 import {FunctionStoreProvider} from '../common/FunctionStoreContext';
+import {I18nProvider} from '../common/I18nContext';
 
 export interface TestStore extends FunctionStore {
   sync: InMemoryKeyValueStorage;
@@ -43,14 +44,19 @@ export function renderWithStore(
   store: FunctionStore,
   ui: React.ReactNode,
   initialEntries: string[] = ['/'],
+  // Passed by tests that pre-store a language; the default keeps English.
+  configStore = createConfigStore(new InMemoryKeyValueStorage()),
 ): React.ReactElement {
   // A dedicated in-memory ConfigStore keeps Settings (rendered by App/PageRoot)
   // from falling back to getConfigStore() and touching real chrome.storage.
-  const configStore = createConfigStore(new InMemoryKeyValueStorage());
   return (
     <FunctionStoreProvider value={store}>
       <ConfigStoreProvider value={configStore}>
-        <MemoryRouter initialEntries={initialEntries}>{ui}</MemoryRouter>
+        <ConfigProvider>
+          <I18nProvider>
+            <MemoryRouter initialEntries={initialEntries}>{ui}</MemoryRouter>
+          </I18nProvider>
+        </ConfigProvider>
       </ConfigStoreProvider>
     </FunctionStoreProvider>
   );

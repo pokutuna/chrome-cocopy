@@ -3,6 +3,8 @@ import '@testing-library/jest-dom';
 import {vi} from 'vitest';
 
 import {defaultFunctions} from '../../lib/builtin';
+import {createConfigStore} from '../../lib/config';
+import {InMemoryKeyValueStorage} from '../../lib/function-store/memory-storage';
 import {
   LEGACY_BACKUP_KEY,
   MIGRATION_RESULT_KEY,
@@ -53,6 +55,37 @@ test('render options', async () => {
   );
 });
 
+test('renders in Japanese when the stored language is ja', async () => {
+  vi.mocked(chrome.tabs.query).mockImplementation(
+    async () => [{url: 'https://example.test/page'}] as chrome.tabs.Tab[],
+  );
+  vi.mocked(chrome.runtime.getManifest).mockImplementation(
+    () => ({version_name: 'Build v0.0.0'}) as chrome.runtime.Manifest,
+  );
+
+  const store = createTestStore();
+  await seedStore(store, defaultFunctions);
+  const configStore = createConfigStore(new InMemoryKeyValueStorage());
+  await configStore.update({language: 'ja'});
+
+  render(renderWithStore(store, <App />, ['/'], configStore));
+
+  // Body text comes from the ja catalog, while section headings stay English.
+  expect(await screen.findByText('新しい関数を作成')).toBeInTheDocument();
+  expect(screen.getByText('Functions')).toBeInTheDocument();
+  expect(screen.getByText('Hints')).toBeInTheDocument();
+  expect(screen.getByText('Debugging')).toBeInTheDocument();
+  expect(screen.getByText('Links')).toBeInTheDocument();
+
+  // A split hint keeps the code fragment intact next to the translated text.
+  expect(
+    screen.getByText('render(template, view)').parentElement,
+  ).toHaveTextContent('mustache テンプレート');
+
+  // User data stays untranslated.
+  expect(screen.getByText(defaultFunctions[0].name)).toBeInTheDocument();
+});
+
 test('render install page', async () => {
   const fn = defaultFunctions[0];
   const path = `/install?f=${encodeURIComponent(encodeSharable(fn))}`;
@@ -73,11 +106,11 @@ test('render install page', async () => {
 
   // Install page preamble.
   expect(
-    screen.getByText('Sharing this URL makes others can use this function.'),
+    screen.getByText('Sharing this URL lets others use this function.'),
   ).toBeInTheDocument();
   expect(
     screen.getByText(
-      'You can edit the code and every fields before installation.',
+      'You can edit the code and every field before installation.',
     ),
   ).toBeInTheDocument();
 

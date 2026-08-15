@@ -6,14 +6,20 @@ import * as v from 'valibot';
 
 import {ChromeKeyValueStorage} from './function-store/chrome-storage';
 import {KeyValueStorage, Unsubscribe} from './function-store/storage';
+// Type-only: the message catalogs must not enter this module's runtime graph.
+import type {LanguageSetting} from './i18n';
 
 export const CONFIG_KEY = 'cocopy:config';
 
 export interface Config {
   closeAfterCopy: boolean;
+  language: LanguageSetting;
 }
 
-export const DEFAULT_CONFIG: Config = {closeAfterCopy: false};
+export const DEFAULT_CONFIG: Config = {
+  closeAfterCopy: false,
+  language: 'auto',
+};
 
 // Forward-compatibility matters here, unlike FunctionStore: a config field
 // added by a newer extension version must not make an older version's read()
@@ -23,6 +29,10 @@ const configSchema = v.object({
   closeAfterCopy: v.fallback(
     v.optional(v.boolean(), DEFAULT_CONFIG.closeAfterCopy),
     DEFAULT_CONFIG.closeAfterCopy,
+  ),
+  language: v.fallback(
+    v.optional(v.picklist(['en', 'ja', 'auto']), DEFAULT_CONFIG.language),
+    DEFAULT_CONFIG.language,
   ),
 });
 
@@ -40,7 +50,7 @@ export interface ConfigStore {
 function parseConfig(raw: unknown): Config {
   if (typeof raw !== 'object' || raw === null) return {...DEFAULT_CONFIG};
   const parsed = v.parse(configSchema, raw);
-  return {closeAfterCopy: parsed.closeAfterCopy};
+  return {closeAfterCopy: parsed.closeAfterCopy, language: parsed.language};
 }
 
 export function createConfigStore(storage: KeyValueStorage): ConfigStore {

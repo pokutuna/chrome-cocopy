@@ -9,7 +9,9 @@ import {
 import {CopyFunction} from '../../lib/function';
 import {FunctionRepository} from '../../lib/function-store/repository';
 import {CopyFunctionRef} from '../../lib/function-store/types';
+import {Messages} from '../../lib/i18n';
 import {useFunctionRepository} from '../common/FunctionStoreContext';
+import {useT} from '../common/I18nContext';
 import {DnDWrapper} from './DnD';
 import {AddFunction} from './FunctionItemParts';
 import {FunctionListItem} from './FunctionListItem';
@@ -32,21 +34,23 @@ import styles from './FunctionList.module.css';
  * Conflict and quota get their own message because the user can act on them
  * (docs/function-storage.md, "Data Integrity and Error Handling").
  */
-export function messageForError(error: unknown): string {
+export function messageForError(t: Messages, error: unknown): string {
   const code =
     error && typeof error === 'object' && 'code' in error
       ? (error as {code: unknown}).code
       : undefined;
   if (code === 'conflict') {
-    return 'These functions were changed in another window. The list has been reloaded; review your changes and save again.';
+    return t.functionList.conflict;
   }
   if (code === 'quota') {
-    return `Not enough sync storage to save this. ${
+    // The appended detail comes from src/lib/ and stays English until errors
+    // carry structured values (docs/i18n.md, "Error Messages").
+    return `${t.functionList.quota} ${
       error instanceof Error ? error.message : ''
     }`.trim();
   }
   if (error instanceof Error && error.message) return error.message;
-  return 'The operation failed. Please try again.';
+  return t.functionList.operationFailed;
 }
 
 /**
@@ -58,6 +62,7 @@ export function messageForError(error: unknown): string {
  * (docs/function-storage.md, "options で関数を編集する").
  */
 export function useFunctionListStore(repository: FunctionRepository) {
+  const t = useT();
   const [state, dispatch] = useReducer(reducer, initialState);
 
   // Callbacks read the current state through a ref so their identity does not
@@ -75,9 +80,9 @@ export function useFunctionListStore(repository: FunctionRepository) {
     try {
       dispatch({t: 'refresh', refs: await repository.list()});
     } catch (error) {
-      dispatch({t: 'error', message: messageForError(error)});
+      dispatch({t: 'error', message: messageForError(t, error)});
     }
-  }, [repository]);
+  }, [repository, t]);
 
   useEffect(() => {
     void refresh();
@@ -116,7 +121,7 @@ export function useFunctionListStore(repository: FunctionRepository) {
           // Reload first: a conflict means the stored list moved on, and a
           // failed commit still leaves the previous snapshot readable.
           await refresh();
-          dispatch({t: 'mutation-failed', message: messageForError(error)});
+          dispatch({t: 'mutation-failed', message: messageForError(t, error)});
           return;
         }
         await refresh();
@@ -126,7 +131,7 @@ export function useFunctionListStore(repository: FunctionRepository) {
         mutationInFlight.current = false;
       }
     },
-    [refresh],
+    [refresh, t],
   );
 
   // Serial number of the latest openFunction call. A row click supersedes any
@@ -144,7 +149,7 @@ export function useFunctionListStore(repository: FunctionRepository) {
       // dispatching `cancel`: a dispatched action's outcome is not readable
       // through stateRef until the next render.
       if (current.activeId !== undefined) {
-        if (!confirmDiscard(current)) return;
+        if (!confirmDiscard(current, t.functionList.confirmDiscard)) return;
         dispatch({t: 'close'});
         // Clicking the already-open function only closes it.
         if (current.activeId === ref.id) return;
@@ -156,20 +161,16 @@ export function useFunctionListStore(repository: FunctionRepository) {
         if (requestId !== openRequestId.current) return;
         if (!fn) {
           await refresh();
-          dispatch({
-            t: 'error',
-            message:
-              'This function is no longer stored. The list has been reloaded.',
-          });
+          dispatch({t: 'error', message: t.functionList.functionGone});
           return;
         }
         dispatch({t: 'open', fn, documentId: ref.documentId});
       } catch (error) {
         if (requestId !== openRequestId.current) return;
-        dispatch({t: 'error', message: messageForError(error)});
+        dispatch({t: 'error', message: messageForError(t, error)});
       }
     },
-    [repository, refresh],
+    [repository, refresh, t],
   );
 
   const saveFunction = useCallback(
@@ -204,11 +205,11 @@ export function useFunctionListStore(repository: FunctionRepository) {
       dispatch({t: 'close'});
       return;
     }
-    if (!confirm('Are you sure you want to delete this function?')) return;
+    if (!confirm(t.functionList.confirmDelete)) return;
     void runMutation(() => repository.delete(id), {
       onSuccess: () => dispatch({t: 'close'}),
     });
-  }, [repository, runMutation]);
+  }, [repository, runMutation, t]);
 
   // dnd-kit reports the final move and the drop in the same tick, so the
   // reducer's dragOrder is not yet visible through stateRef when `dropped`
@@ -248,6 +249,7 @@ export function useFunctionListStore(repository: FunctionRepository) {
 }
 
 export function FunctionList() {
+  const t = useT();
   const repository = useFunctionRepository();
   const {
     state,
@@ -259,7 +261,10 @@ export function FunctionList() {
     dropped,
   } = useFunctionListStore(repository);
 
-  const onClickAdd = useCallback(() => dispatch({t: 'add'}), [dispatch]);
+  const onClickAdd = useCallback(
+    () => dispatch({t: 'add', confirm: t.functionList.confirmDiscard}),
+    [dispatch, t],
+  );
 
   const refs = visibleRefs(state);
   const newDraft =
@@ -313,7 +318,9 @@ export function FunctionList() {
               saved={state.saved}
               error={state.error}
               dispatch={dispatch}
-              onOpen={() => dispatch({t: 'cancel'})}
+              onOpen={() =>
+                dispatch({t: 'cancel', confirm: t.functionList.confirmDiscard})
+              }
               onSave={saveFunction}
               onDelete={deleteFunction}
             />

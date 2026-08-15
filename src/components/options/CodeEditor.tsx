@@ -2,6 +2,7 @@ import {javascript, javascriptLanguage} from '@codemirror/lang-javascript';
 import CodeMirror, {EditorView} from '@uiw/react-codemirror';
 import {useCallback} from 'react';
 
+import {useT} from '../common/I18nContext';
 import {theme} from '../common/Theme';
 import {
   additionalCompletionKeymap,
@@ -46,6 +47,7 @@ export const CodeEditor = (props: {
   /** Render the same highlighted surface without accepting edits. */
   readOnly?: boolean;
 }) => {
+  const t = useT();
   const onCreateEditor = useCallback((view: EditorView) => {
     view.contentDOM.id = editorId;
     view.contentDOM.spellcheck = false;
@@ -55,8 +57,8 @@ export const CodeEditor = (props: {
   return (
     <InputBox>
       <Label htmlFor={readOnly ? undefined : editorId}>
-        Code
-        {!readOnly && <LabelSub>Must be a single function.</LabelSub>}
+        {t.editor.code}
+        {!readOnly && <LabelSub>{t.editor.codeNote}</LabelSub>}
       </Label>
       <CodeMirror
         value={props.code}
@@ -74,7 +76,7 @@ export const CodeEditor = (props: {
           highlightActiveLineGutter: false,
         }}
         theme="none"
-        aria-label="Code"
+        aria-label={t.editor.code}
       />
       <ErrorMessage>{props.error}</ErrorMessage>
     </InputBox>

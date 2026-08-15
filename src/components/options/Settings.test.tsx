@@ -74,3 +74,38 @@ test('reflects an external storage change via subscribe', async () => {
 
   await waitFor(() => expect(checkbox).toBeChecked());
 });
+
+test('renders the language selector with auto selected by default', async () => {
+  const storage = new InMemoryKeyValueStorage();
+  renderSettings(storage);
+
+  const select = await screen.findByRole('combobox', {name: /Language/});
+  expect(select).toHaveValue('auto');
+});
+
+test('changing the language selector writes language to storage', async () => {
+  const storage = new InMemoryKeyValueStorage();
+  renderSettings(storage);
+
+  const select = await screen.findByRole('combobox', {name: /Language/});
+  fireEvent.change(select, {target: {value: 'ja'}});
+  expect(select).toHaveValue('ja');
+
+  await waitFor(async () => {
+    expect(await readConfig(storage)).toMatchObject({language: 'ja'});
+  });
+});
+
+test('reflects an external language change via subscribe', async () => {
+  const storage = new InMemoryKeyValueStorage();
+  renderSettings(storage);
+
+  const select = await screen.findByRole('combobox', {name: /Language/});
+  expect(select).toHaveValue('auto');
+
+  await act(async () => {
+    await storage.set({[CONFIG_KEY]: {language: 'en'}});
+  });
+
+  await waitFor(() => expect(select).toHaveValue('en'));
+});

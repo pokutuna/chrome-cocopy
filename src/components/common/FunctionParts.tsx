@@ -1,5 +1,6 @@
 import React, {useCallback} from 'react';
 
+import {useT} from './I18nContext';
 import {PatternIcon} from './Icon';
 
 import styles from './FunctionParts.module.css';
@@ -122,6 +123,7 @@ export function FunctionItem(props: FunctionItemProps) {
 }
 
 export function AddFunctionItem(props: {onClick?: () => void}) {
+  const t = useT();
   return (
     <FunctionBox
       className={styles.addNewFunctionBox}
@@ -130,7 +132,7 @@ export function AddFunctionItem(props: {onClick?: () => void}) {
       onClick={props.onClick}
     >
       <ShortcutBox />
-      <FunctionName>Create New Function</FunctionName>
+      <FunctionName>{t.functionList.createNew}</FunctionName>
     </FunctionBox>
   );
 }

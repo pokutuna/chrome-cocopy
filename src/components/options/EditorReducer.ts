@@ -29,7 +29,8 @@ interface State {
   openPalette: boolean;
 
   errors: {
-    name?: string;
+    /** Flags rather than sentences: the rendering side owns the wording. */
+    name?: boolean;
     backgroundColor?: boolean;
     pattern?: string;
     code?: string;
@@ -83,7 +84,7 @@ function validateEdit(
 ): State['errors'] {
   switch (action.name) {
     case 'name':
-      errors.name = action.value.length === 0 ? 'Cannot be empty.' : undefined;
+      errors.name = action.value.length === 0 ? true : undefined;
       break;
     case 'backgroundColor': {
       const valid = isColorCode(action.value);

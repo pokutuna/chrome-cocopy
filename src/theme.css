@@ -52,7 +52,17 @@
   --font-monospace:
     Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
 
+  /* line height */
+  --leading-normal: 1.5;
+
   /* constants */
   --constants-functionWidth: 380px;
   --constants-functionHeight: 32px;
+}
+
+/* Fixed rather than left at `normal`: that keyword derives the line box from
+   the resolved font's metrics, so switching to a CJK fallback for Japanese
+   text widens every line even though the styles are unchanged. */
+body {
+  line-height: var(--leading-normal);
 }

@@ -13,9 +13,12 @@ describe('createConfigStore', () => {
 
     it('reads a normal stored value', async () => {
       const storage = new InMemoryKeyValueStorage();
-      await storage.set({[CONFIG_KEY]: {closeAfterCopy: true}});
+      await storage.set({[CONFIG_KEY]: {closeAfterCopy: true, language: 'ja'}});
       const store = createConfigStore(storage);
-      expect(await store.read()).toEqual({closeAfterCopy: true});
+      expect(await store.read()).toEqual({
+        closeAfterCopy: true,
+        language: 'ja',
+      });
     });
 
     it('parses a value containing unknown fields, still reading closeAfterCopy', async () => {
@@ -27,7 +30,10 @@ describe('createConfigStore', () => {
         },
       });
       const store = createConfigStore(storage);
-      expect(await store.read()).toEqual({closeAfterCopy: true});
+      expect(await store.read()).toEqual({
+        closeAfterCopy: true,
+        language: 'auto',
+      });
     });
 
     it('falls back to the default when the stored value is not an object', async () => {
@@ -43,6 +49,27 @@ describe('createConfigStore', () => {
       const store = createConfigStore(storage);
       expect(await store.read()).toEqual(DEFAULT_CONFIG);
     });
+
+    it('defaults language to auto when the field is missing', async () => {
+      const storage = new InMemoryKeyValueStorage();
+      await storage.set({[CONFIG_KEY]: {closeAfterCopy: true}});
+      const store = createConfigStore(storage);
+      expect((await store.read()).language).toBe('auto');
+    });
+
+    it('falls back language to auto on an unknown value', async () => {
+      const storage = new InMemoryKeyValueStorage();
+      await storage.set({[CONFIG_KEY]: {language: 'fr'}});
+      const store = createConfigStore(storage);
+      expect((await store.read()).language).toBe('auto');
+    });
+
+    it('falls back language to auto on a wrong type', async () => {
+      const storage = new InMemoryKeyValueStorage();
+      await storage.set({[CONFIG_KEY]: {language: 42}});
+      const store = createConfigStore(storage);
+      expect((await store.read()).language).toBe('auto');
+    });
   });
 
   describe('update', () => {
@@ -50,7 +77,10 @@ describe('createConfigStore', () => {
       const storage = new InMemoryKeyValueStorage();
       const store = createConfigStore(storage);
       await store.update({closeAfterCopy: true});
-      expect(await store.read()).toEqual({closeAfterCopy: true});
+      expect(await store.read()).toEqual({
+        closeAfterCopy: true,
+        language: 'auto',
+      });
     });
 
     it('preserves unknown existing fields in the raw stored value', async () => {
@@ -71,7 +101,7 @@ describe('createConfigStore', () => {
       await store.update({closeAfterCopy: true});
 
       const raw = (await storage.get([CONFIG_KEY]))[CONFIG_KEY];
-      expect(raw).toEqual({closeAfterCopy: true});
+      expect(raw).toEqual({closeAfterCopy: true, language: 'auto'});
     });
   });
 
