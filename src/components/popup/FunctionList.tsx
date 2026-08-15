@@ -100,9 +100,10 @@ export const FunctionList = () => {
     timeIt('FunctionList total', run())
       .then(setFunctions)
       .catch((e: unknown) => {
-        console.error(e);
+        const unsupportedVersion = e instanceof UnsupportedVersionError;
+        if (!unsupportedVersion) console.error(e);
         setListError(
-          e instanceof UnsupportedVersionError
+          unsupportedVersion
             ? 'Your functions were saved by a newer version of cocopy. Update the extension.'
             : 'Failed to load functions.',
         );
