@@ -62,25 +62,37 @@ export function Settings() {
 
   return (
     <Section title="Settings">
-      <label className={styles.checkboxLabel} htmlFor="closeAfterCopy">
-        <input
-          type="checkbox"
-          id="closeAfterCopy"
-          checked={closeAfterCopy}
-          onChange={onChangeCloseAfterCopy}
-        />
-        {t.settings.closeAfterCopy}
-      </label>
-      <label className={styles.selectLabel} htmlFor="language">
-        {t.settings.language}
-        {/* Language names are endonyms on purpose: each option must be
-            readable in that language, so they are not catalog entries. */}
-        <select id="language" value={language} onChange={onChangeLanguage}>
-          <option value="auto">{t.settings.languageAuto}</option>
-          <option value="en">English</option>
-          <option value="ja">日本語</option>
-        </select>
-      </label>
+      <div className={styles.settingList}>
+        <label className={styles.settingRow} htmlFor="closeAfterCopy">
+          {t.settings.closeAfterCopy}
+          <span className={styles.settingControl}>
+            <input
+              type="checkbox"
+              className={styles.checkbox}
+              id="closeAfterCopy"
+              checked={closeAfterCopy}
+              onChange={onChangeCloseAfterCopy}
+            />
+          </span>
+        </label>
+        <label className={styles.settingRow} htmlFor="language">
+          {t.settings.language}
+          <span className={styles.settingControl}>
+            {/* Language names are endonyms on purpose: each option must be
+                readable in that language, so they are not catalog entries. */}
+            <select
+              id="language"
+              className={styles.select}
+              value={language}
+              onChange={onChangeLanguage}
+            >
+              <option value="auto">{t.settings.languageAuto}</option>
+              <option value="en">English</option>
+              <option value="ja">日本語</option>
+            </select>
+          </span>
+        </label>
+      </div>
     </Section>
   );
 }
