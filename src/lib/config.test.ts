@@ -103,6 +103,37 @@ describe('createConfigStore', () => {
       const raw = (await storage.get([CONFIG_KEY]))[CONFIG_KEY];
       expect(raw).toEqual({closeAfterCopy: true, language: 'auto'});
     });
+
+    it('keeps both changes when two updates overlap', async () => {
+      const storage = new InMemoryKeyValueStorage();
+      const store = createConfigStore(storage);
+
+      // Two settings changed before either write settles: without
+      // serialization both reads see the same stored value and the later
+      // write drops the earlier change.
+      await Promise.all([
+        store.update({closeAfterCopy: true}),
+        store.update({language: 'ja'}),
+      ]);
+
+      expect(await store.read()).toEqual({
+        closeAfterCopy: true,
+        language: 'ja',
+      });
+    });
+
+    it('applies a queued update after an earlier one fails', async () => {
+      const storage = new InMemoryKeyValueStorage();
+      const store = createConfigStore(storage);
+      storage.failOnce('set');
+
+      const failing = store.update({closeAfterCopy: true});
+      const following = store.update({language: 'ja'});
+
+      await expect(failing).rejects.toThrow('injected failure: set');
+      await expect(following).resolves.toBeUndefined();
+      expect((await store.read()).language).toBe('ja');
+    });
   });
 
   describe('subscribe', () => {

@@ -54,6 +54,22 @@ function parseConfig(raw: unknown): Config {
 }
 
 export function createConfigStore(storage: KeyValueStorage): ConfigStore {
+  async function writeMerged(patch: Partial<Config>): Promise<void> {
+    const raw = (await storage.get([CONFIG_KEY]))[CONFIG_KEY];
+    const base =
+      typeof raw === 'object' && raw !== null
+        ? (raw as Record<string, unknown>)
+        : DEFAULT_CONFIG;
+    await storage.set({[CONFIG_KEY]: {...base, ...patch}});
+  }
+
+  // Tail of the update chain. storage.sync offers no atomic read-modify-write,
+  // so two updates started before either settles would both read the same
+  // stored value and the later write would drop the earlier change (changing
+  // two settings in quick succession). Each update waits for the previous one
+  // to settle before it reads.
+  let pending: Promise<unknown> = Promise.resolve();
+
   return {
     async read(): Promise<Config> {
       const raw = (await storage.get([CONFIG_KEY]))[CONFIG_KEY];
@@ -61,13 +77,15 @@ export function createConfigStore(storage: KeyValueStorage): ConfigStore {
       return parseConfig(raw);
     },
 
-    async update(patch: Partial<Config>): Promise<void> {
-      const raw = (await storage.get([CONFIG_KEY]))[CONFIG_KEY];
-      const base =
-        typeof raw === 'object' && raw !== null
-          ? (raw as Record<string, unknown>)
-          : DEFAULT_CONFIG;
-      await storage.set({[CONFIG_KEY]: {...base, ...patch}});
+    update(patch: Partial<Config>): Promise<void> {
+      // Settled either way: a failed update must not stop the queue, and its
+      // rejection still reaches this caller through `run`.
+      const run = pending.then(
+        () => writeMerged(patch),
+        () => writeMerged(patch),
+      );
+      pending = run.catch(() => {});
+      return run;
     },
 
     subscribe(listener: () => void): Unsubscribe {
