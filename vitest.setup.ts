@@ -44,3 +44,11 @@ Object.defineProperty(Range.prototype, 'getClientRects', {
   configurable: true,
   value: () => [],
 });
+
+// Keep performance instrumentation enabled in production while avoiding
+// timing noise in tests that only assert behavior.
+vi.mock('./src/lib/perf-debug', () => ({
+  timeIt<T>(_label: string, promise: Promise<T>): Promise<T> {
+    return promise;
+  },
+}));

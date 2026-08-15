@@ -87,17 +87,29 @@ describe('InMemoryKeyValueStorage', () => {
   });
 
   it('isolates a throwing listener from other listeners', async () => {
-    const storage = new InMemoryKeyValueStorage();
-    const throwing = vi.fn(() => {
-      throw new Error('boom');
-    });
-    const other = vi.fn();
-    storage.subscribe(throwing);
-    storage.subscribe(other);
+    const consoleError = vi
+      .spyOn(console, 'error')
+      .mockImplementation(() => {});
 
-    await storage.set({a: 1});
-    await vi.waitFor(() => expect(other).toHaveBeenCalledWith(['a']));
-    expect(throwing).toHaveBeenCalled();
+    try {
+      const storage = new InMemoryKeyValueStorage();
+      const throwing = vi.fn(() => {
+        throw new Error('boom');
+      });
+      const other = vi.fn();
+      storage.subscribe(throwing);
+      storage.subscribe(other);
+
+      await storage.set({a: 1});
+      await vi.waitFor(() => expect(other).toHaveBeenCalledWith(['a']));
+      expect(throwing).toHaveBeenCalled();
+      expect(consoleError).toHaveBeenCalledWith(
+        'InMemoryKeyValueStorage listener failed',
+        expect.any(Error),
+      );
+    } finally {
+      consoleError.mockRestore();
+    }
   });
 
   describe('failOnce', () => {
