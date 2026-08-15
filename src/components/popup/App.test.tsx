@@ -45,8 +45,6 @@ function renderApp(
   store: FunctionStore,
   configStore: ConfigStore = buildConfigStore(),
 ) {
-  // ConfigProvider is part of the popup entry composition (popup.tsx);
-  // FunctionList reads closeAfterCopy through it.
   return render(
     <ConfigStoreProvider value={configStore}>
       <FunctionStoreProvider value={store}>
@@ -315,8 +313,6 @@ test('renders in Japanese when the stored language is ja', async () => {
     </ConfigStoreProvider>,
   );
 
-  // The settings link's aria-label comes from the Japanese catalog once the
-  // stored language resolves.
   expect(await screen.findByLabelText('設定')).toBeInTheDocument();
 });
 
@@ -336,8 +332,6 @@ test('popup startup reads the config from storage only once', async () => {
   const getSpy = vi.spyOn(configStorage, 'get');
   const configStore = createConfigStore(configStorage);
 
-  // The full popup entry composition (popup.tsx): ConfigProvider's read is
-  // shared by both the language and closeAfterCopy consumers.
   render(
     <ConfigStoreProvider value={configStore}>
       <FunctionStoreProvider value={store}>
@@ -350,8 +344,8 @@ test('popup startup reads the config from storage only once', async () => {
     </ConfigStoreProvider>,
   );
 
-  // Wait until the popup has fully settled (functions listed), then confirm
-  // no consumer performed a second config read.
+  // Settle the popup first: a second read would happen while it is still
+  // mounting consumers.
   await waitFor(() => expect(screen.getByText(fn.name)).toBeInTheDocument());
   await waitFor(() => expect(getSpy).toHaveBeenCalled());
   expect(getSpy).toHaveBeenCalledTimes(1);

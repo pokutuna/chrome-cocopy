@@ -18,9 +18,8 @@ export function useConfigStore(): ConfigStore {
   return useContext(ConfigStoreContext) ?? getConfigStore();
 }
 
-// The parsed Config value, read once per page and shared by every consumer
-// (language, closeAfterCopy), so popup startup performs a single storage.sync
-// read. undefined = the initial read has not resolved yet; consumers fall
+// Read once per page and shared by every consumer, so popup startup performs a
+// single storage.sync read. undefined until that read resolves; consumers fall
 // back to their defaults until it does.
 const ConfigContext = createContext<Config | undefined>(undefined);
 

@@ -561,8 +561,6 @@ test('a displayed error follows a language change', async () => {
     ),
   );
 
-  // The reducer keeps the error across the refresh a language change triggers,
-  // so it must be re-worded rather than left in the previous language.
   await act(async () => {
     await configStore.update({language: 'ja'});
   });

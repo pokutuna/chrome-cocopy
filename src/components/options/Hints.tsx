@@ -3,10 +3,9 @@ import {memo} from 'react';
 import {useT} from '../common/I18nContext';
 import {Section, TextList, ExternalLink} from './Parts';
 
-// Code fragments, identifiers, and links stay outside the translated
-// sentences and are never translated themselves (docs/i18n.md, "Nested
-// Elements"): each list item leads with the fragment and follows with a
-// self-contained description from the catalog.
+// Each item leads with the code fragment and follows with a self-contained
+// catalog sentence, so nothing translated wraps around markup
+// (docs/i18n.md, "Nested Elements").
 export const Hint = memo(() => {
   const t = useT();
   return (

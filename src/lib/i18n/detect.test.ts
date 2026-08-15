@@ -12,7 +12,6 @@ describe('detectLanguage', () => {
     ['ja-JP', 'ja'],
     ['en', 'en'],
     ['en-US', 'en'],
-    // Unknown languages fall back to English.
     ['fr-FR', 'en'],
   ])('maps navigator.language %s to %s', (input, expected) => {
     vi.stubGlobal('navigator', {language: input});

@@ -64,10 +64,8 @@ export function createConfigStore(storage: KeyValueStorage): ConfigStore {
   }
 
   // Tail of the update chain. storage.sync offers no atomic read-modify-write,
-  // so two updates started before either settles would both read the same
-  // stored value and the later write would drop the earlier change (changing
-  // two settings in quick succession). Each update waits for the previous one
-  // to settle before it reads.
+  // so overlapping updates would both read the same stored value and the later
+  // write would drop the earlier change; each waits for the previous to settle.
   let pending: Promise<unknown> = Promise.resolve();
 
   return {

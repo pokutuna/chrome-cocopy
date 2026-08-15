@@ -603,11 +603,9 @@ test('banner renders in Japanese when the stored language is ja', async () => {
       exact: false,
     }),
   ).toBeInTheDocument();
-  // The section heading stays English even in Japanese.
   expect(
     screen.getByRole('heading', {name: 'Legacy Functions'}),
   ).toBeInTheDocument();
-  // The link label is the legacy page's own (untranslated) title.
   expect(
     screen.getByRole('link', {name: 'Legacy Functions'}),
   ).toBeInTheDocument();

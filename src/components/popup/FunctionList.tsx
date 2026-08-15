@@ -82,8 +82,6 @@ export const FunctionList = () => {
   const t = useT();
   const evaluate = useEvaluate();
   const repository = useFunctionRepository();
-  // Shares ConfigProvider's single read instead of reading storage again;
-  // the defaults apply until it resolves, matching the previous behaviour.
   const config = useConfig() ?? DEFAULT_CONFIG;
   const [functions, setFunctions] = useState<CopyFunctionRef[]>([]);
   const [running, setRunning] = useState<string | null>(null);

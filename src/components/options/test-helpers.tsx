@@ -44,7 +44,6 @@ export function renderWithStore(
   store: FunctionStore,
   ui: React.ReactNode,
   initialEntries: string[] = ['/'],
-  // Passed by tests that pre-store a language; the default keeps English.
   configStore = createConfigStore(new InMemoryKeyValueStorage()),
 ): React.ReactElement {
   // A dedicated in-memory ConfigStore keeps Settings (rendered by App/PageRoot)

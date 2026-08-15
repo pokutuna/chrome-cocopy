@@ -16,8 +16,6 @@ function Probe() {
 }
 
 function renderProbe(configStore: ConfigStore) {
-  // The language comes out of ConfigProvider's shared read, mirroring the
-  // popup/options entry composition (ConfigProvider > I18nProvider).
   return render(
     <ConfigStoreProvider value={configStore}>
       <ConfigProvider>

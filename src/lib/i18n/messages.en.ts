@@ -1,12 +1,8 @@
-// English catalog: the source of truth for catalog keys and value shapes.
-// messages.ja.ts must conform to `typeof en` (docs/i18n.md, "Message
-// Catalog"). Deliberately not `as const`: widened value types let the
-// Japanese catalog carry its own strings while `typeof en` still checks the
-// key set and whether each value is a string or a function. `satisfies`
-// enforces the catalog invariant (values are strings or functions returning
-// strings, never JSX) without narrowing the inferred type.
+// The source of truth for catalog keys and value shapes; messages.ja.ts must
+// conform to `typeof en` (docs/i18n.md, "Message Catalog"). Deliberately not
+// `as const`, which would narrow every value to its literal and leave no room
+// for the Japanese strings.
 
-/** A catalog value: a string or a function assembling one. */
 type MessageLeaf = string | ((...args: never[]) => string);
 type MessageTree = {[key: string]: MessageLeaf | MessageTree};
 
@@ -89,5 +85,4 @@ export const en = {
   },
 } satisfies MessageTree;
 
-/** Shape shared by every catalog; the English catalog defines it. */
 export type Messages = typeof en;

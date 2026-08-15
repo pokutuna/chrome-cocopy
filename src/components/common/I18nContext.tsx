@@ -15,11 +15,8 @@ export function useT(): Messages {
 }
 
 export function I18nProvider(props: {children: React.ReactNode}) {
-  // The language derives from ConfigProvider's shared read; this provider
-  // performs no storage access of its own, so i18n adds no read to popup
-  // startup. While the read is in flight (config === undefined) the first
-  // paint uses the browser language; an explicit stored setting replaces it
-  // once the read resolves (docs/i18n.md, "起動時に言語が決まる").
+  // Until the stored config arrives the browser language is used, so the first
+  // paint never waits on storage (docs/i18n.md, "起動時に言語が決まる").
   const config = useConfig();
   const language: Language =
     config === undefined || config.language === 'auto'

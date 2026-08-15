@@ -70,19 +70,16 @@ test('renders in Japanese when the stored language is ja', async () => {
 
   render(renderWithStore(store, <App />, ['/'], configStore));
 
-  // Body text comes from the ja catalog, while section headings stay English.
   expect(await screen.findByText('新しい関数を作成')).toBeInTheDocument();
   expect(screen.getByText('Functions')).toBeInTheDocument();
   expect(screen.getByText('Hints')).toBeInTheDocument();
   expect(screen.getByText('Debugging')).toBeInTheDocument();
   expect(screen.getByText('Links')).toBeInTheDocument();
 
-  // A split hint keeps the code fragment intact next to the translated text.
   expect(
     screen.getByText('render(template, view)').parentElement,
   ).toHaveTextContent('mustache テンプレート');
 
-  // User data stays untranslated.
   expect(screen.getByText(defaultFunctions[0].name)).toBeInTheDocument();
 });
 
