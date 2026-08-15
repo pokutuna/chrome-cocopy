@@ -22,6 +22,7 @@ import {
   moved,
   visibleRefs,
   confirmDiscard,
+  ListError,
   State,
 } from './FunctionsReducer';
 import {Section} from './Parts';
@@ -54,6 +55,16 @@ export function messageForError(t: Messages, error: unknown): string {
 }
 
 /**
+ * Wording for a stored list error. Called during render, not at dispatch time,
+ * so an error already on screen follows a language change.
+ */
+export function textForListError(t: Messages, error: ListError): string {
+  return error.kind === 'function-gone'
+    ? t.functionList.functionGone
+    : messageForError(t, error.error);
+}
+
+/**
  * Owns the options list state plus everything asynchronous around it.
  *
  * Persistence lives here rather than in the reducer: a mutation only counts as
@@ -80,9 +91,9 @@ export function useFunctionListStore(repository: FunctionRepository) {
     try {
       dispatch({t: 'refresh', refs: await repository.list()});
     } catch (error) {
-      dispatch({t: 'error', message: messageForError(t, error)});
+      dispatch({t: 'error', error: {kind: 'operation', error}});
     }
-  }, [repository, t]);
+  }, [repository]);
 
   useEffect(() => {
     void refresh();
@@ -121,7 +132,7 @@ export function useFunctionListStore(repository: FunctionRepository) {
           // Reload first: a conflict means the stored list moved on, and a
           // failed commit still leaves the previous snapshot readable.
           await refresh();
-          dispatch({t: 'mutation-failed', message: messageForError(t, error)});
+          dispatch({t: 'mutation-failed', error});
           return;
         }
         await refresh();
@@ -131,7 +142,7 @@ export function useFunctionListStore(repository: FunctionRepository) {
         mutationInFlight.current = false;
       }
     },
-    [refresh, t],
+    [refresh],
   );
 
   // Serial number of the latest openFunction call. A row click supersedes any
@@ -161,13 +172,13 @@ export function useFunctionListStore(repository: FunctionRepository) {
         if (requestId !== openRequestId.current) return;
         if (!fn) {
           await refresh();
-          dispatch({t: 'error', message: t.functionList.functionGone});
+          dispatch({t: 'error', error: {kind: 'function-gone'}});
           return;
         }
         dispatch({t: 'open', fn, documentId: ref.documentId});
       } catch (error) {
         if (requestId !== openRequestId.current) return;
-        dispatch({t: 'error', message: messageForError(t, error)});
+        dispatch({t: 'error', error: {kind: 'operation', error}});
       }
     },
     [repository, refresh, t],
@@ -269,15 +280,18 @@ export function FunctionList() {
   const refs = visibleRefs(state);
   const newDraft =
     state.activeId === NEW_FUNCTION_ID ? state.editing : undefined;
+  // Translated here rather than where the error was dispatched, so switching
+  // the language re-words an error that is already on screen.
+  const errorText = state.error && textForListError(t, state.error);
 
   return (
     <Section title="Functions">
       {/* Errors raised outside an open editor (a failed reorder, a list that
           cannot be read, a function that vanished) have no editor row to show
           them in. */}
-      {state.error !== undefined && state.activeId === undefined && (
+      {errorText !== undefined && state.activeId === undefined && (
         <div className={styles.listError} role="alert">
-          {state.error}
+          {errorText}
         </div>
       )}
       <DnDWrapper move={moveFunction} onDropped={dropped}>
@@ -295,7 +309,7 @@ export function FunctionList() {
               draggable={state.draggable}
               saving={state.saving}
               saved={state.saved}
-              error={active ? state.error : undefined}
+              error={active ? errorText : undefined}
               dispatch={dispatch}
               onOpen={() => void openFunction(ref)}
               onSave={saveFunction}
@@ -316,7 +330,7 @@ export function FunctionList() {
               draggable={false}
               saving={state.saving}
               saved={state.saved}
-              error={state.error}
+              error={errorText}
               dispatch={dispatch}
               onOpen={() =>
                 dispatch({t: 'cancel', confirm: t.functionList.confirmDiscard})

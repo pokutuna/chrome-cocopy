@@ -3,6 +3,17 @@ import {CopyFunctionRef} from '../../lib/function-store/types';
 import {en} from '../../lib/i18n';
 
 /**
+ * A failure as the reducer stores it: what went wrong, not how it reads. The
+ * wording is decided at render time so switching languages re-translates an
+ * error already on screen (docs/i18n.md, "Error Messages").
+ */
+export type ListError =
+  /** A repository operation failed; `error` is what it threw. */
+  | {kind: 'operation'; error: unknown}
+  /** The function behind the clicked row is no longer stored. */
+  | {kind: 'function-gone'};
+
+/**
  * UI state for the options function list.
  *
  * This reducer is pure: it never touches storage. Persisting a change is the
@@ -32,7 +43,7 @@ export interface State {
   saving: boolean;
   /** True only after a mutation resolved, cleared by any further edit. */
   saved: boolean;
-  error: string | undefined;
+  error: ListError | undefined;
 }
 
 export type Action =
@@ -47,8 +58,8 @@ export type Action =
   // Async mutation lifecycle, driven by useFunctionListStore.
   | {t: 'mutation-start'}
   | {t: 'mutation-succeeded'; submitted?: CopyFunction}
-  | {t: 'mutation-failed'; message: string}
-  | {t: 'error'; message: string | undefined}
+  | {t: 'mutation-failed'; error: unknown}
+  | {t: 'error'; error: ListError | undefined}
   // Drag & Drop
   | {t: 'dragging'; dragIndex: number; hoverIndex: number};
 
@@ -211,11 +222,11 @@ function reduce(state: State, action: Action): State {
         ...state,
         saving: false,
         saved: false,
-        error: action.message,
+        error: {kind: 'operation', error: action.error},
         baseDocumentId: rearmedBase(state),
       };
     case 'error':
-      return {...state, error: action.message};
+      return {...state, error: action.error};
     case 'dragging': {
       if (state.saving) return state;
       return {
