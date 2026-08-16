@@ -11,6 +11,7 @@ import {
   MIGRATION_RESULT_KEY,
   MigrationResult,
 } from '../../lib/function-store/migration';
+import {ja} from '../../lib/i18n';
 import {decodeSharable} from '../../lib/share';
 import {LegacyBackup, LegacyBackupBanner} from './LegacyBackup';
 import {
@@ -599,9 +600,7 @@ test('banner renders in Japanese when the stored language is ja', async () => {
   render(renderWithStore(store, <LegacyBackupBanner />, ['/'], configStore));
 
   expect(
-    await screen.findByText('以前の関数は自動的に移行されました。', {
-      exact: false,
-    }),
+    await screen.findByText(ja.legacyBanner.completed, {exact: false}),
   ).toBeInTheDocument();
   expect(
     screen.getByRole('heading', {name: 'Legacy Functions'}),

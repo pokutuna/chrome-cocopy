@@ -9,7 +9,9 @@ type MessageTree = {[key: string]: MessageLeaf | MessageTree};
 export const en = {
   settings: {
     closeAfterCopy: 'Close the popup after copying',
-    language: 'Language',
+    // Both languages, so the setting stays findable when the UI is in a
+    // language the user cannot read.
+    language: 'Language / 言語',
     languageAuto: 'Auto',
   },
   popup: {

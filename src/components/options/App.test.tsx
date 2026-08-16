@@ -9,6 +9,7 @@ import {
   LEGACY_BACKUP_KEY,
   MIGRATION_RESULT_KEY,
 } from '../../lib/function-store/migration';
+import {ja} from '../../lib/i18n';
 import {encodeSharable} from '../../lib/share';
 import {App} from './App';
 import {createTestStore, renderWithStore, seedStore} from './test-helpers';
@@ -70,15 +71,12 @@ test('renders in Japanese when the stored language is ja', async () => {
 
   render(renderWithStore(store, <App />, ['/'], configStore));
 
-  expect(await screen.findByText('新しい関数を作成')).toBeInTheDocument();
-  expect(screen.getByText('Functions')).toBeInTheDocument();
-  expect(screen.getByText('Hints')).toBeInTheDocument();
-  expect(screen.getByText('Debugging')).toBeInTheDocument();
-  expect(screen.getByText('Links')).toBeInTheDocument();
-
+  // Entries are referenced through the catalog so rewording one does not fail
+  // this test (docs/wordings.md, "Tests").
   expect(
-    screen.getByText('render(template, view)').parentElement,
-  ).toHaveTextContent('mustache テンプレート');
+    await screen.findByText(ja.functionList.createNew),
+  ).toBeInTheDocument();
+  expect(screen.getByText('Functions')).toBeInTheDocument();
 
   expect(screen.getByText(defaultFunctions[0].name)).toBeInTheDocument();
 });

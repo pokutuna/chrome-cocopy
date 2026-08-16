@@ -15,6 +15,7 @@ import {
   makeFunction,
   seedSnapshot,
 } from '../../lib/function-store/repository.test-helpers';
+import {ja} from '../../lib/i18n';
 import {ConfigProvider, ConfigStoreProvider} from '../common/ConfigContext';
 import {FunctionStoreProvider} from '../common/FunctionStoreContext';
 import {I18nProvider} from '../common/I18nContext';
@@ -313,7 +314,9 @@ test('renders in Japanese when the stored language is ja', async () => {
     </ConfigStoreProvider>,
   );
 
-  expect(await screen.findByLabelText('設定')).toBeInTheDocument();
+  expect(
+    await screen.findByLabelText(ja.popup.openSettings),
+  ).toBeInTheDocument();
 });
 
 test('popup startup reads the config from storage only once', async () => {

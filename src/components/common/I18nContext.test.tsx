@@ -4,11 +4,12 @@ import {afterEach, expect, test, vi} from 'vitest';
 
 import {CONFIG_KEY, ConfigStore, createConfigStore} from '../../lib/config';
 import {InMemoryKeyValueStorage} from '../../lib/function-store/memory-storage';
+import {en, ja} from '../../lib/i18n';
 import {ConfigProvider, ConfigStoreProvider} from './ConfigContext';
 import {I18nProvider, useT} from './I18nContext';
 
-const EN_TEXT = 'Close the popup after copying';
-const JA_TEXT = 'コピー後にポップアップを閉じる';
+const EN_TEXT = en.settings.closeAfterCopy;
+const JA_TEXT = ja.settings.closeAfterCopy;
 
 function Probe() {
   const t = useT();
