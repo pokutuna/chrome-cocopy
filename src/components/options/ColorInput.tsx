@@ -5,6 +5,7 @@ import chroma from 'chroma-js';
 import React, {useCallback, useEffect, useRef} from 'react';
 
 import {colorPalette} from '../../lib/function';
+import {useT} from '../common/I18nContext';
 import {InputBox, Label, Input} from './Input';
 
 import styles from './ColorInput.module.css';
@@ -44,6 +45,7 @@ const PaletteColor = (props: {
 };
 
 const PaletteColorRandom = (props: {onClick: (color: string) => void}) => {
+  const t = useT();
   const onClick = useCallback(
     () => props.onClick(chroma.random().hex()),
     [props.onClick],
@@ -51,7 +53,7 @@ const PaletteColorRandom = (props: {onClick: (color: string) => void}) => {
   return (
     <PaletteColorBox
       $color="transparent"
-      ariaLabel="Choose a random color"
+      ariaLabel={t.editor.randomColorAria}
       onClick={onClick}
     >
       <FontAwesomeIcon icon={faRandom} />
@@ -111,6 +113,7 @@ type ColorInputProps = {
 };
 
 export function ColorInput(props: ColorInputProps) {
+  const t = useT();
   const onInput = useCallback(
     (event: InputEvent) =>
       props.onInput?.(
@@ -127,7 +130,7 @@ export function ColorInput(props: ColorInputProps) {
 
   return (
     <InputBox>
-      <Label htmlFor="color">Color</Label>
+      <Label htmlFor="color">{t.editor.color}</Label>
       <div className={styles.inputWrap}>
         <Input
           type="text"

@@ -2,6 +2,7 @@ import {useCallback} from 'react';
 
 import {CopyFunction} from '../../lib/function';
 import {FunctionItem, FunctionDisplay} from '../common/FunctionParts';
+import {useT} from '../common/I18nContext';
 import {useDnDItem} from './DnD';
 import {Editor} from './Editor';
 import {Caret, DragKnob, EditorBox} from './FunctionItemParts';
@@ -25,6 +26,7 @@ export type FunctionListItemProps = {
 };
 
 export function FunctionListItem(props: FunctionListItemProps) {
+  const t = useT();
   const {display, index, draggable, editing} = props;
   const {isDragging, ref, handleRef} = useDnDItem({
     id: display.id,
@@ -37,8 +39,8 @@ export function FunctionListItem(props: FunctionListItemProps) {
     [props.dispatch],
   );
   const onCancel = useCallback(
-    () => props.dispatch({t: 'cancel'}),
-    [props.dispatch],
+    () => props.dispatch({t: 'cancel', confirm: t.functionList.confirmDiscard}),
+    [props.dispatch, t],
   );
 
   return (

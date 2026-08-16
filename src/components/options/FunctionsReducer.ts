@@ -1,5 +1,17 @@
 import {CopyFunction, newFunction} from '../../lib/function';
 import {CopyFunctionRef} from '../../lib/function-store/types';
+import {en} from '../../lib/i18n';
+
+/**
+ * A failure as the reducer stores it: what went wrong, not how it reads. The
+ * wording is decided at render time so switching languages re-translates an
+ * error already on screen (docs/i18n.md, "Error Messages").
+ */
+export type ListError =
+  /** A repository operation failed; `error` is what it threw. */
+  | {kind: 'operation'; error: unknown}
+  /** The function behind the clicked row is no longer stored. */
+  | {kind: 'function-gone'};
 
 /**
  * UI state for the options function list.
@@ -31,21 +43,23 @@ export interface State {
   saving: boolean;
   /** True only after a mutation resolved, cleared by any further edit. */
   saved: boolean;
-  error: string | undefined;
+  error: ListError | undefined;
 }
 
 export type Action =
   | {t: 'refresh'; refs: CopyFunctionRef[]}
   | {t: 'open'; fn: CopyFunction; documentId: string}
-  | {t: 'add'}
+  // `confirm` carries the discard prompt in the caller's language; the
+  // reducer is pure TypeScript and cannot reach the i18n Context itself.
+  | {t: 'add'; confirm?: string}
   | {t: 'close'}
   | {t: 'edit'; function: Partial<CopyFunction>}
-  | {t: 'cancel'}
+  | {t: 'cancel'; confirm?: string}
   // Async mutation lifecycle, driven by useFunctionListStore.
   | {t: 'mutation-start'}
   | {t: 'mutation-succeeded'; submitted?: CopyFunction}
-  | {t: 'mutation-failed'; message: string}
-  | {t: 'error'; message: string | undefined}
+  | {t: 'mutation-failed'; error: unknown}
+  | {t: 'error'; error: ListError | undefined}
   // Drag & Drop
   | {t: 'dragging'; dragIndex: number; hoverIndex: number};
 
@@ -102,9 +116,9 @@ export function hasEdited(state: State): boolean {
  * and by `openFunction`, which must decide synchronously (a dispatched action's
  * outcome is not visible until the next render).
  */
-export function confirmDiscard(state: State): boolean {
+export function confirmDiscard(state: State, message?: string): boolean {
   return (
-    !hasEdited(state) || confirm('Are you sure you want to discard changes?')
+    !hasEdited(state) || confirm(message ?? en.functionList.confirmDiscard)
   );
 }
 
@@ -155,7 +169,7 @@ function reduce(state: State, action: Action): State {
       };
     case 'add': {
       if (state.saving) return state;
-      const next = reduce(state, {t: 'cancel'});
+      const next = reduce(state, {t: 'cancel', confirm: action.confirm});
       if (next.activeId !== undefined) return next;
       return {
         ...next,
@@ -175,7 +189,7 @@ function reduce(state: State, action: Action): State {
       };
     case 'cancel': {
       if (state.saving) return state;
-      if (!confirmDiscard(state)) return state;
+      if (!confirmDiscard(state, action.confirm)) return state;
       return closeEditor(state);
     }
     case 'mutation-start':
@@ -208,11 +222,11 @@ function reduce(state: State, action: Action): State {
         ...state,
         saving: false,
         saved: false,
-        error: action.message,
+        error: {kind: 'operation', error: action.error},
         baseDocumentId: rearmedBase(state),
       };
     case 'error':
-      return {...state, error: action.message};
+      return {...state, error: action.error};
     case 'dragging': {
       if (state.saving) return state;
       return {

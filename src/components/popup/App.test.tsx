@@ -15,8 +15,10 @@ import {
   makeFunction,
   seedSnapshot,
 } from '../../lib/function-store/repository.test-helpers';
-import {ConfigStoreProvider} from '../common/ConfigContext';
+import {ja} from '../../lib/i18n';
+import {ConfigProvider, ConfigStoreProvider} from '../common/ConfigContext';
 import {FunctionStoreProvider} from '../common/FunctionStoreContext';
+import {I18nProvider} from '../common/I18nContext';
 import {App} from './App';
 
 const {evaluateMock} = vi.hoisted(() => ({evaluateMock: vi.fn()}));
@@ -47,7 +49,9 @@ function renderApp(
   return render(
     <ConfigStoreProvider value={configStore}>
       <FunctionStoreProvider value={store}>
-        <App />
+        <ConfigProvider>
+          <App />
+        </ConfigProvider>
       </FunctionStoreProvider>
     </ConfigStoreProvider>,
   );
@@ -57,6 +61,9 @@ const clipboardWriteTextMock = vi.fn().mockResolvedValue(undefined);
 const clipboardWriteMock = vi.fn().mockResolvedValue(undefined);
 vi.stubGlobal('navigator', {
   ...navigator,
+  // jsdom's navigator keeps its properties on the prototype, so the spread
+  // above copies none of them; detectLanguage() needs language explicitly.
+  language: 'en-US',
   clipboard: {
     writeText: clipboardWriteTextMock,
     write: clipboardWriteMock,
@@ -281,4 +288,68 @@ test('closeAfterCopy=true does not close the popup when the function errors', as
   expect(clipboardWriteTextMock).not.toHaveBeenCalled();
 
   closeSpy.mockRestore();
+});
+
+test('renders in Japanese when the stored language is ja', async () => {
+  vi.mocked(chrome.tabs.query).mockImplementation(
+    async () => [{url: 'https://example.test/page'}] as chrome.tabs.Tab[],
+  );
+  vi.mocked(chrome.runtime.getManifest).mockImplementation(
+    () => ({version_name: 'Build v0.0.0'}) as chrome.runtime.Manifest,
+  );
+
+  const {store} = buildStore();
+  const configStore = buildConfigStore();
+  await configStore.update({language: 'ja'});
+
+  render(
+    <ConfigStoreProvider value={configStore}>
+      <FunctionStoreProvider value={store}>
+        <ConfigProvider>
+          <I18nProvider>
+            <App />
+          </I18nProvider>
+        </ConfigProvider>
+      </FunctionStoreProvider>
+    </ConfigStoreProvider>,
+  );
+
+  expect(
+    await screen.findByLabelText(ja.popup.openSettings),
+  ).toBeInTheDocument();
+});
+
+test('popup startup reads the config from storage only once', async () => {
+  vi.mocked(chrome.tabs.query).mockImplementation(
+    async () => [{url: 'https://example.test/page'}] as chrome.tabs.Tab[],
+  );
+  vi.mocked(chrome.runtime.getManifest).mockImplementation(
+    () => ({version_name: 'Build v0.0.0'}) as chrome.runtime.Manifest,
+  );
+
+  const fn = makeFunction('runnable', {name: 'Run me'});
+  const {store, storage} = buildStore();
+  await seedSnapshot(storage, [fn]);
+
+  const configStorage = new InMemoryKeyValueStorage();
+  const getSpy = vi.spyOn(configStorage, 'get');
+  const configStore = createConfigStore(configStorage);
+
+  render(
+    <ConfigStoreProvider value={configStore}>
+      <FunctionStoreProvider value={store}>
+        <ConfigProvider>
+          <I18nProvider>
+            <App />
+          </I18nProvider>
+        </ConfigProvider>
+      </FunctionStoreProvider>
+    </ConfigStoreProvider>,
+  );
+
+  // Settle the popup first: a second read would happen while it is still
+  // mounting consumers.
+  await waitFor(() => expect(screen.getByText(fn.name)).toBeInTheDocument());
+  await waitFor(() => expect(getSpy).toHaveBeenCalled());
+  expect(getSpy).toHaveBeenCalledTimes(1);
 });

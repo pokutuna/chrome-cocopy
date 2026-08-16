@@ -3,10 +3,13 @@ import '@testing-library/jest-dom';
 import {vi} from 'vitest';
 
 import {defaultFunctions} from '../../lib/builtin';
+import {createConfigStore} from '../../lib/config';
+import {InMemoryKeyValueStorage} from '../../lib/function-store/memory-storage';
 import {
   LEGACY_BACKUP_KEY,
   MIGRATION_RESULT_KEY,
 } from '../../lib/function-store/migration';
+import {ja} from '../../lib/i18n';
 import {encodeSharable} from '../../lib/share';
 import {App} from './App';
 import {createTestStore, renderWithStore, seedStore} from './test-helpers';
@@ -53,6 +56,31 @@ test('render options', async () => {
   );
 });
 
+test('renders in Japanese when the stored language is ja', async () => {
+  vi.mocked(chrome.tabs.query).mockImplementation(
+    async () => [{url: 'https://example.test/page'}] as chrome.tabs.Tab[],
+  );
+  vi.mocked(chrome.runtime.getManifest).mockImplementation(
+    () => ({version_name: 'Build v0.0.0'}) as chrome.runtime.Manifest,
+  );
+
+  const store = createTestStore();
+  await seedStore(store, defaultFunctions);
+  const configStore = createConfigStore(new InMemoryKeyValueStorage());
+  await configStore.update({language: 'ja'});
+
+  render(renderWithStore(store, <App />, ['/'], configStore));
+
+  // Entries are referenced through the catalog so rewording one does not fail
+  // this test (docs/wordings.md, "Tests").
+  expect(
+    await screen.findByText(ja.functionList.createNew),
+  ).toBeInTheDocument();
+  expect(screen.getByText('Functions')).toBeInTheDocument();
+
+  expect(screen.getByText(defaultFunctions[0].name)).toBeInTheDocument();
+});
+
 test('render install page', async () => {
   const fn = defaultFunctions[0];
   const path = `/install?f=${encodeURIComponent(encodeSharable(fn))}`;
@@ -73,11 +101,11 @@ test('render install page', async () => {
 
   // Install page preamble.
   expect(
-    screen.getByText('Sharing this URL makes others can use this function.'),
+    screen.getByText('Sharing this URL lets others use this function.'),
   ).toBeInTheDocument();
   expect(
     screen.getByText(
-      'You can edit the code and every fields before installation.',
+      'You can edit the code and every field before installation.',
     ),
   ).toBeInTheDocument();
 

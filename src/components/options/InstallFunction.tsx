@@ -7,6 +7,7 @@ import {CopyFunction, generateId, isCopyFunction} from '../../lib/function';
 import {decodeSharable} from '../../lib/share';
 import {FunctionItem} from '../common/FunctionParts';
 import {useFunctionRepository} from '../common/FunctionStoreContext';
+import {useT} from '../common/I18nContext';
 import {Editor} from './Editor';
 import {EditorBox} from './FunctionItemParts';
 import {messageForError} from './FunctionList';
@@ -15,21 +16,23 @@ import {Section, TextList} from './Parts';
 import styles from './InstallFunction.module.css';
 
 const Notice = memo(() => {
+  const t = useT();
   return (
     <div className={styles.noticeFrame}>
       <TextList>
-        <li>Sharing this URL makes others can use this function.</li>
-        <li>You can edit the code and every fields before installation.</li>
+        <li>{t.install.noticeShare}</li>
+        <li>{t.install.noticeEdit}</li>
       </TextList>
     </div>
   );
 });
 
 const FailedMessage = memo(() => {
+  const t = useT();
   return (
     <div className={styles.center}>
       <FontAwesomeIcon icon={faDizzy} size="10x" />
-      <h3>This URL is broken.</h3>
+      <h3>{t.install.broken}</h3>
     </div>
   );
 });
@@ -45,6 +48,7 @@ function useSharedFunction(): CopyFunction | undefined {
 }
 
 export function InstallFunction() {
+  const t = useT();
   const repository = useFunctionRepository();
   const shared = useSharedFunction();
   const [fn, setFn] = useState<CopyFunction | undefined>(shared);
@@ -73,11 +77,11 @@ export function InstallFunction() {
           location.href = 'options.html';
         })
         .catch(e => {
-          setError(messageForError(e));
+          setError(messageForError(t, e));
           setSaving(false);
         });
     },
-    [repository, fn, saving],
+    [repository, fn, saving, t],
   );
 
   return (

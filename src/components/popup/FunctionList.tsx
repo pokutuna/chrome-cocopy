@@ -10,8 +10,9 @@ import {createPageTargetFromTab} from '../../lib/page';
 import {timeIt} from '../../lib/perf-debug';
 import {getActiveTab} from '../../lib/tab';
 import {codeToIndex} from '../../lib/util';
-import {useConfigStore} from '../common/ConfigContext';
+import {useConfig} from '../common/ConfigContext';
 import {useFunctionRepository} from '../common/FunctionStoreContext';
+import {useT} from '../common/I18nContext';
 import {useEvaluate} from '../common/Sandbox';
 import {ListError} from './Error';
 import {FunctionItem} from './Function';
@@ -48,16 +49,17 @@ function writeResultToClipboard(res: EvalResult): Promise<void> {
 /** Shown when `repository.get` returns undefined (document gone) or throws
  * (e.g. CorruptionError): the function itself could not be loaded, as
  * opposed to an EvalError raised while running its code. Wrapped in
- * `{error}` so it matches the shape `evaluate()` rejects with. */
-function loadError(cause?: unknown): {error: EvalError} {
+ * `{error}` so it matches the shape `evaluate()` rejects with.
+ * `missingMessage` is the translated fallback for a non-Error cause. */
+function loadError(
+  missingMessage: string,
+  cause?: unknown,
+): {error: EvalError} {
   return {
     error: {
       type: 'ExecutionError',
       name: cause instanceof Error ? cause.name : 'Error',
-      message:
-        cause instanceof Error
-          ? cause.message
-          : 'This function could not be loaded. It may have been deleted.',
+      message: cause instanceof Error ? cause.message : missingMessage,
     },
   };
 }
@@ -72,15 +74,19 @@ function isEvalRejection(r: unknown): r is {error: EvalError} {
   );
 }
 
+// Stored as a kind and translated at render time, so a language change does
+// not have to re-run the load effect.
+type ListErrorKind = 'unsupported-version' | 'load-failed';
+
 export const FunctionList = () => {
+  const t = useT();
   const evaluate = useEvaluate();
   const repository = useFunctionRepository();
-  const configStore = useConfigStore();
+  const config = useConfig() ?? DEFAULT_CONFIG;
   const [functions, setFunctions] = useState<CopyFunctionRef[]>([]);
   const [running, setRunning] = useState<string | null>(null);
   const [fnError, setFnError] = useState<FunctionError>(null);
-  const [listError, setListError] = useState<string | null>(null);
-  const [config, setConfig] = useState(DEFAULT_CONFIG);
+  const [listError, setListError] = useState<ListErrorKind | null>(null);
   const modifier = useModifier();
 
   // The running indicator is cleared by a timer; clear it on unmount so it
@@ -103,16 +109,10 @@ export const FunctionList = () => {
         const unsupportedVersion = e instanceof UnsupportedVersionError;
         if (!unsupportedVersion) console.error(e);
         setListError(
-          unsupportedVersion
-            ? 'Your functions were saved by a newer version of cocopy. Update the extension.'
-            : 'Failed to load functions.',
+          unsupportedVersion ? 'unsupported-version' : 'load-failed',
         );
       });
   }, [repository]);
-
-  useEffect(() => {
-    configStore.read().then(setConfig);
-  }, [configStore]);
 
   const onClick = useCallback(
     (ref: CopyFunctionRef) => {
@@ -132,10 +132,10 @@ export const FunctionList = () => {
         const [tab, fn] = await Promise.all([
           getActiveTab(),
           repository.get(ref).catch(e => {
-            throw loadError(e);
+            throw loadError(t.popup.functionMissing, e);
           }),
         ]);
-        if (!fn) throw loadError();
+        if (!fn) throw loadError(t.popup.functionMissing);
 
         return evaluate({
           command: 'eval',
@@ -157,11 +157,13 @@ export const FunctionList = () => {
         .catch((r: unknown) =>
           setFnError({
             id: ref.id,
-            error: isEvalRejection(r) ? r.error : loadError(r).error,
+            error: isEvalRejection(r)
+              ? r.error
+              : loadError(t.popup.functionMissing, r).error,
           }),
         );
     },
-    [config, evaluate, modifier, repository],
+    [config, evaluate, modifier, repository, t],
   );
 
   // Kyeboard Shortcut
@@ -185,7 +187,15 @@ export const FunctionList = () => {
 
   return (
     <>
-      {listError && <ListError message={listError} />}
+      {listError && (
+        <ListError
+          message={
+            listError === 'unsupported-version'
+              ? t.popup.unsupportedVersion
+              : t.popup.loadFailed
+          }
+        />
+      )}
       {functions.map((r, idx) => (
         <FunctionItem
           key={r.id}

@@ -2,13 +2,16 @@ import {act, fireEvent, render, screen, waitFor} from '@testing-library/react';
 import '@testing-library/jest-dom';
 import {vi} from 'vitest';
 
+import {createConfigStore} from '../../lib/config';
 import {CopyFunction} from '../../lib/function';
+import {InMemoryKeyValueStorage} from '../../lib/function-store/memory-storage';
 import {
   LEGACY_BACKUP_KEY,
   LEGACY_FUNCTIONS_KEY,
   MIGRATION_RESULT_KEY,
   MigrationResult,
 } from '../../lib/function-store/migration';
+import {ja} from '../../lib/i18n';
 import {decodeSharable} from '../../lib/share';
 import {LegacyBackup, LegacyBackupBanner} from './LegacyBackup';
 import {
@@ -532,7 +535,7 @@ test('banner links to the legacy page without rendering the full section', async
     }),
   ).toBeInTheDocument();
   expect(
-    screen.getByText('The original data will be removed in a future update.'),
+    screen.getByText('will be removed in a future update', {exact: false}),
   ).toBeInTheDocument();
 
   // The inspection UI stays on the legacy page.
@@ -557,7 +560,7 @@ test('banner reports functions the migration left behind', async () => {
 
   await screen.findByRole('link', {name: 'Legacy Functions'});
   expect(
-    screen.getByText('1 function(s) could not be carried over.', {
+    screen.getByText('1 of your functions could not be carried over.', {
       exact: false,
     }),
   ).toBeInTheDocument();
@@ -575,9 +578,35 @@ test('banner reports a failed migration', async () => {
   await screen.findByRole('link', {name: 'Legacy Functions'});
   expect(
     screen.getByText(
-      'The automatic migration failed. Your original data is kept untouched',
+      'The automatic migration failed; your original data is untouched.',
       {exact: false},
     ),
+  ).toBeInTheDocument();
+});
+
+test('banner renders in Japanese when the stored language is ja', async () => {
+  const store = createTestStore();
+  const legacy = [fn('a')];
+  await seedStore(store, legacy);
+  await seedLegacy(store, {
+    legacy,
+    backup: legacy,
+    result: result({migratedCount: 1}),
+  });
+
+  const configStore = createConfigStore(new InMemoryKeyValueStorage());
+  await configStore.update({language: 'ja'});
+
+  render(renderWithStore(store, <LegacyBackupBanner />, ['/'], configStore));
+
+  expect(
+    await screen.findByText(ja.legacyBanner.completed, {exact: false}),
+  ).toBeInTheDocument();
+  expect(
+    screen.getByRole('heading', {name: 'Legacy Functions'}),
+  ).toBeInTheDocument();
+  expect(
+    screen.getByRole('link', {name: 'Legacy Functions'}),
   ).toBeInTheDocument();
 });
 

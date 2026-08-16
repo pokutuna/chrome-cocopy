@@ -3,14 +3,22 @@ import '@testing-library/jest-dom';
 import {renderHook} from '@testing-library/react';
 import {vi} from 'vitest';
 
+import {createConfigStore} from '../../lib/config';
 import {CopyFunction} from '../../lib/function';
+import {InMemoryKeyValueStorage} from '../../lib/function-store/memory-storage';
 import {seedSnapshot} from '../../lib/function-store/repository.test-helpers';
 import {
   ConflictError,
   CorruptionError,
   QuotaError,
 } from '../../lib/function-store/types';
-import {FunctionList, useFunctionListStore} from './FunctionList';
+import {en, ja} from '../../lib/i18n';
+import {
+  FunctionList,
+  textForListError,
+  useFunctionListStore,
+} from './FunctionList';
+import {ListError} from './FunctionsReducer';
 import {
   createTestStore,
   renderWithStore,
@@ -27,6 +35,11 @@ function fn(id: string, overrides: Partial<CopyFunction> = {}): CopyFunction {
     theme: {textColor: '#000000', backgroundColor: '#ffffff'},
     ...overrides,
   };
+}
+
+/** The English wording for a stored error, as the list would render it. */
+function errorText(error: ListError | undefined): string {
+  return error ? textForListError(en, error) : '';
 }
 
 /** Reads the committed catalog straight from storage, bypassing the UI. */
@@ -253,7 +266,9 @@ test('a ConflictError keeps the draft, reloads the list, and shows an error', as
   });
 
   await waitFor(() => expect(result.current.state.error).toBeDefined());
-  expect(result.current.state.error).toContain('changed in another window');
+  expect(errorText(result.current.state.error)).toContain(
+    'changed in another window',
+  );
   expect(result.current.state.saving).toBe(false);
   expect(result.current.state.saved).toBe(false);
 
@@ -292,7 +307,9 @@ test('a save over an entry changed since the editor opened conflicts, then savin
   });
 
   await waitFor(() => expect(result.current.state.error).toBeDefined());
-  expect(result.current.state.error).toContain('changed in another window');
+  expect(errorText(result.current.state.error)).toContain(
+    'changed in another window',
+  );
   expect((await store.repository.list())[0].name).toBe('theirs');
   expect(result.current.state.editing?.name).toBe('my draft');
 
@@ -332,7 +349,9 @@ test('a QuotaError is reported without losing the draft', async () => {
   });
 
   await waitFor(() => expect(result.current.state.error).toBeDefined());
-  expect(result.current.state.error).toContain('Not enough sync storage');
+  expect(errorText(result.current.state.error)).toContain(
+    'Not enough sync storage',
+  );
   expect(result.current.state.editing?.name).toBe('too big');
 });
 
@@ -522,6 +541,35 @@ test('an error with no open editor is shown at the list level', async () => {
 
   await waitFor(() => expect(screen.getByRole('alert')).toBeInTheDocument());
   expect(screen.getByRole('alert')).toHaveTextContent('broken catalog');
+});
+
+test('a displayed error follows a language change', async () => {
+  const store = createTestStore();
+  await seedStore(store, [fn('a')]);
+  // A conflict is worded from the catalog, so the text is a translation
+  // rather than the error's own English message.
+  vi.spyOn(store.repository, 'list').mockRejectedValueOnce(
+    new ConflictError('changed elsewhere'),
+  );
+
+  const configStore = createConfigStore(new InMemoryKeyValueStorage());
+  render(renderWithStore(store, <FunctionList />, ['/'], configStore));
+
+  await waitFor(() =>
+    expect(screen.getByRole('alert')).toHaveTextContent(
+      en.functionList.conflict,
+    ),
+  );
+
+  await act(async () => {
+    await configStore.update({language: 'ja'});
+  });
+
+  await waitFor(() =>
+    expect(screen.getByRole('alert')).toHaveTextContent(
+      ja.functionList.conflict,
+    ),
+  );
 });
 
 test('renders the list and opens an editor on click', async () => {

@@ -7,6 +7,7 @@ import {useReducer, useMemo, useCallback, useRef, useLayoutEffect} from 'react';
 import {EvalPayload, EvalResult} from '../../lib/eval';
 import {CopyFunction} from '../../lib/function';
 import {encodeSharable} from '../../lib/share';
+import {useT} from '../common/I18nContext';
 import {useSandbox} from '../common/Sandbox';
 import {Button, ButtonIcon} from './Button';
 import {CodeEditor} from './CodeEditor';
@@ -34,6 +35,7 @@ type EditorProps = {
 };
 
 export function Editor(props: EditorProps) {
+  const t = useT();
   // The reducer captures its callbacks once, so route them through a ref that
   // always points at the current props (the previous code had the same shape
   // with a dispatch function). Assigning in a layout effect (not during
@@ -94,12 +96,12 @@ export function Editor(props: EditorProps) {
 
   const saving = props.saving ?? false;
   const saveLabel = props.install
-    ? 'Install'
+    ? t.editor.install
     : saving
-      ? 'Saving...'
+      ? t.editor.saving
       : props.saved
-        ? 'Saved'
-        : 'Save';
+        ? t.editor.saved
+        : t.editor.save;
 
   return (
     <form>
@@ -107,12 +109,12 @@ export function Editor(props: EditorProps) {
         <Row>
           <Item $grow={1}>
             <TextInput
-              label="Name"
+              label={t.editor.name}
               name="name"
               placeholder=""
               value={state.name}
               onInput={onEdit}
-              error={state.errors.name}
+              error={state.errors.name ? t.editor.nameEmpty : undefined}
             />
           </Item>
           <Item style={{width: '9rem'}}>
@@ -127,14 +129,10 @@ export function Editor(props: EditorProps) {
         </Row>
         <Row>
           <TextInput
-            label="URL Pattern"
+            label={t.editor.pattern}
             name="pattern"
             placeholder=".*"
-            subLabel={
-              <span>
-                (optional) This function will be displayed if the URL matches.
-              </span>
-            }
+            subLabel={<span>{t.editor.patternNote}</span>}
             value={state.pattern || ''}
             onInput={onEdit}
             error={state.errors.pattern}
@@ -163,7 +161,7 @@ export function Editor(props: EditorProps) {
           {!props.install && (
             <Item>
               <Button onClick={onClickCancel} disabled={saving}>
-                Cancel
+                {t.editor.cancel}
               </Button>
             </Item>
           )}
@@ -175,7 +173,7 @@ export function Editor(props: EditorProps) {
               <ButtonIcon>
                 <FontAwesomeIcon icon={faShareSquare} />
               </ButtonIcon>
-              {!props.install ? 'Share' : 'Update URL'}
+              {!props.install ? t.editor.share : t.editor.updateUrl}
             </Button>
           </Item>
           {!props.install && (
@@ -184,7 +182,7 @@ export function Editor(props: EditorProps) {
                 <ButtonIcon>
                   <FontAwesomeIcon icon={faTrash} />
                 </ButtonIcon>
-                Delete
+                {t.editor.delete}
               </Button>
             </Item>
           )}

@@ -23,6 +23,7 @@ import {
   useFunctionRepository,
   useLegacyBackupRepository,
 } from '../common/FunctionStoreContext';
+import {useT} from '../common/I18nContext';
 import {Button, ButtonIcon} from './Button';
 import {CodeEditor} from './CodeEditor';
 import {Caret, EditorBox} from './FunctionItemParts';
@@ -407,6 +408,7 @@ function EntryRow(props: {
 }
 
 export function LegacyBackup() {
+  const t = useT();
   const legacyBackup = useLegacyBackupRepository();
   const repository = useFunctionRepository();
 
@@ -428,9 +430,9 @@ export function LegacyBackup() {
       setStatus(next);
       setStoredIds(new Set(refs.map(ref => ref.id)));
     } catch (e) {
-      setError(messageForError(e));
+      setError(messageForError(t, e));
     }
-  }, [legacyBackup, repository]);
+  }, [legacyBackup, repository, t]);
 
   useEffect(() => {
     void load();
@@ -464,11 +466,11 @@ export function LegacyBackup() {
         .then(() => load())
         .then(() => setBusy(false))
         .catch(e => {
-          setError(messageForError(e));
+          setError(messageForError(t, e));
           setBusy(false);
         });
     },
-    [repository, busy, load],
+    [repository, busy, load, t],
   );
 
   const onDelete = useCallback(
@@ -486,11 +488,11 @@ export function LegacyBackup() {
         .then(() => load())
         .then(() => setBusy(false))
         .catch(e => {
-          setError(messageForError(e));
+          setError(messageForError(t, e));
           setBusy(false);
         });
     },
-    [legacyBackup, busy, load],
+    [legacyBackup, busy, load, t],
   );
 
   const onExport = useCallback(() => {
@@ -563,9 +565,13 @@ export function LegacyBackup() {
 /**
  * Compact pointer to the /legacy page, shown on the main page only when there
  * is legacy data worth reviewing. The full inspection UI lives in
- * LegacyBackup on that page.
+ * LegacyBackup on that page. Unlike that page (which stays English until its
+ * planned removal), the banner is translated: a shared lead, one status
+ * sentence, and the link placed at the end of the sentence
+ * (docs/i18n.md, "Nested Elements").
  */
 export function LegacyBackupBanner() {
+  const t = useT();
   const legacyBackup = useLegacyBackupRepository();
   const [status, setStatus] = useState<LegacyBackupStatus | undefined>(
     undefined,
@@ -591,32 +597,20 @@ export function LegacyBackupBanner() {
 
   const failed = status.result?.outcome === 'failed';
   const skippedCount = status.result?.skipped.length ?? 0;
-  const detail = failed ? (
-    <>
-      The automatic migration failed. Your original data is kept untouched
-      &mdash; recover it from the <Link to="/legacy">Legacy Functions</Link>{' '}
-      page.
-    </>
-  ) : skippedCount > 0 ? (
-    <>
-      Your previous functions were migrated automatically, but {skippedCount}{' '}
-      function(s) could not be carried over. Review and import them from the{' '}
-      <Link to="/legacy">Legacy Functions</Link> page.
-    </>
-  ) : (
-    <>
-      Your previous functions were migrated automatically. If anything is
-      missing, review and recover the original data from the{' '}
-      <Link to="/legacy">Legacy Functions</Link> page.
-    </>
-  );
+  const state = failed
+    ? t.legacyBanner.failed
+    : skippedCount > 0
+      ? t.legacyBanner.skipped(skippedCount)
+      : t.legacyBanner.completed;
 
   return (
     <Section title="Legacy Functions">
       <div className={failed ? styles.bannerProblem : styles.banner}>
-        <p>{MIGRATION_INTRO}</p>
-        <p>{detail}</p>
-        <p>The original data will be removed in a future update.</p>
+        <p>{t.legacyBanner.lead}</p>
+        <p>
+          {state} {t.legacyBanner.review}{' '}
+          <Link to="/legacy">Legacy Functions</Link>
+        </p>
       </div>
     </Section>
   );
