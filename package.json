@@ -1,6 +1,6 @@
 {
   "name": "chrome-cocopy",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "private": true,
   "type": "module",
   "repository": "ssh://git@github.com/pokutuna/chrome-cocopy.git",
