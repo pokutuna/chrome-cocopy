@@ -4,3 +4,5 @@ blockExoticSubdeps: true
 minimumReleaseAgeExclude:
   # Renovate security update: vitest@4.1.11
   - vitest@4.1.11
+  # Renovate security update: js-yaml@5.4.1
+  - js-yaml@5.4.1
