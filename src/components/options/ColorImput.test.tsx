@@ -1,5 +1,5 @@
 import {fireEvent, render, screen} from '@testing-library/react';
-import '@testing-library/jest-dom';
+import '@testing-library/jest-dom/vitest';
 import {vi} from 'vitest';
 
 import {Wrapper} from '../common/ForTest';

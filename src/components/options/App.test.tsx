@@ -1,5 +1,5 @@
 import {render, screen, waitFor} from '@testing-library/react';
-import '@testing-library/jest-dom';
+import '@testing-library/jest-dom/vitest';
 import {vi} from 'vitest';
 
 import {defaultFunctions} from '../../lib/builtin';

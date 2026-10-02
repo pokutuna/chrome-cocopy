@@ -1,5 +1,5 @@
 import {act, render, screen} from '@testing-library/react';
-import '@testing-library/jest-dom';
+import '@testing-library/jest-dom/vitest';
 import {afterEach, expect, test, vi} from 'vitest';
 
 import {CONFIG_KEY, ConfigStore, createConfigStore} from '../../lib/config';
