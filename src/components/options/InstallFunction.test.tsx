@@ -1,5 +1,5 @@
 import {fireEvent, render, screen, waitFor} from '@testing-library/react';
-import '@testing-library/jest-dom';
+import '@testing-library/jest-dom/vitest';
 import {vi} from 'vitest';
 
 import {CopyFunction} from '../../lib/function';

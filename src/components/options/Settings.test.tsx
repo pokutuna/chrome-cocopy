@@ -1,5 +1,5 @@
 import {act, fireEvent, render, screen, waitFor} from '@testing-library/react';
-import '@testing-library/jest-dom';
+import '@testing-library/jest-dom/vitest';
 
 import {CONFIG_KEY, createConfigStore} from '../../lib/config';
 import {InMemoryKeyValueStorage} from '../../lib/function-store/memory-storage';

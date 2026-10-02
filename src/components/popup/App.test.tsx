@@ -1,5 +1,5 @@
 import {render, screen, waitFor, fireEvent} from '@testing-library/react';
-import '@testing-library/jest-dom';
+import '@testing-library/jest-dom/vitest';
 import {vi, test, expect, afterEach} from 'vitest';
 
 import {ConfigStore, createConfigStore} from '../../lib/config';
