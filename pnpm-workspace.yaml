@@ -6,6 +6,8 @@ minimumReleaseAgeExclude:
   - vitest@4.1.11
   # Renovate security update: js-yaml@5.4.1
   - js-yaml@5.4.1
+  # Renovate security update: vite@8.2.4
+  - vite@8.2.4
 
 allowBuilds:
   # Keep pnpm 10 behavior: esbuild ships prebuilt platform binaries.
