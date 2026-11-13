@@ -9,9 +9,9 @@ jobs:
   generate:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
-      - uses: pnpm/action-setup@v6
-      - uses: actions/setup-node@v7
+      - uses: actions/checkout@v7.0.1
+      - uses: pnpm/action-setup@v6.1.1
+      - uses: actions/setup-node@v7.1.0
         with:
           node-version-file: .node-version
           cache: pnpm
@@ -31,7 +31,7 @@ jobs:
           git commit -m 'update gallery pages'
       - name: Push
         if: steps.vars.outputs.updated != 0
-        uses: ad-m/github-push-action@master
+        uses: ad-m/github-push-action@v1.3.0
         with:
           branch: ${{ steps.vars.outputs.branch }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
